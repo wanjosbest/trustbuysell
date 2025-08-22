@@ -22,7 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("user.urls")),
     path("", include("Products.urls")),
-    path("accounts/", include("django.contrib.auth.urls")),
+   
     
     
 ]
