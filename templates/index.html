@@ -1,712 +1,210 @@
+<!-- =============================================
+VARIANT A — "Clean Commerce"
+Minimal, airy layout with hero search, category chips, and a tight product grid.
+Copy this into a Django template (e.g., templates/index.html)
+============================================= -->
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>TrustBuySell — Adamawa Marketplace</title>
 <style>
   :root{
-    --primary:#1E3A8A;
-    --accent:#F97316;
-    --bg:#f4f6fb;
-    --card:#fff;
-    --muted:#6b7280;
-    --gap:18px;
-    --header-h:72px;
+    --primary:#1e293b; /* slate-800 */
+    --accent:#f97316;  /* orange-500 */
+    --fg:#0f172a;      /* slate-900 */
+    --muted:#64748b;   /* slate-500 */
+    --bg:#f6f7fb;      /* subtle gray */
+    --card:#ffffff;
+    --ring:rgba(2,6,23,.08);
+    --radius:14px;
+    --gap:14px;
   }
   *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:Inter, system-ui, Arial, sans-serif;
-    background:var(--bg);
-    color:#0f172a;
-    line-height:1.45;
-    -webkit-font-smoothing:antialiased;
-  }
+  html,body{margin:0;padding:0}
+  body{font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;color:var(--fg);background:var(--bg);-webkit-font-smoothing:antialiased}
   a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
 
-  /* HEADER */
-  header{
-    position:sticky;
-    top:0;
-    z-index:1200;
-    background:linear-gradient(90deg,var(--primary),#12306b);
-    box-shadow:0 4px 16px rgba(2,6,23,.12);
+  /* ===== Header (mobile-first) ===== */
+  header{position:sticky;top:0;z-index:1000;background:linear-gradient(90deg,#0b3a74,#0a2d59);color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}
+  .wrap{max-width:1200px;margin:0 auto;padding:12px}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .brand{font-weight:900;letter-spacing:.2px}
+  .brand a{display:flex;align-items:center;gap:8px;color:#fff}
+  .brand .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(180deg,#60a5fa,#2563eb);display:grid;place-items:center;font-weight:900}
+  .hamb{border:0;background:rgba(255,255,255,.1);color:#fff;border-radius:10px;padding:8px 10px;cursor:pointer}
+  .links{display:none;flex-direction:column;gap:6px;width:100%}
+  .links a{padding:10px;border-radius:10px;background:rgba(255,255,255,.06)}
+  .cta{display:flex;gap:8px;align-items:center}
+  .btn{border:0;cursor:pointer;border-radius:10px;padding:10px 12px;font-weight:800}
+  .btn-accent{background:var(--accent);color:#fff}
+  .searchbar{display:flex;gap:8px;background:#fff;border-radius:999px;padding:6px 8px;box-shadow:0 8px 24px var(--ring);flex:1;min-width:0}
+  .searchbar input{border:0;outline:none;background:transparent;padding:8px;min-width:0;width:100%}
+  .searchbar button{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:8px 12px;font-weight:800}
+
+  /* Desktop nav */
+  @media(min-width:900px){
+    .nav{flex-wrap:nowrap}
+    .links{display:flex;flex-direction:row;gap:10px;width:auto}
+    .links a{background:transparent}
+    .hamb{display:none}
   }
-  .nav{
-    max-width:1200px;
-    margin:0 auto;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:14px;
-    gap:12px;
+
+  /* ===== Hero ===== */
+  .hero{max-width:1200px;margin:12px auto;padding:0 12px}
+  .hero-card{position:relative;overflow:hidden;border-radius:var(--radius);background:linear-gradient(135deg,#e0f2fe,#eff6ff);box-shadow:0 18px 50px rgba(2,6,23,.10)}
+  .hero-media{height:clamp(260px,46vh,520px);background-position:center;background-size:cover}
+  .hero-content{position:absolute;inset:auto 12px 12px 12px;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.55));color:#fff;padding:14px;border-radius:12px;max-width:680px}
+  .hero h1{margin:0 0 6px;font-size:clamp(1.1rem,3.6vw,2rem)}
+  .hero p{margin:0;color:rgba(255,255,255,.95)}
+  .hero-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .ghost{background:transparent;border:1px solid rgba(255,255,255,.6);color:#fff}
+
+  /* ===== Category chips ===== */
+  .chip-row{display:flex;gap:8px;overflow:auto;padding:10px 0}
+  .chip{flex:0 0 auto;padding:8px 12px;border-radius:999px;background:#fff;box-shadow:0 6px 18px var(--ring);font-weight:700;white-space:nowrap}
+
+  /* ===== Sections ===== */
+  .section{max-width:1200px;margin:16px auto;padding:0 12px}
+  .title{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .title h2{margin:0;color:#0f2a54;font-size:clamp(1.05rem,2.6vw,1.6rem)}
+  .muted{color:var(--muted)}
+
+  /* ===== Products grid ===== */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(min-width:680px){.grid{grid-template-columns:repeat(3,1fr)}}
+  @media(min-width:1024px){.grid{grid-template-columns:repeat(4,1fr)}}
+  .card{background:var(--card);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 10px 30px var(--ring)}
+  .media{height:170px;background:#eef2ff;display:grid;place-items:center;overflow:hidden}
+  .media img{width:100%;height:100%;object-fit:cover}
+  .body{padding:10px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .p-title{font-weight:700;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .price{color:#10387b;font-weight:900}
+  .actions{margin-top:auto;display:flex;gap:6px;flex-wrap:wrap}
+  .btn-outline{border:1px solid rgba(2,6,23,.10);background:transparent}
+
+  /* ===== Testimonials ===== */
+  .testimonials{background:linear-gradient(180deg,#fff,#f8fafc);border-radius:12px;padding:12px;box-shadow:0 10px 30px var(--ring)}
+  .trow{display:flex;gap:10px;overflow:auto}
+  .t{min-width:240px;background:#fff;border-radius:10px;padding:10px;box-shadow:0 6px 18px var(--ring)}
+
+  /* ===== Footer ===== */
+  footer{margin-top:18px;background:#fff;border-top:1px solid #eef2f7;color:#334155}
+  .foot{max-width:1200px;margin:0 auto;padding:18px;display:flex;flex-direction:column;gap:10px}
+
+  /* Motion prefs */
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;scroll-behavior:auto !important}
   }
-  .brand{color:#fff;font-weight:800;font-size:1.25rem;letter-spacing:.3px}
-  .nav-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-  .search{
-    display:flex;align-items:center;background:#fff;padding:6px 8px;border-radius:999px;
-    min-width:180px;flex:1;max-width:420px;box-shadow:0 6px 20px rgba(2,6,23,0.06)
-  }
-  .search input{border:0;outline:none;font-size:0.95rem;padding:8px;width:100%;background:transparent;min-width:0}
-  .search button{background:var(--accent);border:0;color:#fff;padding:8px 10px;border-radius:999px;cursor:pointer;font-weight:700;font-size:0.9rem}
-  nav .links{display:flex;gap:12px;align-items:center}
-  nav .links a{color:#fff;padding:10px 12px;border-radius:8px;font-weight:700}
-  nav .cta-sell{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;font-weight:800;font-size:0.9rem}
-  .hamb{display:none;font-size:1.6rem;padding:8px;border-radius:8px;background:rgba(255,255,255,0.06);color:#fff;cursor:pointer;border:0}
-
-  /* Mobile nav overlay */
-  .mobile-nav {
-    display:none;
-    position:fixed;
-    inset:var(--header-h) 0 0 0;
-    background:linear-gradient(180deg,#123d6b,#0c2945);
-    color:#fff;
-    z-index:1199;
-    padding:20px;
-    overflow:auto;
-  }
-  .mobile-nav.open { display:block; }
-  .mobile-nav a { display:block; padding:12px 0; color:#fff; font-weight:700; text-decoration:none; border-bottom:1px solid rgba(255,255,255,0.06) }
-
-  /* HERO CAROUSEL */
-  .hero{max-width:1200px;margin:14px auto;position:relative;border-radius:12px;overflow:hidden;box-shadow:0 12px 40px rgba(2,6,23,0.08)}
-  .slides{position:relative;height:56vh;min-height:300px;max-height:520px;background:#dbeafe}
-  .slide{position:absolute;inset:0;opacity:0;transition:opacity .8s ease, transform .8s ease;display:flex;align-items:flex-end;padding:28px;background-size:cover;background-position:center}
-  .slide.active{opacity:1}
-  .hero .caption{background:linear-gradient(180deg, rgba(0,0,0,0.24), rgba(0,0,0,0.48));color:#fff;padding:18px;border-radius:10px;max-width:68%}
-  .hero h1{margin:0;font-size:clamp(20px,3vw,36px)}
-  .hero p{margin:6px 0 0;color:rgba(255,255,255,0.9)}
-  .hero .controls{position:absolute;right:16px;bottom:16px;display:flex;gap:8px;z-index:6}
-  .hero .controls button{background:rgba(0,0,0,0.36);border:0;color:#fff;padding:10px;border-radius:8px;cursor:pointer}
-
-  /* LAYOUT: main content */
-  main{max-width:1200px;margin:20px auto;padding:0 16px;display:grid;gap:20px}
-  .grid-3{display:grid;grid-template-columns:1fr 380px;gap:20px}
-  @media(max-width:980px){ .grid-3{grid-template-columns:1fr} }
-
-  /* CATEGORIES */
-  .categories{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;background:var(--card);padding:14px;border-radius:12px}
-  .cat{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border-radius:10px;text-align:center;cursor:pointer}
-  .cat img{width:100%;height:88px;object-fit:cover;border-radius:8px;box-shadow:0 8px 20px rgba(2,6,23,0.05)}
-
-  /* SECTION TITLES */
-  .section-title{display:flex;justify-content:space-between;align-items:end;gap:12px;padding:6px 0}
-  .section-title h2{margin:0;color:var(--primary);font-size:clamp(1.1rem,2.5vw,1.6rem)}
-  .flash{background:linear-gradient(90deg,#fff6ef,#fff3eb);padding:12px;border-radius:10px;border:1px solid rgba(249,115,22,0.08);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-  .countdown{font-weight:800;color:var(--accent)}
-
-  /* PRODUCTS GRID */
-  .products{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-  @media(max-width:1100px){ .products{grid-template-columns:repeat(2,1fr)} }
-  @media(max-width:680px){ .products{grid-template-columns:repeat(1,1fr)} }
-
-  .card{background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(2,6,23,.06);display:flex;flex-direction:column}
-  .media{height:200px;background:#eef2ff;overflow:hidden}
-  .media img{width:100%;height:100%;object-fit:cover;display:block}
-  .card-body{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
-  .price{color:var(--primary);font-weight:800}
-  .card .actions{display:flex;gap:8px;margin-top:auto;flex-wrap:wrap}
-  .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-size:0.9rem}
-  .btn-primary{background:var(--accent);color:#fff;font-weight:800}
-  .btn-outline{background:transparent;border:1px solid rgba(15,23,42,0.06)}
-
-  /* TESTIMONIALS */
-  .testimonials{background:linear-gradient(180deg,#fff,#f8fafc);padding:14px;border-radius:12px}
-  .t-list{display:flex;gap:12px;overflow:auto;padding-bottom:6px}
-  .t-card{min-width:260px;background:#fff;padding:12px;border-radius:10px;box-shadow:0 8px 20px rgba(2,6,23,0.04)}
-
-  /* SELLER CTA */
-  .seller-cta{background:linear-gradient(90deg,#fef3e0,#fff7f0);padding:16px;border-radius:12px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-  .cta-left h3{margin:0;color:#7a2e00;font-size:clamp(1rem,2vw,1.3rem)}
-  .cta-btn{background:var(--primary);color:#fff;padding:10px 14px;border-radius:10px;font-weight:800;border:0;cursor:pointer}
-
-  /* NEWSLETTER + FOOTER */
-  .newsletter{display:flex;gap:12px;align-items:center;padding:12px;background:var(--card);border-radius:12px;flex-wrap:wrap}
-  .newsletter input{flex:1;padding:10px;border-radius:8px;border:1px solid #e6e9ef;min-width:0}
-  footer{margin-top:18px;padding:18px;color:#334155;background:#fff;border-top:1px solid #eef2f7;}
-
-  /* === Product Cards Fix (Jumia style) === */
-.products {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 14px;
-}
-
-/* Force 2 columns on small phones */
-@media (max-width: 600px) {
-  .products {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Card structure */
-.card {
-  display: flex;
-  flex-direction: column;
-  background: var(--card, #fff);
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  overflow: hidden;
-  height: 100%;              /* equal height in grid */
-}
-
-.card .media {
-  height: 180px;             /* consistent image height */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fafafa;
-  overflow: hidden;
-}
-
-.card .media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;         /* images crop neatly */
-}
-
-.card-body {
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-/* Clamp product title to 2 lines */
-.p-title {
-  font-size: 14px;
-  line-height: 1.3;
-  margin-bottom: 4px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;     /* 2 lines only */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Price always bold & aligned */
-.price {
-  font-weight: bold;
-  color: var(--primary, #e67e22);
-}
-
-/* Push actions to bottom */
-.card-body .actions {
-  margin-top: auto;
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-/* === Featured Products Grid === */
-#featured .products {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-}
-
-/* Force 2 columns ONLY on mobile */
-@media (max-width: 600px) {
-  #featured .products {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* === Card Styling === */
-#featured .card {
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
-  height: 100%;
-}
-
-#featured .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-/* Image area */
-#featured .media {
-  height: 220px;
-  background: #f9f9f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-#featured .media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-#featured .card:hover .media img {
-  transform: scale(1.05);
-}
-
-/* Card body */
-#featured .card-body {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-/* Product Title */
-#featured .p-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 6px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-height: 36px; /* keeps rows even */
-}
-
-/* Seller info */
-#featured .p-seller {
-  font-size: 13px;
-  color: var(--muted, #777);
-  margin-bottom: 8px;
-}
-
-/* Price */
-#featured .price {
-  font-size: 16px;
-  font-weight: bold;
-  color: #e67e22;
-  margin-bottom: 10px;
-}
-
-/* Actions */
-#featured .actions {
-  margin-top: auto;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-#featured .actions .btn {
-  flex: 1;
-  text-align: center;
-  border-radius: 8px;
-  font-size: 14px;
-  padding: 8px;
-}
-
-  /* HEADER RESPONSIVENESS */
-@media(max-width:960px){
-  .nav {
-    flex-wrap:wrap;
-    justify-content:space-between;
-  }
-  .nav-right {
-    flex:1 1 100%;
-    justify-content:flex-start;
-    gap:8px;
-    margin-top:8px;
-  }
-  .search {
-    flex:1;
-    max-width:100%;
-    min-width:0;
-  }
-}
-
-@media(max-width:600px){
-  .nav {
-    flex-direction:column;
-    align-items:flex-start;
-    gap:8px;
-  }
-  .nav-right {
-    width:100%;
-    flex-direction:column;
-    align-items:stretch;
-  }
-  .search {
-    width:100%;
-  }
-}
-
-/* HERO RESPONSIVENESS */
-.hero .slides {
-  height: clamp(260px, 50vh, 460px);
-}
-.hero .caption {
-  max-width: 90%;
-  font-size: 0.95rem;
-}
-.hero h1 {
-  font-size: clamp(1rem, 4vw, 1.8rem);
-}
-.hero p {
-  font-size: clamp(0.85rem, 2.8vw, 1rem);
-}
-.hero .controls {
-  right: 8px;
-  bottom: 8px;
-  gap:6px;
-}
-.hero .controls button {
-  padding:6px 8px;
-  font-size:1rem;
-}
-
-/* On very small devices */
-@media(max-width:480px){
-  .hero .caption {
-    padding:12px;
-    font-size:0.85rem;
-    max-width:100%;
-  }
-  .hero h1 { font-size:1rem; }
-  .hero p { font-size:0.8rem; }
-}
-
 </style>
 </head>
 <body>
-
-<!-- HEADER -->
 <header>
-  <div class="nav" role="navigation" aria-label="Main">
-    <div style="display:flex;align-items:center;gap:12px">
-      <div class="brand">TrustBuySell</div>
-      <button class="hamb" id="hambBtn" aria-label="Open menu" aria-controls="mobileNav" aria-expanded="false">☰</button>
-      <div class="links" id="topLinks" style="display:flex;gap:8px">
-        <a href="{% url 'index' %}">Home</a>
-        <a href="#categories">Shop</a>
-      </div>
+  <div class="wrap nav" role="navigation" aria-label="Main">
+    <div class="brand"><a href="{% url 'index' %}"><span class="logo">TB</span> TrustBuySell</a></div>
+    <button class="hamb" id="hambA" aria-expanded="false" aria-controls="navA">☰</button>
+    <div class="searchbar" style="flex:1;min-width:220px">
+      <input id="qA" placeholder="Search products, categories, sellers…" />
+      <button id="qABtn">Search</button>
     </div>
-
-    <div class="nav-right" style="align-items:center">
-      <div class="search" role="search" aria-label="Search products">
-        <input id="searchInput" placeholder="Search products, categories, sellers..." aria-label="Search products" />
-        <button id="searchBtn" title="Search">Search</button>
-      </div>
+    <nav id="navA" class="links" aria-label="Primary">
+      <a href="#featuredA">Featured</a>
+      <a href="#catsA">Categories</a>
       {% if user.is_authenticated %}
-      <a class="cta-sell" href="{% url 'logout' %}">Log Out</a>
+      <a href="{% url 'logout' %}">Log Out</a>
       {% else %}
-      <a class="cta-sell" href="{% url 'login' %}">Login</a>
-      <a class="cta-sell" href="{% url 'register'%}">Register</a>
+      <a href="{% url 'login' %}">Login</a>
+      <a href="{% url 'register' %}">Register</a>
       {% endif %}
-    </div>
-  </div>
-
-  <!-- mobile nav overlay (hidden by default) -->
-  <div id="mobileNav" class="mobile-nav" aria-hidden="true">
-    <div style="display:flex;flex-direction:column;gap:10px;max-width:420px;margin:0 auto">
-      <a href="#featured">Home</a>
-      <a href="#categories">Shop</a>
-      <a href="#register">Sell on TrustBuySell</a>
-      <a href="#contact">Contact</a>
-    </div>
+    </nav>
   </div>
 </header>
 
-<!-- HERO -->
-<section class="hero" aria-label="Hero carousel">
-  <div class="slides" id="slides">
-    <div class="slide active" style="background-image:url('http://127.0.0.1:8000/media/img/file_00000000afa461f4a80e92c6f39e3067.png')" role="img" aria-label="Slide 1">
-      <div class="caption">
-        <h1>Buy & Sell in Adamawa — Fast • Secure • Local</h1>
-        <p>Reach more customers in your community. Start selling today on TrustBuySell.</p>
-        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-primary" onclick="document.getElementById('register').scrollIntoView({behavior:'smooth'})">Register & Sell</button>
-          <button class="btn btn-outline" onclick="document.getElementById('featured').scrollIntoView({behavior:'smooth'})">Shop Featured</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide" style="background-image:url('http://127.0.0.1:8000/media/img/jj.png')" role="img" aria-label="Slide 2">
-      <div class="caption">
-        <h1>Quality local products — Support Adamawa businesses</h1>
-        <p>Handmade, fresh and trusted items from sellers near you.</p>
-      </div>
-    </div>
-
-    <div class="slide" style="background-image:url('http://127.0.0.1:8000/media/img/best9ja.jpg')" role="img" aria-label="Slide 3">
-      <div class="caption">
-        <h1>Safe Payments • Local Delivery</h1>
-        <p>Secure transactions and delivery options across the state.</p>
+<section class="hero" aria-label="Hero">
+  <div class="hero-card">
+    <div class="hero-media" style="background-image:url('https://trustbuysell.onrender.com/media/img/file_00000000afa461f4a80e92c6f39e3067.png')"></div>
+    <div class="hero-content">
+      <h1>Buy & Sell in Adamawa — Fast • Secure • Local</h1>
+      <p>Reach more customers in your community. Start selling today on TrustBuySell.</p>
+      <div class="hero-actions">
+        <a class="btn btn-accent" href="{% url 'register' %}">Register & Sell</a>
+        <a class="btn ghost" href="#featuredA">Shop Featured</a>
       </div>
     </div>
   </div>
-
-  <div class="controls" aria-hidden="false">
-    <button id="prev" aria-label="Previous slide" class="btn" style="background:rgba(0,0,0,.36);color:#fff">‹</button>
-    <button id="next" aria-label="Next slide" class="btn" style="background:rgba(0,0,0,.36);color:#fff">›</button>
+  <div class="chip-row" id="catsA">
+    {% for category in categories %}
+      <a class="chip" href="#" data-cat="{{ category.name|default:'' }}">{{ category.name }}</a>
+    {% empty %}
+      <span class="chip">No categories yet</span>
+    {% endfor %}
   </div>
 </section>
 
-<!-- MAIN -->
-<main>
-  <div class="grid-3">
-
-    <!-- LEFT COLUMN -->
-    <div>
-
-      <!-- CATEGORIES -->
-      <section id="categories" style="margin-bottom:18px">
-        <div class="section-title" style="margin-bottom:10px">
-          <h2>Shop by Category</h2>
-          <div style="color:var(--muted)">Browse popular categories</div>
-        </div>
-        <div class="categories" aria-label="Product categories">
-           {% for category in categories %}
-          <div class="cat" data-cat="{{category.name|default:''}}">
-            <img src="{{category.image.url}}" alt="{{category.name}}">
-            <div>{{category.name}}</div>
-          </div>
-           {% endfor %}
-        </div>
-      </section>
-
-      <!-- FLASH / TOP DEALS -->
-      <section style="margin:18px 0">
-        <div class="flash">
-          <div style="flex:1">
-            <strong>Today's Top Deal:</strong> Solar Lantern — limited stock!
-            <div style="font-size:13px;color:var(--muted)">Discount ends in <span class="countdown" id="dealTimer">00:00:00</span></div>
-          </div>
-          <div><button class="btn btn-primary" onclick="alert('Flash deal clicked')">Grab Deal</button></div>
-        </div>
-      </section>
-
-      <!-- FEATURED PRODUCTS -->
-      <section id="featured" style="margin-top:18px">
-        <div class="section-title" style="margin-bottom:12px">
-          <h2>Featured Products</h2>
-          <div style="color:var(--muted)">Top picks from local sellers</div>
-        </div>
-
-        <div style="margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <div style="flex:1;color:var(--muted)">Showing featured products — use the search bar to filter</div>
-          <button id="showAll" class="btn btn-outline" type="button">View All</button>
-        </div>
-
-        <div class="products" id="productGrid" aria-live="polite">
-          {% for product in FeaturedProduct %}
-          <article class="card">
-            <div class="media">
-              <img loading="lazy" src="{{ product.product_image.image.url }}" alt="{{ product.title }}">
-            </div>
-            <div class="card-body">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <strong class="p-title">{{ product.title }}</strong>
-                <div class="price">₦{{ product.discountedprice|floatformat:0 }}</div>
-              </div>
-              <div class="p-seller" style="color:var(--muted);font-size:13px">{{ product.seller.name }}</div>
-              <div class="actions">
-                <a href="#" class="btn btn-primary">Add To Cart</a>
-                <a href="{% url 'product_detail' product.slug %}" class="btn btn-outline">View</a>
-              </div>
-            </div>
-          </article>
-          {% empty %}
-          <p style="color:var(--muted)">No featured products available at the moment.</p>
-          {% endfor %}
-        </div>
-      </section>
-
-      <!-- TESTIMONIALS -->
-      <section style="margin-top:20px">
-        <h2>What Sellers & Buyers Say</h2>
-        <div class="testimonials" aria-label="Testimonials">
-          <div class="t-list" id="testimonialList">
-            <div class="t-card">
-              <strong>Fatima (seller)</strong>
-              <p style="color:var(--muted)">"My sales increased after I joined TrustBuySell — easy and local."</p>
-            </div>
-            <div class="t-card">
-              <strong>Ali (buyer)</strong>
-              <p style="color:var(--muted)">"Fast delivery and good prices. I love supporting local stores."</p>
-            </div>
-            <div class="t-card">
-              <strong>Nura (seller)</strong>
-              <p style="color:var(--muted)">"Smooth onboarding and payments. Great support from the team."</p>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- RIGHT COLUMN -->
-    <aside style="display:flex;flex-direction:column;gap:12px">
-      <!-- SELLER CTA -->
-      <div class="seller-cta" id="register">
-        <div class="cta-left">
-          <h3>Own a shop in Adamawa?</h3>
-          <p style="margin:6px 0;color:var(--muted)">Register and list your products to reach local buyers.</p>
-        </div>
-        <div><button class="cta-btn" type="button" onclick="location.href="{% url 'register' %}'">Register & Sell</button></div>
-      </div>
-
-      <!-- NEWSLETTER -->
-      <div style="background:var(--card);padding:14px;border-radius:12px">
-        <h3 style="margin:0 0 8px">Join our newsletter</h3>
-        <p style="margin:0 0 12px;color:var(--muted)">Get deals and tips — once a week.</p>
-        <div class="newsletter">
-          <input id="emailInput" placeholder="Your email address" type="email" />
-          <button class="btn btn-primary" id="newsletterBtn" type="button">Subscribe</button>
+<main class="section">
+  <div class="title"><h2>Featured Products</h2><span class="muted">Top picks from local sellers</span></div>
+  <div id="featuredA" class="grid" aria-live="polite">
+    {% for product in FeaturedProduct %}
+    <article class="card">
+      <div class="media"><img loading="lazy" src="{{ product.product_image.image.url }}" alt="{{ product.title }}"></div>
+      <div class="body">
+        <div class="p-title">{{ product.title }}</div>
+        <div class="muted">{{ product.seller.name }}</div>
+        <div class="price">₦{{ product.discountedprice|floatformat:0 }}</div>
+        <div class="actions">
+          <a class="btn btn-accent" href="#">Add to Cart</a>
+          <a class="btn btn-outline" href="{% url 'product_detail' product.slug %}">View</a>
         </div>
       </div>
-
-      <!-- QUICK LINKS -->
-      <div style="background:var(--card);padding:12px;border-radius:12px">
-        <h4 style="margin:0 0 8px">Quick Links</h4>
-        <ul style="list-style:none;padding-left:0;color:var(--muted)">
-          <li><a href="#featured">Featured</a></li>
-          <li><a href="#categories">Categories</a></li>
-          <li><a href="#register">Sell on TrustBuySell</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-      </div>
-    </aside>
-
+    </article>
+    {% empty %}
+      <p class="muted">No featured products available at the moment.</p>
+    {% endfor %}
   </div>
+
+  <section class="section" style="padding:0;margin-top:16px">
+    <div class="title"><h2>What Sellers & Buyers Say</h2></div>
+    <div class="testimonials" aria-label="Testimonials">
+      <div class="trow" id="trowA">
+        <div class="t"><strong>Fatima (seller)</strong><p class="muted">“My sales increased after I joined TrustBuySell — easy and local.”</p></div>
+        <div class="t"><strong>Ali (buyer)</strong><p class="muted">“Fast delivery and good prices. I love supporting local stores.”</p></div>
+        <div class="t"><strong>Nura (seller)</strong><p class="muted">“Smooth onboarding and payments. Great support from the team.”</p></div>
+      </div>
+    </div>
+  </section>
 </main>
 
-<!-- FOOTER -->
-<footer id="contact">
-  <div style="max-width:1200px;margin:0 auto;padding:18px;display:flex;flex-direction:column;gap:10px">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
-      <div>
-        <strong>TrustBuySell</strong><div style="color:var(--muted)">Serving Adamawa sellers & buyers</div>
-      </div>
-      <div style="display:flex;gap:12px;align-items:center">
-        <div style="color:var(--muted)">Contact: 07041696102</div>
-        <div style="display:flex;gap:8px">
-          <a href="#" aria-label="facebook" style="color:var(--muted)">Fb</a>
-          <a href="#" aria-label="instagram" style="color:var(--muted)">Ig</a>
-          <a href="#" aria-label="whatsapp" style="color:var(--muted)">Wa</a>
-        </div>
-      </div>
+<footer>
+  <div class="foot">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div><strong>TrustBuySell</strong><div class="muted">Serving Adamawa sellers & buyers</div></div>
+      <div class="muted">Contact: 07041696102</div>
     </div>
-    <div style="color:var(--muted);font-size:13px">© TrustBuySell — All rights reserved.</div>
+    <div class="muted" style="font-size:13px">© {{ now|date:"Y" }} TrustBuySell — All rights reserved.</div>
   </div>
 </footer>
 
 <script>
-/* ========== Mobile nav toggle ========== */
-const hamb = document.getElementById('hambBtn');
-const mobileNav = document.getElementById('mobileNav');
-hamb.addEventListener('click', () => {
-  const open = mobileNav.classList.toggle('open');
-  mobileNav.setAttribute('aria-hidden', String(!open));
-  hamb.setAttribute('aria-expanded', String(open));
-  if(open){ document.body.style.overflow = 'hidden'; stopHero(); } else { document.body.style.overflow = ''; startHero(); }
-});
-/* close mobile nav when resizing to desktop */
-window.addEventListener('resize', ()=> { if(window.innerWidth>900){ mobileNav.classList.remove('open'); mobileNav.setAttribute('aria-hidden','true'); hamb.setAttribute('aria-expanded','false'); document.body.style.overflow=''; startHero(); } });
+// Mobile nav toggle
+const hambA=document.getElementById('hambA');
+const navA=document.getElementById('navA');
+if(hambA){hambA.addEventListener('click',()=>{const open=getComputedStyle(navA).display==='none';navA.style.display=open?'flex':'none';hambA.setAttribute('aria-expanded',String(open));});}
 
-/* ========== Hero carousel (loops through your images) ========== */
-const slides = Array.from(document.querySelectorAll('.slide'));
-let slideIndex = 0;
-const nextBtn = document.getElementById('next');
-const prevBtn = document.getElementById('prev');
-let heroInterval = null;
+// Client-side filter
+const qA=document.getElementById('qA');
+const qABtn=document.getElementById('qABtn');
+const gridA=document.getElementById('featuredA');
+function filterA(){const q=(qA?.value||'').toLowerCase();gridA?.querySelectorAll('.card').forEach(c=>{const t=(c.querySelector('.p-title')?.textContent||'').toLowerCase();const s=(c.querySelector('.muted')?.textContent||'').toLowerCase();c.style.display=(t+s).includes(q)?'':'none';});}
+qABtn?.addEventListener('click',filterA);qA?.addEventListener('keydown',e=>{if(e.key==='Enter')filterA();});
 
-function showHero(i){
-  slides.forEach((s, idx)=> {
-    s.classList.toggle('active', idx===i);
-    // subtle parallax-ish transform
-    s.style.transform = idx===i ? 'translateY(0)' : 'translateY(6px)';
-  });
-}
-function nextHero(){
-  slideIndex = (slideIndex+1) % slides.length;
-  showHero(slideIndex);
-}
-function prevHero(){
-  slideIndex = (slideIndex-1 + slides.length) % slides.length;
-  showHero(slideIndex);
-}
-if(nextBtn) nextBtn.addEventListener('click', ()=>{ stopHero(); nextHero(); startHero(); });
-if(prevBtn) prevBtn.addEventListener('click', ()=>{ stopHero(); prevHero(); startHero(); });
-
-function startHero(){ stopHero(); heroInterval = setInterval(nextHero, 4500); }
-function stopHero(){ if(heroInterval){ clearInterval(heroInterval); heroInterval=null; } }
-startHero();
-
-/* ========== Live search (filters featured products in DOM) ========== */
-const searchInput = document.getElementById('searchInput');
-const searchBtn = document.getElementById('searchBtn');
-const grid = document.getElementById('productGrid');
-
-function filterProducts(query){
-  if(!grid) return;
-  const cards = grid.querySelectorAll('.card');
-  const q = (query||'').trim().toLowerCase();
-  let visibleCount = 0;
-  cards.forEach(card=>{
-    const title = card.querySelector('.p-title')?.textContent || '';
-    const seller = card.querySelector('.p-seller')?.textContent || '';
-    const text = (title + ' ' + seller).toLowerCase();
-    const show = !q || text.includes(q);
-    card.style.display = show ? '' : 'none';
-    if(show) visibleCount++;
-  });
-  // aria-live feedback could be added here if needed
-}
-
-function doSearch(){ filterProducts(searchInput.value); }
-if(searchBtn) searchBtn.addEventListener('click', doSearch);
-if(searchInput){
-  searchInput.addEventListener('input', () => { if(searchInput.value.length===0) filterProducts(''); });
-  searchInput.addEventListener('keydown', (e)=> { if(e.key==='Enter') doSearch(); });
-}
-
-/* Show All */
-const showAllBtn = document.getElementById('showAll');
-if(showAllBtn) showAllBtn.addEventListener('click', ()=> { filterProducts(''); searchInput.value=''; grid?.scrollIntoView({behavior:'smooth'}); });
-
-/* ========== Deal countdown (example: ends in 6 hours) ========== */
-function startCountdown(el, seconds){
-  function tick(){
-    if(seconds<=0){ el.textContent = '00:00:00'; clearInterval(iv); return; }
-    const h = Math.floor(seconds/3600); const m = Math.floor((seconds%3600)/60); const s = seconds%60;
-    el.textContent = [h,m,s].map(v=>String(v).padStart(2,'0')).join(':');
-    seconds--; 
-  }
-  tick(); const iv = setInterval(tick,1000);
-}
-const dealTimerEl = document.getElementById('dealTimer');
-if(dealTimerEl) startCountdown(dealTimerEl, 6*3600);
-
-/* ========== Testimonials horizontal auto-scroll ========== */
-const tlist = document.getElementById('testimonialList');
-if(tlist){
-  let tpos = 0;
-  setInterval(()=>{ 
-    tpos += 260; 
-    if(tpos > tlist.scrollWidth - tlist.clientWidth) tpos=0; 
-    tlist.scrollTo({left:tpos,behavior:'smooth'});
-  }, 3500);
-}
-
-/* ========== Newsletter (simple client-side demo) ========== */
-const newsletterBtn = document.getElementById('newsletterBtn');
-if(newsletterBtn){
-  newsletterBtn.addEventListener('click', ()=>{
-    const input = document.getElementById('emailInput');
-    const email = (input?.value || '').trim();
-    if(!email || !email.includes('@')) return alert('Enter a valid email');
-    alert('Thanks! Subscribed: ' + email);
-    input.value='';
-  });
-}
+// Testimonials auto-scroll
+const trowA=document.getElementById('trowA');
+if(trowA){let x=0;setInterval(()=>{x+=240;if(x>trowA.scrollWidth-trowA.clientWidth) x=0;trowA.scrollTo({left:x,behavior:'smooth'});},3500);}
 </script>
 </body>
 </html>
+
+
+

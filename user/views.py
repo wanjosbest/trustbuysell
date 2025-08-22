@@ -62,7 +62,7 @@ def index(request):
     #Output categories
     categories = category.objects.all()
     #output featured products
-    FeaturedProduct = Products.objects.filter(featured = True).order_by("-published")[:6]
+    FeaturedProduct = Products.objects.filter(featured = True).order_by("-published")[:8]
    
     context = {"categories":categories,"FeaturedProduct":FeaturedProduct}
     return render(request,"index.html", context)

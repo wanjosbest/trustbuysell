@@ -15,8 +15,10 @@
     .btn-danger { background: #dc2626; }
     .btn-danger:hover { background: #b91c1c; }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.05); }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+    /* Table styles */
+    .table-wrapper { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.05); min-width: 800px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
     th { background: #f1f5f9; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
 
     .status { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
@@ -31,7 +33,7 @@
     .form label { font-weight: bold; font-size: 14px; }
     .form input, .form textarea, .form select { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; }
 
-    .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
+    .form-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 15px; }
 
     /* Image grid */
     .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; }
@@ -49,6 +51,15 @@
     .delete-modal { background: #fff; border-radius: 12px; padding: 20px; max-width: 400px; width: 95%; text-align: center; }
     .delete-modal h3 { margin: 0 0 10px; color: #dc2626; }
     .delete-modal p { margin-bottom: 20px; }
+
+    /* Responsive tweaks */
+    @media (max-width: 768px) {
+      header h1 { font-size: 18px; }
+      .btn { font-size: 13px; padding: 8px 10px; }
+      th, td { padding: 10px; font-size: 13px; }
+      .form-actions { flex-direction: column; align-items: stretch; }
+      .form-actions .btn { width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -59,39 +70,41 @@
     <button class="btn" onclick="openModal()">＋ Add Product</button>
     <button class="btn" onclick="openImageUploadModal()">＋ Add Image</button>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Category</th>
-          <th>Price</th>
-          <th>Discounted</th>
-          <th>Status</th>
-          <th>Featured</th>
-          <th>Updated</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for product in products %}
-        <tr>
-          <td>{{ product.name }}</td>
-          <td>{{ product.category.name }}</td>
-          <td>₦{{ product.actualprice }}</td>
-          <td>₦{{ product.discountedprice }}</td>
-          <td><span class="status {{ product.status }}">{{ product.get_status_display }}</span></td>
-          <td>{% if product.featured %}⭐ Yes{% else %}—{% endif %}</td>
-          <td>{{ product.updated|date:"M d, Y" }}</td>
-          <td>
-            <a href="{% url 'product_update' product.slug %}" class="btn">Edit</a>
-            <button class="btn btn-danger" onclick="openDeleteModal('{{ product.slug }}', '{{ product.name }}')">Delete</button>
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="8">No products yet.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Discounted</th>
+            <th>Status</th>
+            <th>Featured</th>
+            <th>Updated</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in products %}
+          <tr>
+            <td>{{ product.name }}</td>
+            <td>{{ product.category.name }}</td>
+            <td>₦{{ product.actualprice }}</td>
+            <td>₦{{ product.discountedprice }}</td>
+            <td><span class="status {{ product.status }}">{{ product.get_status_display }}</span></td>
+            <td>{% if product.featured %}⭐ Yes{% else %}—{% endif %}</td>
+            <td>{{ product.updated|date:"M d, Y" }}</td>
+            <td>
+              <a href="{% url 'product_update' product.slug %}" class="btn">Edit</a>
+              <button class="btn btn-danger" onclick="openDeleteModal('{{ product.slug }}', '{{ product.name }}')">Delete</button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8">No products yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Delete Modal -->
