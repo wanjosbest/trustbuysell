@@ -1,0 +1,6 @@
+<div class="container">
+  <h2>✅ Payment Successful</h2>
+  <p>Reference: {{ payment.reference }}</p>
+  <p>Amount: ₦{{ payment.amount|floatformat:2 }}</p>
+  <a href="{% url 'index' %}">Continue Shopping</a>
+</div>

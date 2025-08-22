@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import (Product_image,Products,category,Cart_Items)
+from .models import (Product_image,Products,category,Cart_Items,shipping,Payment)
 from user.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils.text import slugify
-
-
+from .utils import generate_reference
+from django.conf import settings
+import requests,uuid
+from django.urls import reverse
 #users to add products images
 
 @login_required
@@ -42,6 +44,7 @@ def product_list(request):
         image_id2 = request.FILES.get("product_image2")
         image_id3 = request.FILES.get("product_image3")
         slug = slugify(name)
+        stock = request.POST.get("stock")
         # Relations
         category_obj = category.objects.get(id=category_id) if category_id else None
         image_obj = request.FILES.get("product_image")
@@ -63,6 +66,7 @@ def product_list(request):
             product_image2=image_id2,
             product_image3=image_id3,
             slug=slug,
+            stock = stock,
         )
         return redirect("product_list")
 
@@ -179,3 +183,103 @@ def remove_item(request, product_id):
         remove_cart_item.delete()
    
     return redirect("cart")
+@login_required
+def shipping_view(request):
+    cartitems = Cart_Items.objects.filter(user=request.user)
+    cart_total = sum(item.product.discountedprice * item.quantity for item in cartitems)
+    if request.method == "POST":
+        full_name = request.POST.get("full_name")
+        state = request.POST.get("state")
+        lga = request.POST.get("lga")
+        phone = request.POST.get("phone")
+        address = request.POST.get("street")
+        landmark = request.POST.get("landmark")
+        savedata = shipping.objects.create(
+            user=request.user,
+            full_name=full_name,
+            state=state,
+            lga=lga,
+            address=address,
+            landmark=landmark,
+            phone=phone,
+        )
+        # store shipping id for payment initialization
+        request.session["shipping_id"] = savedata.id
+        return redirect("initiate_payment")
+    return render(request, "shippingaddress.html", {"cartitems": cartitems, "cart_total": cart_total})
+
+
+@login_required
+def initiate_payment(request):
+    cartitems = Cart_Items.objects.filter(user=request.user)
+    total_amount = sum(item.product.discountedprice * item.quantity for item in cartitems)
+
+    if total_amount <= 0:
+        return render(request, "payment_failed.html", {"error": "Cart is empty."})
+
+    # Generate unique reference
+    reference = str(uuid.uuid4()).replace("-", "")[:12]
+
+    # Save payment object before redirecting
+    payment = Payment.objects.create(
+        user=request.user,
+        amount=total_amount,
+        reference=reference,
+        verified=False
+    )
+
+    # Callback URL
+    callback_url = request.build_absolute_uri(reverse("verify_payment"))
+
+    # Paystack request
+    url = "https://api.paystack.co/transaction/initialize"
+    headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
+    data = {
+        "email": request.user.email,
+        "amount": int(total_amount * 100),  # Paystack expects kobo
+        "reference": reference,
+        "callback_url": callback_url,
+    }
+
+    response = requests.post(url, headers=headers, json=data, timeout=10)
+    res_data = response.json()
+
+    if res_data.get("status"):
+        auth_url = res_data["data"]["authorization_url"]
+        return redirect(auth_url)
+    else:
+        return render(request, "payment_failed.html", {"error": res_data.get("message", "Payment init failed.")})
+
+
+
+
+@login_required
+def verify_payment(request):
+    reference = request.GET.get("reference")
+    if not reference:
+        return render(request, "payment_failed.html", {"error": "No payment reference provided."})
+
+    payment = get_object_or_404(Payment, reference=reference, user=request.user)
+
+    url = f"https://api.paystack.co/transaction/verify/{reference}"
+    headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
+
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        res_data = response.json()
+    except Exception as e:
+        return render(request, "payment_failed.html", {"error": f"Connection error: {str(e)}"})
+
+    if res_data.get("status") and res_data["data"]["status"] == "success":
+        payment.verified = True
+        payment.amount = res_data["data"]["amount"] / 100  # convert kobo → naira
+        payment.channel = res_data["data"].get("channel")
+        payment.paid_at = res_data["data"].get("paid_at")
+        payment.save()
+
+        # Clear cart after successful payment
+        Cart_Items.objects.filter(user=request.user).delete()
+
+        return render(request, "payment_success.html", {"payment": payment})
+    else:
+        return render(request, "payment_failed.html", {"payment": payment, "error": "Payment verification failed."})

@@ -121,6 +121,21 @@
   .checkout-btn:hover {
     background: #45a049;
   }
+button {
+      margin-top: 20px;
+      width: 100%;
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1e4fc5;
+    }
 
   /* Tablet and up */
   @media (min-width: 768px) {
@@ -141,7 +156,7 @@
   <div class="cart-item">
    
     <div class="item-info">
-
+  {% if cart_items %}
   {% for item in cart_items %}
   <div class="cart-item">
     <img src="{{ item.product.product_image.image.url }}" alt="{{ item.product.name }}">
@@ -180,8 +195,9 @@
       <span>₦{{ item.get_total }}</span>
     </div>
      {% endfor %}
+      
   </div>
-</div>
+</div><a href="{% url 'shipping' %}"><button type="submit"> Check Out</button></a>
 
 <script>
   function increaseQty(btn) {

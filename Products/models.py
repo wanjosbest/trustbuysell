@@ -77,3 +77,26 @@ class Cart_Items(models.Model):
     def get_total(self):
         return self.product.discountedprice * self.quantity
     
+class shipping(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+    # items = models.ForeignKey(Cart_Items, on_delete=models.CASCADE, related_name="cartitems")
+    state = models.CharField(max_length=30)
+    phone = models.CharField(max_length=15)
+    full_name = models.CharField(max_length=30)
+    lga = models.CharField(max_length= 30)
+    address = models.CharField(max_length=150)
+    landmark = models.CharField(max_length=100, blank=True,null=True)
+
+    def __str__(self):
+        return f'shipping to {self.user}| {self.state} |{self.lga}| {self.address}'
+class Payment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    reference = models.CharField(max_length=100, unique=True)
+    verified = models.BooleanField(default=False)
+    channel = models.CharField(max_length=50, blank=True, null=True)
+    paid_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.reference} - {'Verified' if self.verified else 'Pending'}"

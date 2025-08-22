@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - Pay with Paystack</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f8f9fa; }
+    .container { max-width: 400px; margin: auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; }
+    input, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #ccc; }
+    button { background: #0d6efd; color: #fff; border: none; font-size: 16px; cursor: pointer; }
+    button:hover { background: #0b5ed7; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Pay with Paystack</h2>
+    <form method="POST">
+      {% csrf_token %}
+      <label>Amount (₦)</label>
+      <input type="number" name="amount" placeholder="Enter amount" required>
+      <button type="submit">Proceed to Paystack</button>
+    </form>
+  </div>
+</body>
+</html>

@@ -128,3 +128,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+PAYSTACK_PUBLIC_KEY = "pk_test_de865d92498dfae7e39732927052da70dc7412ac"
+PAYSTACK_SECRET_KEY = "sk_test_e7e1ceb7a2e6669e5608c89a8d2e01a06ef4bbee"
