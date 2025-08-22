@@ -167,7 +167,7 @@
         <button class="close-x" aria-label="Close" onclick="closeAddModal()">✕</button>
       </div>
       <div class="body">
-        <form method="post" class="form" id="addForm">
+        <form method="post" class="form" id="addForm" enctype="multipart/form-data">
           {% csrf_token %}
           <label>Name</label>
           <input type="text" name="name" required>
@@ -213,7 +213,7 @@
               <img id="preview1" alt="Selected image 1">
               <div class="hint">Image 1</div>
               <button type="button" class="btn" onclick="openPickerFor(1)">Select Image</button>
-              <input type="hidden" name="product_image1" id="product_image1">
+              <input type="hidden" name="product_image" id="product_image1">
             </div>
             <!-- Slot 2 -->
             <div class="slot" id="slot2">

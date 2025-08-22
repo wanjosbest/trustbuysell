@@ -43,9 +43,8 @@ def product_list(request):
         slug = slugify(name)
         # Relations
         category_obj = category.objects.get(id=category_id) if category_id else None
-        image_obj = Product_image.objects.get(id=image_id) if image_id else None
-        # image_obj2 = Product_image.objects.get(id=image_id) if image_id else None
-        # image_obj3 = Product_image.objects.get(id=image_id) if image_id else None
+        image_obj = request.FILES.get("product_image")
+      
 
         # Save product
         product = Products.objects.create(
