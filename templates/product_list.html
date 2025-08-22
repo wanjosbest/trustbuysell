@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Products Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }
+    header { background: #2563eb; color: #fff; padding: 16px; }
+    h1 { margin: 0; font-size: 20px; }
+    .container { padding: 20px; }
+
+    .btn { background: #2563eb; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    .btn:hover { background: #1d4ed8; }
+    .btn-danger { background: #dc2626; }
+    .btn-danger:hover { background: #b91c1c; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.05); }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+    th { background: #f1f5f9; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+
+    .status { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+    .status.draft { background: rgba(245,158,11,.1); color: #f59e0b; }
+    .status.published { background: rgba(22,163,74,.1); color: #16a34a; }
+
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; overflow-y: auto; padding: 20px; }
+    .modal { background: #fff; border-radius: 12px; width: min(600px, 95%); padding: 20px; animation: pop .3s ease; max-height: 90vh; overflow-y: auto; }
+    @keyframes pop { from { transform: scale(.9); opacity:.5 } to { transform: scale(1); opacity:1 } }
+
+    .form { display: grid; gap: 12px; }
+    .form label { font-weight: bold; font-size: 14px; }
+    .form input, .form textarea, .form select { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; }
+
+    .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
+
+    /* Image grid */
+    .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; }
+    .image-option { position: relative; cursor: pointer; border: 2px solid transparent; border-radius: 8px; overflow: hidden; }
+    .image-option img { width: 100%; height: 80px; object-fit: cover; display: block; }
+    .image-option.selected { border-color: #2563eb; box-shadow: 0 0 6px rgba(37,99,235,.6); }
+
+    /* Sub modal for images */
+    .image-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; padding: 20px; }
+    .image-modal { background: #fff; border-radius: 12px; padding: 20px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; }
+    .image-modal h3 { margin-top: 0; }
+    .close-btn { float: right; cursor: pointer; font-weight: bold; }
+
+    /* Delete confirmation modal */
+    .delete-modal { background: #fff; border-radius: 12px; padding: 20px; max-width: 400px; width: 95%; text-align: center; }
+    .delete-modal h3 { margin: 0 0 10px; color: #dc2626; }
+    .delete-modal p { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Products Dashboard</h1>
+  </header>
+  <div class="container">
+    <button class="btn" onclick="openModal()">＋ Add Product</button>
+    <button class="btn" onclick="openImageUploadModal()">＋ Add Image</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Discounted</th>
+          <th>Status</th>
+          <th>Featured</th>
+          <th>Updated</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+        <tr>
+          <td>{{ product.name }}</td>
+          <td>{{ product.category.name }}</td>
+          <td>₦{{ product.actualprice }}</td>
+          <td>₦{{ product.discountedprice }}</td>
+          <td><span class="status {{ product.status }}">{{ product.get_status_display }}</span></td>
+          <td>{% if product.featured %}⭐ Yes{% else %}—{% endif %}</td>
+          <td>{{ product.updated|date:"M d, Y" }}</td>
+          <td>
+            <a href="{% url 'product_update' product.slug %}" class="btn">Edit</a>
+            <button class="btn btn-danger" onclick="openDeleteModal('{{ product.slug }}', '{{ product.name }}')">Delete</button>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8">No products yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Delete Modal -->
+  <div class="modal-backdrop" id="deleteModal">
+    <div class="delete-modal">
+      <h3>Confirm Delete</h3>
+      <p>Are you sure you want to delete <strong id="deleteProductName"></strong>?</p>
+      <form method="post" id="deleteForm">
+        {% csrf_token %}
+        <div class="form-actions">
+          <button type="button" class="btn" onclick="closeDeleteModal()">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Product Modal -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal">
+      <h2>Add Product</h2>
+      <form method="post" enctype="multipart/form-data" class="form">
+        {% csrf_token %}
+        <label>Name</label>
+        <input type="text" name="name" required>
+
+        <label>Category</label>
+        <select name="category" required>
+          {% for c in categories %}
+          <option value="{{ c.id }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
+
+        <label>Actual Price</label>
+        <input type="number" name="actualprice" step="0.01">
+
+        <label>Discounted Price</label>
+        <input type="number" name="discountedprice" step="0.01">
+
+        <label>Description</label>
+        <textarea name="description"></textarea>
+
+        <label>SEO Keywords</label>
+        <input type="text" name="meta_keywords">
+
+        <label>SEO Description</label>
+        <input type="text" name="meta_descriptions">
+
+        <!-- Image select 1 -->
+        <label>Select Product Image One</label>
+        <input type="hidden" name="product_image" id="product_image1">
+        <button type="button" class="btn" onclick="openImageModal('product_image1','preview-img1')">Select Image</button>
+        <div style="margin-top:10px;">
+          <img id="preview-img1" src="" alt="No image selected"
+               style="max-width:120px; display:none; border:1px solid #ccc; border-radius:8px;">
+        </div>
+
+        <!-- Image select 2 -->
+        <label>Select Product Image Two</label>
+        <input type="hidden" name="product_image2" id="product_image2">
+        <button type="button" class="btn" onclick="openImageModal('product_image2','preview-img2')">Select Image</button>
+        <div style="margin-top:10px;">
+          <img id="preview-img2" src="" alt="No image selected"
+               style="max-width:120px; display:none; border:1px solid #ccc; border-radius:8px;">
+        </div>
+
+        <!-- Image select 3 -->
+        <label>Select Product Image Three</label>
+        <input type="hidden" name="product_image3" id="product_image3">
+        <button type="button" class="btn" onclick="openImageModal('product_image3','preview-img3')">Select Image</button>
+        <div style="margin-top:10px;">
+          <img id="preview-img3" src="" alt="No image selected"
+               style="max-width:120px; display:none; border:1px solid #ccc; border-radius:8px;">
+        </div>
+
+        <label>Status</label>
+        <select name="status">
+          <option value="draft">Draft</option>
+          <option value="published">Published</option>
+        </select>
+
+        <label>Featured</label>
+        <input type="checkbox" name="featured">
+
+        <div class="form-actions">
+          <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Image Modal -->
+  <div class="modal-backdrop" id="imageUploadModal">
+    <div class="modal">
+      <h2>Upload Image</h2>
+      <form method="post" enctype="multipart/form-data" class="form" action="{% url 'addproductimage' %}">
+        {% csrf_token %}
+        <label>Select Image</label>
+        <input type="file" name="image" accept="image/*" required>
+        <div class="form-actions">
+          <button type="button" class="btn" onclick="closeImageUploadModal()">Cancel</button>
+          <button type="submit" class="btn">Upload</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Image Selection Modal -->
+  <div class="image-modal-backdrop" id="imageModal">
+    <div class="image-modal">
+      <span class="close-btn" onclick="closeImageModal()">✖</span>
+      <h3>Select an Image</h3>
+      <div class="image-grid">
+        {% for img in images %}
+          <div class="image-option" data-id="{{ img.id }}" data-url="{{ img.image.url }}">
+            <img src="{{ img.image.url }}" alt="Image {{ img.id }}">
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Add Product Modal
+    const modal = document.getElementById('modal');
+    function openModal() { modal.style.display = 'flex'; }
+    function closeModal() { modal.style.display = 'none'; }
+
+    // Add Image Modal
+    const imageUploadModal = document.getElementById('imageUploadModal');
+    function openImageUploadModal() { imageUploadModal.style.display = 'flex'; }
+    function closeImageUploadModal() { imageUploadModal.style.display = 'none'; }
+
+    // Image Modal
+    const imageModal = document.getElementById('imageModal');
+    let currentHiddenInput = null;
+    let currentPreviewImg = null;
+
+    function openImageModal(hiddenInputId, previewImgId) {
+      currentHiddenInput = document.getElementById(hiddenInputId);
+      currentPreviewImg = document.getElementById(previewImgId);
+      imageModal.style.display = 'flex';
+    }
+    function closeImageModal() { imageModal.style.display = 'none'; }
+
+    document.querySelectorAll('.image-option').forEach(option => {
+      option.addEventListener('click', () => {
+        if (!currentHiddenInput || !currentPreviewImg) return;
+        const id = option.getAttribute('data-id');
+        const url = option.getAttribute('data-url');
+        currentHiddenInput.value = id;
+        currentPreviewImg.src = url;
+        currentPreviewImg.style.display = 'block';
+        closeImageModal();
+      });
+    });
+
+    // Delete Modal
+    const deleteModal = document.getElementById('deleteModal');
+    const deleteForm = document.getElementById('deleteForm');
+    const deleteProductName = document.getElementById('deleteProductName');
+
+    function openDeleteModal(slug, name) {
+      deleteForm.action = `{% url 'product_delete' 'slug-placeholder' %}`.replace('slug-placeholder', slug);
+      deleteProductName.textContent = name;
+      deleteModal.style.display = 'flex';
+    }
+    function closeDeleteModal() { deleteModal.style.display = 'none'; }
+
+    // Close modal if backdrop clicked
+    window.onclick = function(e) {
+      if (e.target == modal) modal.style.display = 'none';
+      if (e.target == imageModal) imageModal.style.display = 'none';
+      if (e.target == imageUploadModal) imageUploadModal.style.display = 'none';
+      if (e.target == deleteModal) deleteModal.style.display = 'none';
+    }
+  </script>
+</body>
+</html>

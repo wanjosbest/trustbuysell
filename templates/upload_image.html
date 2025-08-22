@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload Image</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+    }
+
+    .container {
+        margin: 40px auto;
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        max-width: 800px;
+        width: 100%;
+    }
+
+    h2 {
+        text-align: center;
+        color: #333;
+    }
+
+    .upload-area {
+        border: 2px dashed #4CAF50;
+        padding: 30px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.3s;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .upload-area:hover {
+        background: #f9fff9;
+        border-color: #45a049;
+    }
+
+    .upload-area p {
+        margin: 0;
+        color: #555;
+    }
+
+    /* Thumbnail preview */
+    .preview img {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-top: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    button {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 15px;
+        font-size: 16px;
+    }
+
+    button:hover {
+        background: #45a049;
+    }
+
+    .gallery {
+        margin-top: 30px;
+    }
+
+    .gallery h3 {
+        margin-bottom: 15px;
+        color: #444;
+    }
+
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+
+    .image-card {
+        background: #fafafa;
+        border-radius: 10px;
+        padding: 10px;
+        text-align: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .image-card img {
+        width: 100%;
+        border-radius: 8px;
+        height: 150px;
+        object-fit: cover;
+    }
+
+    .image-card p {
+        font-size: 13px;
+        margin: 5px 0 0;
+        color: #666;
+    }
+</style>
+</head>
+<body>
+  <a href="{% url 'product_list'%}">  <button> View Products </button> </a> 
+
+<div class="container">
+    <h2>Upload an Image</h2>
+    <form id="uploadForm" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="upload-area" id="uploadArea">
+            <p>Drag & Drop an image or <strong>Click to Upload</strong></p>
+            <input type="file" id="fileInput" name="image" accept="image/*" hidden>
+        </div>
+
+        <div class="preview" id="preview"></div>
+        <button type="submit">Upload</button>
+    </form>
+
+    <div class="gallery">
+        <h3>My Uploaded Images</h3>
+        <div class="image-grid">
+            {% for img in images %}
+                <div class="image-card">
+                    <img src="{{ img.image.url }}" alt="Uploaded image">
+                    <p>Uploaded by: {{ img.user.username }}</p>
+                </div>
+            {% empty %}
+                <p>No images uploaded yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+
+    // Open file picker on click
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    // Show thumbnail preview when file selected
+    fileInput.addEventListener('change', function() {
+        preview.innerHTML = '';
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                preview.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Drag and Drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.background = '#f9fff9';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.background = '';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileInput.files = e.dataTransfer.files;
+        fileInput.dispatchEvent(new Event('change'));
+        uploadArea.style.background = '';
+    });
+</script>
+
+</body>
+</html>

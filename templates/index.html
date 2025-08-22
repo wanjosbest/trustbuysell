@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TrustBuySell — Adamawa Marketplace</title>
+<style>
+  :root{
+    --primary:#1E3A8A;
+    --accent:#F97316;
+    --bg:#f4f6fb;
+    --card:#fff;
+    --muted:#6b7280;
+    --gap:18px;
+    --header-h:72px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Inter, system-ui, Arial, sans-serif;
+    background:var(--bg);
+    color:#0f172a;
+    line-height:1.4;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit}
+
+  /* HEADER */
+  header{
+    position:sticky;
+    top:0;
+    z-index:1200;
+    background:linear-gradient(90deg,var(--primary),#12306b);
+    box-shadow:0 4px 16px rgba(2,6,23,.12);
+  }
+  .nav{
+    max-width:1200px;
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px;
+    gap:12px;
+  }
+  .brand{color:#fff;font-weight:800;font-size:1.25rem;letter-spacing:.3px}
+  .nav-right{display:flex;align-items:center;gap:12px}
+  .search{
+    display:flex;align-items:center;background:#fff;padding:6px 8px;border-radius:999px;
+    min-width:220px;max-width:420px;box-shadow:0 6px 20px rgba(2,6,23,0.06)
+  }
+  .search input{border:0;outline:none;font-size:0.95rem;padding:8px;width:100%;background:transparent}
+  .search button{background:var(--accent);border:0;color:#fff;padding:8px 10px;border-radius:999px;cursor:pointer;font-weight:700}
+  nav .links{display:flex;gap:12px;align-items:center}
+  nav .links a{color:#fff;padding:10px 12px;border-radius:8px;font-weight:700}
+  nav .cta-sell{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;font-weight:800}
+  .hamb{display:none;font-size:1.6rem;padding:8px;border-radius:8px;background:rgba(255,255,255,0.06);color:#fff;cursor:pointer;border:0}
+
+  /* Mobile nav overlay */
+  .mobile-nav {
+    display:none;
+    position:fixed;
+    inset:var(--header-h) 0 0 0;
+    background:linear-gradient(180deg,#123d6b,#0c2945);
+    color:#fff;
+    z-index:1199;
+    padding:20px;
+    overflow:auto;
+  }
+  .mobile-nav.open { display:block; }
+
+  .mobile-nav a { display:block; padding:12px 0; color:#fff; font-weight:700; text-decoration:none; border-bottom:1px solid rgba(255,255,255,0.03) }
+
+  /* HERO CAROUSEL */
+  .hero{max-width:1200px;margin:14px auto;position:relative;border-radius:12px;overflow:hidden;box-shadow:0 12px 40px rgba(2,6,23,0.08)}
+  .slides{position:relative;height:56vh;min-height:300px;background:#dbeafe}
+  .slide{position:absolute;inset:0;opacity:0;transition:opacity .8s ease, transform .8s ease;display:flex;align-items:flex-end;padding:28px;background-size:cover;background-position:center}
+  .slide.active{opacity:1}
+  .hero .caption{background:linear-gradient(180deg, rgba(0,0,0,0.24), rgba(0,0,0,0.48));color:#fff;padding:18px;border-radius:10px;max-width:68%}
+  .hero h1{margin:0;font-size:clamp(20px,3vw,36px)}
+  .hero p{margin:6px 0 0;color:rgba(255,255,255,0.9)}
+  .hero .controls{position:absolute;right:16px;bottom:16px;display:flex;gap:8px;z-index:6}
+  .hero .controls button{background:rgba(0,0,0,0.36);border:0;color:#fff;padding:10px;border-radius:8px;cursor:pointer}
+
+  /* LAYOUT: main content */
+  main{max-width:1200px;margin:20px auto;padding:0 16px;display:grid;gap:20px}
+  .grid-3{display:grid;grid-template-columns:1fr 380px;gap:20px}
+  @media(max-width:980px){ .grid-3{grid-template-columns:1fr} }
+
+  /* CATEGORIES */
+  .categories{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;background:var(--card);padding:14px;border-radius:12px}
+  .cat{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border-radius:10px;text-align:center;cursor:pointer}
+  .cat img{width:100%;height:88px;object-fit:cover;border-radius:8px;box-shadow:0 8px 20px rgba(2,6,23,0.05)}
+
+  /* TOP DEALS / FEATURED */
+  .section-title{display:flex;justify-content:space-between;align-items:end;gap:12px;padding:6px 0}
+  .section-title h2{margin:0;color:var(--primary)}
+  .flash{background:linear-gradient(90deg,#fff6ef,#fff3eb);padding:12px;border-radius:10px;border:1px solid rgba(249,115,22,0.08);display:flex;align-items:center;gap:12px}
+  .countdown{font-weight:800;color:var(--accent)}
+
+  /* PRODUCTS GRID */
+  .products{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:1100px){ .products{grid-template-columns:repeat(2,1fr)} }
+  @media(max-width:680px){ .products{grid-template-columns:repeat(1,1fr)} }
+
+  .card{background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(2,6,23,.06);display:flex;flex-direction:column}
+  .media{height:200px;background:#eef2ff;overflow:hidden}
+  .media img{width:100%;height:100%;object-fit:cover;display:block}
+  .card-body{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .price{color:var(--primary);font-weight:800}
+  .card .actions{display:flex;gap:8px;margin-top:auto}
+  .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
+  .btn-primary{background:var(--accent);color:#fff;font-weight:800}
+  .btn-outline{background:transparent;border:1px solid rgba(15,23,42,0.06)}
+
+  /* TESTIMONIALS */
+  .testimonials{background:linear-gradient(180deg,#fff,#f8fafc);padding:14px;border-radius:12px}
+  .t-list{display:flex;gap:12px;overflow:auto;padding-bottom:6px}
+  .t-card{min-width:260px;background:#fff;padding:12px;border-radius:10px;box-shadow:0 8px 20px rgba(2,6,23,0.04)}
+
+  /* SELLER CTA */
+  .seller-cta{background:linear-gradient(90deg,#fef3e0,#fff7f0);padding:16px;border-radius:12px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+  .cta-left h3{margin:0;color:#7a2e00}
+  .cta-btn{background:var(--primary);color:#fff;padding:10px 14px;border-radius:10px;font-weight:800;border:0;cursor:pointer}
+
+  /* NEWSLETTER + FOOTER */
+  .newsletter{display:flex;gap:12px;align-items:center;padding:12px;background:var(--card);border-radius:12px}
+  .newsletter input{flex:1;padding:10px;border-radius:8px;border:1px solid #e6e9ef}
+  footer{margin-top:18px;padding:18px;color:#334155;background:#fff;border-top:1px solid #eef2f7;}
+
+  /* small screens */
+  @media(max-width:720px){
+    .search{min-width:120px}
+    .hero .caption{max-width:92%}
+    .nav .links{display:none}
+    .hamb{display:block}
+    .nav-right{gap:6px}
+    .mobile-nav { inset: var(--header-h) 0 0 0; }
+  }
+
+  /* accessibility focus */
+  a:focus, button:focus, input:focus { outline: 3px solid rgba(249,115,22,0.18); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="nav" role="navigation" aria-label="Main">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="brand">TrustBuySell</div>
+      <button class="hamb" id="hambBtn" aria-label="Open menu">☰</button>
+      <div class="links" id="topLinks" style="display:flex;gap:8px">
+        <a href="{% url 'index' %}" style="color:#fff;padding:8px 10px;border-radius:8px">Home</a>
+        <a href="#categories" style="color:#fff;padding:8px 10px;border-radius:8px">Shop</a>
+      </div>
+    </div>
+
+    <div class="nav-right" style="align-items:center">
+      <div class="search" role="search" aria-label="Search products">
+        <input id="searchInput" placeholder="Search products, categories, sellers..." aria-label="Search products" />
+        <button id="searchBtn" title="Search">Search</button>
+      </div>
+      {% if user.is_authenticated %}
+      <a class="cta-sell" href="{% url 'logout' %}" id="startSellingBtn" style="padding:8px 12px;margin-left:6px">Log Out</a>
+      {% else %}
+      <a class="cta-sell" href="{% url 'login' %}" id="startSellingBtn" style="padding:8px 12px;margin-left:6px">Login</a>
+      <a class="cta-sell" href="{% url 'register'%}" id="startSellingBtn" style="padding:8px 12px;margin-left:6px">Register</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- mobile nav overlay (hidden by default) -->
+  <div id="mobileNav" class="mobile-nav" aria-hidden="true">
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:420px;margin:0 auto">
+      <a href="#featured">Home</a>
+      <a href="#categories">Shop</a>
+      <a href="#register">Sell on TrustBuySell</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" aria-label="Hero carousel">
+  <div class="slides" id="slides">
+    <div class="slide active" style="background-image:url('http://127.0.0.1:8000/media/img/file_00000000afa461f4a80e92c6f39e3067.png')" role="img" aria-label="Slide 1">
+      <div class="caption">
+        <h1>Buy & Sell in Adamawa — Fast • Secure • Local</h1>
+        <p>Reach more customers in your community. Start selling today on TrustBuySell.</p>
+        <div style="margin-top:12px;display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="document.getElementById('register').scrollIntoView({behavior:'smooth'})">Register & Sell</button>
+          <button class="btn btn-outline" onclick="document.getElementById('featured').scrollIntoView({behavior:'smooth'})">Shop Featured</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" style="background-image:url('http://127.0.0.1:8000/media/img/jj.png')" role="img" aria-label="Slide 2">
+      <div class="caption">
+        <h1>Quality local products — Support Adamawa businesses</h1>
+        <p>Handmade, fresh and trusted items from sellers near you.</p>
+      </div>
+    </div>
+
+    <div class="slide" style="background-image:url('http://127.0.0.1:8000/media/img/best9ja.jpg')" role="img" aria-label="Slide 3">
+      <div class="caption">
+        <h1>Safe Payments • Local Delivery</h1>
+        <p>Secure transactions and delivery options across the state.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls" aria-hidden="false">
+    <button id="prev" aria-label="Previous slide" class="btn" style="background:rgba(0,0,0,.36);color:#fff">‹</button>
+    <button id="next" aria-label="Next slide" class="btn" style="background:rgba(0,0,0,.36);color:#fff">›</button>
+  </div>
+</section>
+
+<!-- MAIN -->
+<main>
+  <div class="grid-3">
+
+    <!-- LEFT COLUMN -->
+    <div>
+
+      <!-- CATEGORIES -->
+      
+      <section id="categories" style="margin-bottom:18px">
+        <div class="section-title" style="margin-bottom:10px">
+          <h2>Shop by Category</h2>
+          <div style="color:var(--muted)">Browse popular categories</div>
+        </div>
+        <div class="categories" aria-label="Product categories">
+           {% for category in categories %}
+          <div class="cat" data-cat="electronics">
+            <img src="{{category.image.url}}" alt="{{category.name}}">
+            <div>{{category.name}}</div>
+          </div>
+           {% endfor %}
+        </div>
+      </section>
+     
+      <!-- FLASH / TOP DEALS -->
+      <section style="margin:18px 0">
+        <div class="flash">
+          <div style="flex:1">
+            <strong>Today's Top Deal:</strong> Solar Lantern — limited stock!
+            <div style="font-size:13px;color:var(--muted)">Discount ends in <span class="countdown" id="dealTimer">00:00:00</span></div>
+          </div>
+          <div><button class="btn btn-primary" onclick="alert('Flash deal clicked')">Grab Deal</button></div>
+        </div>
+      </section>
+
+      <!-- FEATURED PRODUCTS -->
+<section id="featured" style="margin-top:18px">
+  <div class="section-title" style="margin-bottom:12px">
+    <h2>Featured Products</h2>
+    <div style="color:var(--muted)">Top picks from local sellers</div>
+  </div>
+
+  <div style="margin-bottom:8px;display:flex;gap:8px;align-items:center">
+    <div style="flex:1;color:var(--muted)">Showing featured products — use the search bar to filter</div>
+    <button id="showAll" class="btn btn-outline">View All</button>
+  </div>
+
+  <div class="products" id="productGrid" aria-live="polite">
+    {% for product in FeaturedProduct %}
+    <article class="card">
+      <div class="media">
+        <img loading="lazy" src="{{ product.product_image.image.url }}" alt="{{ product.title }}">
+      </div>
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>{{ product.title }}</strong>
+          <div class="price">₦{{ product.discountedprice|floatformat:0 }}</div>
+        </div>
+        <div style="color:var(--muted);font-size:13px">{{ product.seller.name }}</div>
+        <div class="actions">
+          <a href="" class="btn btn-primary">Add To Cart</a>
+          <a href="{% url 'product_detail' product.slug %}" class="btn btn-outline">View</a>
+        </div>
+      </div>
+    </article>
+    {% empty %}
+    <p style="color:var(--muted)">No featured products available at the moment.</p>
+    {% endfor %}
+  </div>
+</section>
+
+
+      <!-- TESTIMONIALS -->
+      <section style="margin-top:20px">
+        <h2>What Sellers & Buyers Say</h2>
+        <div class="testimonials" aria-label="Testimonials">
+          <div class="t-list" id="testimonialList">
+            <div class="t-card">
+              <strong>Fatima (seller)</strong>
+              <p style="color:var(--muted)">"My sales increased after I joined TrustBuySell — easy and local."</p>
+            </div>
+            <div class="t-card">
+              <strong>Ali (buyer)</strong>
+              <p style="color:var(--muted)">"Fast delivery and good prices. I love supporting local stores."</p>
+            </div>
+            <div class="t-card">
+              <strong>Nura (seller)</strong>
+              <p style="color:var(--muted)">"Smooth onboarding and payments. Great support from the team."</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <aside style="display:flex;flex-direction:column;gap:12px">
+      <!-- SELLER CTA -->
+      <div class="seller-cta" id="register">
+        <div class="cta-left">
+          <h3>Own a shop in Adamawa?</h3>
+          <p style="margin:6px 0;color:var(--muted)">Register and list your products to reach local buyers.</p>
+        </div>
+        <div><button class="cta-btn" onclick="alert('Go to seller signup')">Register & Sell</button></div>
+      </div>
+
+      <!-- NEWSLETTER -->
+      <div style="background:var(--card);padding:14px;border-radius:12px">
+        <h3 style="margin:0 0 8px">Join our newsletter</h3>
+        <p style="margin:0 0 12px;color:var(--muted)">Get deals and tips — once a week.</p>
+        <div class="newsletter">
+          <input id="emailInput" placeholder="Your email address" type="email" />
+          <button class="btn btn-primary" id="newsletterBtn">Subscribe</button>
+        </div>
+      </div>
+
+      <!-- QUICK LINKS -->
+      <div style="background:var(--card);padding:12px;border-radius:12px">
+        <h4 style="margin:0 0 8px">Quick Links</h4>
+        <ul style="list-style:none;padding-left:0;color:var(--muted)">
+          <li><a href="#featured">Featured</a></li>
+          <li><a href="#categories">Categories</a></li>
+          <li><a href="#register">Sell on TrustBuySell</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div style="max-width:1200px;margin:0 auto;padding:18px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
+      <div>
+        <strong>TrustBuySell</strong><div style="color:var(--muted)">Serving Adamawa sellers & buyers</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div style="color:var(--muted)">Contact: 07041696102</div>
+        <div style="display:flex;gap:8px">
+          <a href="#" aria-label="facebook" style="color:var(--muted)">Fb</a>
+          <a href="#" aria-label="instagram" style="color:var(--muted)">Ig</a>
+          <a href="#" aria-label="whatsapp" style="color:var(--muted)">Wa</a>
+        </div>
+      </div>
+    </div>
+    <div style="color:var(--muted);font-size:13px">© TrustBuySell — All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+/* ========== Mobile nav toggle ========== */
+const hamb = document.getElementById('hambBtn');
+const mobileNav = document.getElementById('mobileNav');
+hamb.addEventListener('click', () => {
+  const open = mobileNav.classList.toggle('open');
+  mobileNav.setAttribute('aria-hidden', !open);
+  if(open){ document.body.style.overflow = 'hidden'; stopHero(); } else { document.body.style.overflow = ''; startHero(); }
+});
+/* close mobile nav when resizing to desktop */
+window.addEventListener('resize', ()=> { if(window.innerWidth>900){ mobileNav.classList.remove('open'); mobileNav.setAttribute('aria-hidden','true'); document.body.style.overflow=''; startHero(); } });
+
+/* ========== Hero carousel (loops through your images) ========== */
+const slides = Array.from(document.querySelectorAll('.slide'));
+let slideIndex = 0;
+const nextBtn = document.getElementById('next');
+const prevBtn = document.getElementById('prev');
+let heroInterval = null;
+
+function showHero(i){
+  slides.forEach((s, idx)=> {
+    s.classList.toggle('active', idx===i);
+    // subtle parallax-ish transform
+    s.style.transform = idx===i ? 'translateY(0)' : 'translateY(6px)';
+  });
+}
+function nextHero(){
+  slideIndex = (slideIndex+1) % slides.length;
+  showHero(slideIndex);
+}
+function prevHero(){
+  slideIndex = (slideIndex-1 + slides.length) % slides.length;
+  showHero(slideIndex);
+}
+if(nextBtn) nextBtn.addEventListener('click', ()=>{ stopHero(); nextHero(); startHero(); });
+if(prevBtn) prevBtn.addEventListener('click', ()=>{ stopHero(); prevHero(); startHero(); });
+
+function startHero(){ stopHero(); heroInterval = setInterval(nextHero, 4500); }
+function stopHero(){ if(heroInterval){ clearInterval(heroInterval); heroInterval=null; } }
+startHero();
+
+/* ========== Pause when mobile nav open - also handled in toggle above using startHero/stopHero ========== */
+
+
+/* ========== Live search (filters featured products) ========== */
+const searchInput = document.getElementById('searchInput');
+const searchBtn = document.getElementById('searchBtn');
+
+function doSearch(){
+  const q = searchInput.value.trim().toLowerCase();
+  if(!q){ renderProducts(products); return; }
+  const filtered = products.filter(p => (p.title + ' ' + p.seller).toLowerCase().includes(q) && p.featured);
+  renderProducts(filtered);
+}
+if(searchBtn) searchBtn.addEventListener('click', doSearch);
+if(searchInput){
+  searchInput.addEventListener('input', () => { if(searchInput.value.length===0) renderProducts(products); });
+  searchInput.addEventListener('keydown', (e)=> { if(e.key==='Enter') doSearch(); });
+}
+
+/* ========== Deal countdown (example: ends in 6 hours) ========== */
+function startCountdown(el, seconds){
+  function tick(){
+    if(seconds<=0){ el.textContent = '00:00:00'; clearInterval(iv); return; }
+    const h = Math.floor(seconds/3600); const m = Math.floor((seconds%3600)/60); const s = seconds%60;
+    el.textContent = [h,m,s].map(v=>String(v).padStart(2,'0')).join(':');
+    seconds--; 
+  }
+  tick(); const iv = setInterval(tick,1000);
+}
+const dealTimerEl = document.getElementById('dealTimer');
+if(dealTimerEl) startCountdown(dealTimerEl, 6*3600);
+
+/* ========== Testimonials horizontal auto-scroll ========== */
+const tlist = document.getElementById('testimonialList');
+if(tlist){
+  let tpos = 0;
+  setInterval(()=>{ 
+    tpos += 260; 
+    if(tpos > tlist.scrollWidth - tlist.clientWidth) tpos=0; 
+    tlist.scrollTo({left:tpos,behavior:'smooth'});
+  }, 3500);
+}
+
+/* ========== Newsletter (simple client-side demo) ========== */
+const newsletterBtn = document.getElementById('newsletterBtn');
+if(newsletterBtn){
+  newsletterBtn.addEventListener('click', ()=>{
+    const email = document.getElementById('emailInput').value.trim();
+    if(!email || !email.includes('@')) return alert('Enter a valid email');
+    alert('Thanks! Subscribed: ' + email);
+    document.getElementById('emailInput').value='';
+  });
+}
+
+/* ========== Small helpers ========== */
+const showAllBtn = document.getElementById('showAll');
+if(showAllBtn) showAllBtn.addEventListener('click', ()=> alert('Show all products — implement with pagination or /api/products/'));
+
+const startSellingBtn = document.getElementById('startSellingBtn');
+if(startSellingBtn) startSellingBtn.addEventListener('click', ()=> document.getElementById('register').scrollIntoView({behavior:'smooth'}));
+
+</script>
+</body>
+</html>

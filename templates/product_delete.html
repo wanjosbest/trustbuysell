@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Delete Product</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0d47a1, #1976d2);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+    }
+
+    .confirm-box {
+      background: #fff;
+      color: #333;
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+      text-align: center;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    .confirm-box h2 {
+      margin-top: 0;
+      font-size: 1.5rem;
+      color: #0d47a1;
+    }
+
+    .confirm-box p {
+      font-size: 1rem;
+      margin: 1rem 0 2rem;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .btn {
+      padding: 0.7rem 1.4rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.3s ease;
+    }
+
+    .btn-delete {
+      background: #d32f2f;
+      color: #fff;
+    }
+
+    .btn-cancel {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-delete:hover {
+      background: #b71c1c;
+    }
+
+    .btn-cancel:hover {
+      background: #bdbdbd;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="confirm-box">
+    <h2>Confirm Delete</h2>
+    <p>Are you sure you want to delete <strong>{{ product.name }}</strong>?  
+       This action cannot be undone.</p>
+
+    <form method="POST">
+      {% csrf_token %}
+      <div class="buttons">
+        <button type="submit" class="btn btn-delete">Yes, Delete</button>
+        <a href="{% url 'product_list' %}" class="btn btn-cancel">Cancel</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

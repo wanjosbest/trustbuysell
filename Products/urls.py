@@ -1,0 +1,12 @@
+from django.urls import path
+from.import views
+
+urlpatterns = [
+    #user
+    path("add-product-image/", views.upload_image, name="addproductimage"),
+    path("products/", views.product_list, name="product_list"),
+    path("product-details/<slug>/", views.product_detail, name="product_detail"),
+    path("product-update/<slug>/",views.product_update, name="product_update"),
+    path("product-delete/<slug>/",views.product_delete, name="product_delete"),
+   
+]

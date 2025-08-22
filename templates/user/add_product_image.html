@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Upload</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .upload-container {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        text-align: center;
+        width: 350px;
+    }
+
+    .upload-area {
+        border: 2px dashed #4CAF50;
+        padding: 30px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .upload-area:hover {
+        background: #f9fff9;
+        border-color: #45a049;
+    }
+
+    .upload-area p {
+        margin: 0;
+        color: #555;
+    }
+
+    .preview {
+        margin-top: 20px;
+    }
+
+    .preview img {
+        max-width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    button {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 15px;
+        font-size: 16px;
+    }
+
+    button:hover {
+        background: #45a049;
+    }
+</style>
+</head>
+<body>
+
+<div class="upload-container">
+    <form id="uploadForm" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="upload-area" id="uploadArea">
+            <p>Drag & Drop an image or <strong>Click to Upload</strong></p>
+            <input type="file" id="fileInput" name="image" accept="image/*" hidden>
+        </div>
+
+        <div class="preview" id="preview"></div>
+        <button type="submit">Upload</button>
+    </form>
+</div>
+
+<div>
+    <h2> Choose from uploaded Images</h2>
+    {% for images in images %}
+        <li> {{images.user}} | {{images}}</li>
+
+    {% empty %}
+    <h4> No Image uploaded</h4>
+    {% endfor %}
+</div>
+
+<script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+
+    // Open file picker on click
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    // Show preview when file selected
+    fileInput.addEventListener('change', function() {
+        preview.innerHTML = '';
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                preview.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Drag and Drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.background = '#f9fff9';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.background = '';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileInput.files = e.dataTransfer.files;
+        fileInput.dispatchEvent(new Event('change'));
+        uploadArea.style.background = '';
+    });
+</script>
+
+</body>
+</html>
