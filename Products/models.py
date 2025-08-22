@@ -56,6 +56,7 @@ class Products(models.Model):
     featured = models.BooleanField(default=False, null=True,blank=True)
     product_image2 = models.ForeignKey(Product_image, on_delete=models.CASCADE,null=True,related_name="prod_image2")
     product_image3 = models.ForeignKey(Product_image, on_delete=models.CASCADE, null=True,related_name="prod_image3")
+    stock = models.PositiveIntegerField(default=0)
     def __str__(self):
         return f"{self.name} "
     def get_absolute_url(self):
@@ -63,3 +64,16 @@ class Products(models.Model):
     class Meta:
         verbose_name="Products"
         verbose_name_plural="Products"
+
+
+class Cart_Items(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+    product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name="cartitemsproduct")
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.product.name} by {self.user}"
+    
+    def get_total(self):
+        return self.product.discountedprice * self.quantity
+    

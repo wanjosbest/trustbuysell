@@ -154,7 +154,7 @@ Copy this into a Django template (e.g., templates/index.html)
         <div class="muted">{{ product.seller.name }}</div>
         <div class="price">₦{{ product.discountedprice|floatformat:0 }}</div>
         <div class="actions">
-          <a class="btn btn-accent" href="#">Add to Cart</a>
+          <a class="btn btn-accent" href="{% url 'add-to-cart' product.id %}">Add to Cart</a>
           <a class="btn btn-outline" href="{% url 'product_detail' product.slug %}">View</a>
         </div>
       </div>

@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import (Product_image,Products,category)
+from .models import (Product_image,Products,category,Cart_Items)
 from user.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils.text import slugify
+
 
 #users to add products images
 
@@ -142,3 +143,39 @@ def product_delete(request, slug):
         product.delete()
         return redirect("product_list")
     return render(request, "product_delete.html", {"product": product})
+
+#add to cart
+@login_required
+def add_to_cart(request,product_id):
+    product = get_object_or_404(Products, id= product_id)
+
+    cart_item, created = Cart_Items.objects.get_or_create(
+        user = request.user,
+        product = product,
+    )
+    if not created:
+        cart_item.quantity +=1
+        cart_item.save()
+    return redirect("cart")
+@login_required
+def view_cart(request):
+    cart_items = Cart_Items.objects.filter(user = request.user)
+    total = sum(item.get_total() for item in cart_items)
+    context = {
+        "cart_items":cart_items,
+        "total":total,
+    }
+    
+    return render(request, "cart.html", context)
+
+@login_required
+def remove_item(request, product_id):
+    if request.method =="POST":
+        remove_cart_item = get_object_or_404(
+        Cart_Items, 
+        product_id=product_id, 
+        user=request.user
+    )
+        remove_cart_item.delete()
+   
+    return redirect("cart")
