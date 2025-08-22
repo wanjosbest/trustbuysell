@@ -150,13 +150,14 @@ button {
 </style>
 </head>
 <body>
-
+{% if cart_items %}
 <div class="container">
   <h2>🛒 My Cart</h2>
+  
   <div class="cart-item">
    
     <div class="item-info">
-  {% if cart_items %}
+
   {% for item in cart_items %}
   <div class="cart-item">
     <img src="{{ item.product.product_image.image.url }}" alt="{{ item.product.name }}">
@@ -198,7 +199,9 @@ button {
       
   </div>
 </div><a href="{% url 'shipping' %}"><button type="submit"> Check Out</button></a>
-
+{% else %}
+<h2>Cart is Empty </h2>
+{% endif %}
 <script>
   function increaseQty(btn) {
     let span = btn.parentNode.querySelector('span');
