@@ -8,6 +8,10 @@ from .utils import generate_reference
 from django.conf import settings
 import requests,uuid
 from django.urls import reverse
+import io
+from django.core.mail import EmailMessage
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 #users to add products images
 
 @login_required
@@ -161,7 +165,7 @@ def add_to_cart(request,product_id):
         cart_item.quantity +=1
         cart_item.save()
     return redirect("cart")
-@login_required
+@login_required(login_url="login",redirect_field_name="next")
 def view_cart(request):
     cart_items = Cart_Items.objects.filter(user = request.user)
     total = sum(item.get_total() for item in cart_items)
@@ -172,7 +176,7 @@ def view_cart(request):
     
     return render(request, "cart.html", context)
 
-@login_required
+@login_required(login_url="login")
 def remove_item(request, product_id):
     if request.method =="POST":
         remove_cart_item = get_object_or_404(
@@ -183,7 +187,7 @@ def remove_item(request, product_id):
         remove_cart_item.delete()
    
     return redirect("cart")
-@login_required
+@login_required(login_url="login")
 def shipping_view(request):
     cartitems = Cart_Items.objects.filter(user=request.user)
     cart_total = sum(item.product.discountedprice * item.quantity for item in cartitems)
@@ -209,7 +213,7 @@ def shipping_view(request):
     return render(request, "shippingaddress.html", {"cartitems": cartitems, "cart_total": cart_total})
 
 
-@login_required
+@login_required(login_url="login")
 def initiate_payment(request):
     cartitems = Cart_Items.objects.filter(user=request.user)
     total_amount = sum(item.product.discountedprice * item.quantity for item in cartitems)
@@ -250,36 +254,54 @@ def initiate_payment(request):
     else:
         return render(request, "payment_failed.html", {"error": res_data.get("message", "Payment init failed.")})
 
-
-
-
-@login_required
+@login_required(login_url="login",redirect_field_name="next")
 def verify_payment(request):
     reference = request.GET.get("reference")
     if not reference:
         return render(request, "payment_failed.html", {"error": "No payment reference provided."})
-
     payment = get_object_or_404(Payment, reference=reference, user=request.user)
-
-    url = f"https://api.paystack.co/transaction/verify/{reference}"
     headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
-
+    url = f"https://api.paystack.co/transaction/verify/{reference}"
     try:
         response = requests.get(url, headers=headers, timeout=10)
         res_data = response.json()
     except Exception as e:
         return render(request, "payment_failed.html", {"error": f"Connection error: {str(e)}"})
-
     if res_data.get("status") and res_data["data"]["status"] == "success":
         payment.verified = True
-        payment.amount = res_data["data"]["amount"] / 100  # convert kobo → naira
-        payment.channel = res_data["data"].get("channel")
+        payment.amount = res_data["data"]["amount"] / 100
+        payment.channel = res_data["data"].get("channel", "")
         payment.paid_at = res_data["data"].get("paid_at")
         payment.save()
-
-        # Clear cart after successful payment
+        # clear cart
         Cart_Items.objects.filter(user=request.user).delete()
-
+        # Generate PDF Receipt
+        buffer = io.BytesIO()
+        p = canvas.Canvas(buffer, pagesize=A4)
+        width, height = A4
+        p.setFont("Helvetica-Bold", 16)
+        p.drawString(200, height - 50, "TrustBuySell Receipt")
+        p.setFont("Helvetica", 12)
+        p.drawString(50, height - 120, f"Customer: {request.user.username}")
+        p.drawString(50, height - 150, f"Email: {request.user.email}")
+        p.drawString(50, height - 180, f"Reference: {payment.reference}")
+        p.drawString(50, height - 210, f"Amount Paid: ₦{payment.amount:,.2f}")
+        p.drawString(50, height - 240, f"Payment Channel: {payment.channel}")
+        p.drawString(50, height - 270, f"Date: {payment.paid_at}")
+        p.drawString(50, height - 320, "Thank you for shopping with TrustBuySell!")
+        p.showPage()
+        p.save()
+        buffer.seek(0)
+        email = EmailMessage(
+            "TrustBuySell Receipt",
+            f"Hi {request.user.username},\n\nThank you for your purchase. Find your receipt attached.",
+            settings.DEFAULT_FROM_EMAIL,
+            [request.user.email],
+        )
+        email.attach(f"receipt_{payment.reference}.pdf", buffer.getvalue(), "application/pdf")
+        email.send()
         return render(request, "payment_success.html", {"payment": payment})
     else:
-        return render(request, "payment_failed.html", {"payment": payment, "error": "Payment verification failed."})
+        error_message = res_data.get("message", "Payment verification failed.")
+        return render(request, "payment_failed.html", {"payment": payment, "error": error_message})
+

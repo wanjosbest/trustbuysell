@@ -1,5 +1,79 @@
-<div class="container">
-  <h2>❌ Payment Failed</h2>
-  <p>Please try again.</p>
-  <a href="{% url 'initiate_payment' %}">Retry</a>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Failed</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 16px;
+      padding: 25px 20px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      font-size: 20px;
+      color: #dc2626; /* red-600 */
+      margin-bottom: 15px;
+    }
+
+    p {
+      font-size: 15px;
+      color: #333;
+      margin: 8px 0;
+    }
+
+    a {
+      display: block;
+      margin-top: 20px;
+      text-decoration: none;
+      background: #dc2626; /* red button */
+      color: #fff;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 15px;
+      transition: background 0.3s ease;
+    }
+
+    a:hover {
+      background: #b91c1c; /* darker red */
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px 15px;
+      }
+      h2 {
+        font-size: 18px;
+      }
+      p, a {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>❌ Payment Failed</h2>
+    <p>Please try again.</p>
+    <a href="{% url 'initiate_payment' %}">Retry</a>
+  </div>
+
+</body>
+</html>

@@ -132,3 +132,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 PAYSTACK_PUBLIC_KEY = "pk_test_de865d92498dfae7e39732927052da70dc7412ac"
 PAYSTACK_SECRET_KEY = "sk_test_e7e1ceb7a2e6669e5608c89a8d2e01a06ef4bbee"
+
+
+import socket
+socket.getaddrinfo('localhost', 8080)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' 
+EMAIL_PORT =587 
+EMAIL_USE_TLS =True 
+EMAIL_HOST = 'smtp.gmail.com' 
+EMAIL_HOST_USER = 'josephwandiyahyel3@gmail.com'  
+EMAIL_HOST_PASSWORD ='sranztwrlxvcclwl' 
+EMAIL_USE_SSL=False
+DEFAULT_FROM_EMAIL = "TrustBuySell <josephwandiyahyel3@gmail.com>"
