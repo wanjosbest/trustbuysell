@@ -190,7 +190,7 @@ def remove_item(request, product_id):
         remove_cart_item.delete()
    
     return redirect("cart")
-@login_required(login_url="login")
+@login_required
 def shipping_view(request):
     cartitems = Cart_Items.objects.filter(user=request.user)
     cart_total = sum(item.product.discountedprice * item.quantity for item in cartitems)
@@ -216,7 +216,7 @@ def shipping_view(request):
     return render(request, "shippingaddress.html", {"cartitems": cartitems, "cart_total": cart_total})
 
 
-@login_required(login_url="login")
+@login_required
 def initiate_payment(request):
     cartitems = Cart_Items.objects.filter(user=request.user)
     total_amount = sum(item.product.discountedprice * item.quantity for item in cartitems)
@@ -257,7 +257,7 @@ def initiate_payment(request):
     else:
         return render(request, "payment_failed.html", {"error": res_data.get("message", "Payment init failed.")})
 
-@login_required(login_url="login", redirect_field_name="next")
+@login_required
 def verify_payment(request):
     reference = request.GET.get("reference")
     if not reference:
