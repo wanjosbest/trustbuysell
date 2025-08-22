@@ -20,10 +20,10 @@
     font-family:Inter, system-ui, Arial, sans-serif;
     background:var(--bg);
     color:#0f172a;
-    line-height:1.4;
+    line-height:1.45;
     -webkit-font-smoothing:antialiased;
   }
-  a{color:inherit}
+  a{color:inherit;text-decoration:none}
 
   /* HEADER */
   header{
@@ -43,16 +43,16 @@
     gap:12px;
   }
   .brand{color:#fff;font-weight:800;font-size:1.25rem;letter-spacing:.3px}
-  .nav-right{display:flex;align-items:center;gap:12px}
+  .nav-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   .search{
     display:flex;align-items:center;background:#fff;padding:6px 8px;border-radius:999px;
-    min-width:220px;max-width:420px;box-shadow:0 6px 20px rgba(2,6,23,0.06)
+    min-width:180px;flex:1;max-width:420px;box-shadow:0 6px 20px rgba(2,6,23,0.06)
   }
-  .search input{border:0;outline:none;font-size:0.95rem;padding:8px;width:100%;background:transparent}
-  .search button{background:var(--accent);border:0;color:#fff;padding:8px 10px;border-radius:999px;cursor:pointer;font-weight:700}
+  .search input{border:0;outline:none;font-size:0.95rem;padding:8px;width:100%;background:transparent;min-width:0}
+  .search button{background:var(--accent);border:0;color:#fff;padding:8px 10px;border-radius:999px;cursor:pointer;font-weight:700;font-size:0.9rem}
   nav .links{display:flex;gap:12px;align-items:center}
   nav .links a{color:#fff;padding:10px 12px;border-radius:8px;font-weight:700}
-  nav .cta-sell{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;font-weight:800}
+  nav .cta-sell{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;font-weight:800;font-size:0.9rem}
   .hamb{display:none;font-size:1.6rem;padding:8px;border-radius:8px;background:rgba(255,255,255,0.06);color:#fff;cursor:pointer;border:0}
 
   /* Mobile nav overlay */
@@ -67,12 +67,11 @@
     overflow:auto;
   }
   .mobile-nav.open { display:block; }
-
-  .mobile-nav a { display:block; padding:12px 0; color:#fff; font-weight:700; text-decoration:none; border-bottom:1px solid rgba(255,255,255,0.03) }
+  .mobile-nav a { display:block; padding:12px 0; color:#fff; font-weight:700; text-decoration:none; border-bottom:1px solid rgba(255,255,255,0.06) }
 
   /* HERO CAROUSEL */
   .hero{max-width:1200px;margin:14px auto;position:relative;border-radius:12px;overflow:hidden;box-shadow:0 12px 40px rgba(2,6,23,0.08)}
-  .slides{position:relative;height:56vh;min-height:300px;background:#dbeafe}
+  .slides{position:relative;height:56vh;min-height:300px;max-height:520px;background:#dbeafe}
   .slide{position:absolute;inset:0;opacity:0;transition:opacity .8s ease, transform .8s ease;display:flex;align-items:flex-end;padding:28px;background-size:cover;background-position:center}
   .slide.active{opacity:1}
   .hero .caption{background:linear-gradient(180deg, rgba(0,0,0,0.24), rgba(0,0,0,0.48));color:#fff;padding:18px;border-radius:10px;max-width:68%}
@@ -91,10 +90,10 @@
   .cat{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border-radius:10px;text-align:center;cursor:pointer}
   .cat img{width:100%;height:88px;object-fit:cover;border-radius:8px;box-shadow:0 8px 20px rgba(2,6,23,0.05)}
 
-  /* TOP DEALS / FEATURED */
+  /* SECTION TITLES */
   .section-title{display:flex;justify-content:space-between;align-items:end;gap:12px;padding:6px 0}
-  .section-title h2{margin:0;color:var(--primary)}
-  .flash{background:linear-gradient(90deg,#fff6ef,#fff3eb);padding:12px;border-radius:10px;border:1px solid rgba(249,115,22,0.08);display:flex;align-items:center;gap:12px}
+  .section-title h2{margin:0;color:var(--primary);font-size:clamp(1.1rem,2.5vw,1.6rem)}
+  .flash{background:linear-gradient(90deg,#fff6ef,#fff3eb);padding:12px;border-radius:10px;border:1px solid rgba(249,115,22,0.08);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   .countdown{font-weight:800;color:var(--accent)}
 
   /* PRODUCTS GRID */
@@ -107,8 +106,8 @@
   .media img{width:100%;height:100%;object-fit:cover;display:block}
   .card-body{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
   .price{color:var(--primary);font-weight:800}
-  .card .actions{display:flex;gap:8px;margin-top:auto}
-  .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
+  .card .actions{display:flex;gap:8px;margin-top:auto;flex-wrap:wrap}
+  .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-size:0.9rem}
   .btn-primary{background:var(--accent);color:#fff;font-weight:800}
   .btn-outline{background:transparent;border:1px solid rgba(15,23,42,0.06)}
 
@@ -118,27 +117,263 @@
   .t-card{min-width:260px;background:#fff;padding:12px;border-radius:10px;box-shadow:0 8px 20px rgba(2,6,23,0.04)}
 
   /* SELLER CTA */
-  .seller-cta{background:linear-gradient(90deg,#fef3e0,#fff7f0);padding:16px;border-radius:12px;display:flex;gap:12px;align-items:center;justify-content:space-between}
-  .cta-left h3{margin:0;color:#7a2e00}
+  .seller-cta{background:linear-gradient(90deg,#fef3e0,#fff7f0);padding:16px;border-radius:12px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .cta-left h3{margin:0;color:#7a2e00;font-size:clamp(1rem,2vw,1.3rem)}
   .cta-btn{background:var(--primary);color:#fff;padding:10px 14px;border-radius:10px;font-weight:800;border:0;cursor:pointer}
 
   /* NEWSLETTER + FOOTER */
-  .newsletter{display:flex;gap:12px;align-items:center;padding:12px;background:var(--card);border-radius:12px}
-  .newsletter input{flex:1;padding:10px;border-radius:8px;border:1px solid #e6e9ef}
+  .newsletter{display:flex;gap:12px;align-items:center;padding:12px;background:var(--card);border-radius:12px;flex-wrap:wrap}
+  .newsletter input{flex:1;padding:10px;border-radius:8px;border:1px solid #e6e9ef;min-width:0}
   footer{margin-top:18px;padding:18px;color:#334155;background:#fff;border-top:1px solid #eef2f7;}
 
-  /* small screens */
-  @media(max-width:720px){
-    .search{min-width:120px}
-    .hero .caption{max-width:92%}
-    .nav .links{display:none}
-    .hamb{display:block}
-    .nav-right{gap:6px}
-    .mobile-nav { inset: var(--header-h) 0 0 0; }
-  }
+  /* === Product Cards Fix (Jumia style) === */
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
 
-  /* accessibility focus */
-  a:focus, button:focus, input:focus { outline: 3px solid rgba(249,115,22,0.18); outline-offset: 2px; }
+/* Force 2 columns on small phones */
+@media (max-width: 600px) {
+  .products {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Card structure */
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--card, #fff);
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  overflow: hidden;
+  height: 100%;              /* equal height in grid */
+}
+
+.card .media {
+  height: 180px;             /* consistent image height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  overflow: hidden;
+}
+
+.card .media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;         /* images crop neatly */
+}
+
+.card-body {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Clamp product title to 2 lines */
+.p-title {
+  font-size: 14px;
+  line-height: 1.3;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;     /* 2 lines only */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Price always bold & aligned */
+.price {
+  font-weight: bold;
+  color: var(--primary, #e67e22);
+}
+
+/* Push actions to bottom */
+.card-body .actions {
+  margin-top: auto;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+/* === Featured Products Grid === */
+#featured .products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+/* Force 2 columns ONLY on mobile */
+@media (max-width: 600px) {
+  #featured .products {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* === Card Styling === */
+#featured .card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  height: 100%;
+}
+
+#featured .card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Image area */
+#featured .media {
+  height: 220px;
+  background: #f9f9f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#featured .media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+#featured .card:hover .media img {
+  transform: scale(1.05);
+}
+
+/* Card body */
+#featured .card-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Product Title */
+#featured .p-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 36px; /* keeps rows even */
+}
+
+/* Seller info */
+#featured .p-seller {
+  font-size: 13px;
+  color: var(--muted, #777);
+  margin-bottom: 8px;
+}
+
+/* Price */
+#featured .price {
+  font-size: 16px;
+  font-weight: bold;
+  color: #e67e22;
+  margin-bottom: 10px;
+}
+
+/* Actions */
+#featured .actions {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#featured .actions .btn {
+  flex: 1;
+  text-align: center;
+  border-radius: 8px;
+  font-size: 14px;
+  padding: 8px;
+}
+
+  /* HEADER RESPONSIVENESS */
+@media(max-width:960px){
+  .nav {
+    flex-wrap:wrap;
+    justify-content:space-between;
+  }
+  .nav-right {
+    flex:1 1 100%;
+    justify-content:flex-start;
+    gap:8px;
+    margin-top:8px;
+  }
+  .search {
+    flex:1;
+    max-width:100%;
+    min-width:0;
+  }
+}
+
+@media(max-width:600px){
+  .nav {
+    flex-direction:column;
+    align-items:flex-start;
+    gap:8px;
+  }
+  .nav-right {
+    width:100%;
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .search {
+    width:100%;
+  }
+}
+
+/* HERO RESPONSIVENESS */
+.hero .slides {
+  height: clamp(260px, 50vh, 460px);
+}
+.hero .caption {
+  max-width: 90%;
+  font-size: 0.95rem;
+}
+.hero h1 {
+  font-size: clamp(1rem, 4vw, 1.8rem);
+}
+.hero p {
+  font-size: clamp(0.85rem, 2.8vw, 1rem);
+}
+.hero .controls {
+  right: 8px;
+  bottom: 8px;
+  gap:6px;
+}
+.hero .controls button {
+  padding:6px 8px;
+  font-size:1rem;
+}
+
+/* On very small devices */
+@media(max-width:480px){
+  .hero .caption {
+    padding:12px;
+    font-size:0.85rem;
+    max-width:100%;
+  }
+  .hero h1 { font-size:1rem; }
+  .hero p { font-size:0.8rem; }
+}
+
 </style>
 </head>
 <body>
@@ -148,10 +383,10 @@
   <div class="nav" role="navigation" aria-label="Main">
     <div style="display:flex;align-items:center;gap:12px">
       <div class="brand">TrustBuySell</div>
-      <button class="hamb" id="hambBtn" aria-label="Open menu">☰</button>
+      <button class="hamb" id="hambBtn" aria-label="Open menu" aria-controls="mobileNav" aria-expanded="false">☰</button>
       <div class="links" id="topLinks" style="display:flex;gap:8px">
-        <a href="{% url 'index' %}" style="color:#fff;padding:8px 10px;border-radius:8px">Home</a>
-        <a href="#categories" style="color:#fff;padding:8px 10px;border-radius:8px">Shop</a>
+        <a href="{% url 'index' %}">Home</a>
+        <a href="#categories">Shop</a>
       </div>
     </div>
 
@@ -161,10 +396,10 @@
         <button id="searchBtn" title="Search">Search</button>
       </div>
       {% if user.is_authenticated %}
-      <a class="cta-sell" href="{% url 'logout' %}" id="startSellingBtn" style="padding:8px 12px;margin-left:6px">Log Out</a>
+      <a class="cta-sell" href="{% url 'logout' %}">Log Out</a>
       {% else %}
-      <a class="cta-sell" href="{% url 'login' %}" id="startSellingBtn" style="padding:8px 12px;margin-left:6px">Login</a>
-      <a class="cta-sell" href="{% url 'register'%}" id="startSellingBtn" style="padding:8px 12px;margin-left:6px">Register</a>
+      <a class="cta-sell" href="{% url 'login' %}">Login</a>
+      <a class="cta-sell" href="{% url 'register'%}">Register</a>
       {% endif %}
     </div>
   </div>
@@ -187,7 +422,7 @@
       <div class="caption">
         <h1>Buy & Sell in Adamawa — Fast • Secure • Local</h1>
         <p>Reach more customers in your community. Start selling today on TrustBuySell.</p>
-        <div style="margin-top:12px;display:flex;gap:10px">
+        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn btn-primary" onclick="document.getElementById('register').scrollIntoView({behavior:'smooth'})">Register & Sell</button>
           <button class="btn btn-outline" onclick="document.getElementById('featured').scrollIntoView({behavior:'smooth'})">Shop Featured</button>
         </div>
@@ -223,7 +458,6 @@
     <div>
 
       <!-- CATEGORIES -->
-      
       <section id="categories" style="margin-bottom:18px">
         <div class="section-title" style="margin-bottom:10px">
           <h2>Shop by Category</h2>
@@ -231,14 +465,14 @@
         </div>
         <div class="categories" aria-label="Product categories">
            {% for category in categories %}
-          <div class="cat" data-cat="electronics">
+          <div class="cat" data-cat="{{category.name|default:''}}">
             <img src="{{category.image.url}}" alt="{{category.name}}">
             <div>{{category.name}}</div>
           </div>
            {% endfor %}
         </div>
       </section>
-     
+
       <!-- FLASH / TOP DEALS -->
       <section style="margin:18px 0">
         <div class="flash">
@@ -251,41 +485,40 @@
       </section>
 
       <!-- FEATURED PRODUCTS -->
-<section id="featured" style="margin-top:18px">
-  <div class="section-title" style="margin-bottom:12px">
-    <h2>Featured Products</h2>
-    <div style="color:var(--muted)">Top picks from local sellers</div>
-  </div>
-
-  <div style="margin-bottom:8px;display:flex;gap:8px;align-items:center">
-    <div style="flex:1;color:var(--muted)">Showing featured products — use the search bar to filter</div>
-    <button id="showAll" class="btn btn-outline">View All</button>
-  </div>
-
-  <div class="products" id="productGrid" aria-live="polite">
-    {% for product in FeaturedProduct %}
-    <article class="card">
-      <div class="media">
-        <img loading="lazy" src="{{ product.product_image.image.url }}" alt="{{ product.title }}">
-      </div>
-      <div class="card-body">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <strong>{{ product.title }}</strong>
-          <div class="price">₦{{ product.discountedprice|floatformat:0 }}</div>
+      <section id="featured" style="margin-top:18px">
+        <div class="section-title" style="margin-bottom:12px">
+          <h2>Featured Products</h2>
+          <div style="color:var(--muted)">Top picks from local sellers</div>
         </div>
-        <div style="color:var(--muted);font-size:13px">{{ product.seller.name }}</div>
-        <div class="actions">
-          <a href="" class="btn btn-primary">Add To Cart</a>
-          <a href="{% url 'product_detail' product.slug %}" class="btn btn-outline">View</a>
-        </div>
-      </div>
-    </article>
-    {% empty %}
-    <p style="color:var(--muted)">No featured products available at the moment.</p>
-    {% endfor %}
-  </div>
-</section>
 
+        <div style="margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div style="flex:1;color:var(--muted)">Showing featured products — use the search bar to filter</div>
+          <button id="showAll" class="btn btn-outline" type="button">View All</button>
+        </div>
+
+        <div class="products" id="productGrid" aria-live="polite">
+          {% for product in FeaturedProduct %}
+          <article class="card">
+            <div class="media">
+              <img loading="lazy" src="{{ product.product_image.image.url }}" alt="{{ product.title }}">
+            </div>
+            <div class="card-body">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <strong class="p-title">{{ product.title }}</strong>
+                <div class="price">₦{{ product.discountedprice|floatformat:0 }}</div>
+              </div>
+              <div class="p-seller" style="color:var(--muted);font-size:13px">{{ product.seller.name }}</div>
+              <div class="actions">
+                <a href="#" class="btn btn-primary">Add To Cart</a>
+                <a href="{% url 'product_detail' product.slug %}" class="btn btn-outline">View</a>
+              </div>
+            </div>
+          </article>
+          {% empty %}
+          <p style="color:var(--muted)">No featured products available at the moment.</p>
+          {% endfor %}
+        </div>
+      </section>
 
       <!-- TESTIMONIALS -->
       <section style="margin-top:20px">
@@ -317,7 +550,7 @@
           <h3>Own a shop in Adamawa?</h3>
           <p style="margin:6px 0;color:var(--muted)">Register and list your products to reach local buyers.</p>
         </div>
-        <div><button class="cta-btn" onclick="alert('Go to seller signup')">Register & Sell</button></div>
+        <div><button class="cta-btn" type="button" onclick="location.href="{% url 'register' %}'">Register & Sell</button></div>
       </div>
 
       <!-- NEWSLETTER -->
@@ -326,7 +559,7 @@
         <p style="margin:0 0 12px;color:var(--muted)">Get deals and tips — once a week.</p>
         <div class="newsletter">
           <input id="emailInput" placeholder="Your email address" type="email" />
-          <button class="btn btn-primary" id="newsletterBtn">Subscribe</button>
+          <button class="btn btn-primary" id="newsletterBtn" type="button">Subscribe</button>
         </div>
       </div>
 
@@ -346,7 +579,7 @@
 </main>
 
 <!-- FOOTER -->
-<footer>
+<footer id="contact">
   <div style="max-width:1200px;margin:0 auto;padding:18px;display:flex;flex-direction:column;gap:10px">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
       <div>
@@ -371,11 +604,12 @@ const hamb = document.getElementById('hambBtn');
 const mobileNav = document.getElementById('mobileNav');
 hamb.addEventListener('click', () => {
   const open = mobileNav.classList.toggle('open');
-  mobileNav.setAttribute('aria-hidden', !open);
+  mobileNav.setAttribute('aria-hidden', String(!open));
+  hamb.setAttribute('aria-expanded', String(open));
   if(open){ document.body.style.overflow = 'hidden'; stopHero(); } else { document.body.style.overflow = ''; startHero(); }
 });
 /* close mobile nav when resizing to desktop */
-window.addEventListener('resize', ()=> { if(window.innerWidth>900){ mobileNav.classList.remove('open'); mobileNav.setAttribute('aria-hidden','true'); document.body.style.overflow=''; startHero(); } });
+window.addEventListener('resize', ()=> { if(window.innerWidth>900){ mobileNav.classList.remove('open'); mobileNav.setAttribute('aria-hidden','true'); hamb.setAttribute('aria-expanded','false'); document.body.style.overflow=''; startHero(); } });
 
 /* ========== Hero carousel (loops through your images) ========== */
 const slides = Array.from(document.querySelectorAll('.slide'));
@@ -406,24 +640,37 @@ function startHero(){ stopHero(); heroInterval = setInterval(nextHero, 4500); }
 function stopHero(){ if(heroInterval){ clearInterval(heroInterval); heroInterval=null; } }
 startHero();
 
-/* ========== Pause when mobile nav open - also handled in toggle above using startHero/stopHero ========== */
-
-
-/* ========== Live search (filters featured products) ========== */
+/* ========== Live search (filters featured products in DOM) ========== */
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
+const grid = document.getElementById('productGrid');
 
-function doSearch(){
-  const q = searchInput.value.trim().toLowerCase();
-  if(!q){ renderProducts(products); return; }
-  const filtered = products.filter(p => (p.title + ' ' + p.seller).toLowerCase().includes(q) && p.featured);
-  renderProducts(filtered);
+function filterProducts(query){
+  if(!grid) return;
+  const cards = grid.querySelectorAll('.card');
+  const q = (query||'').trim().toLowerCase();
+  let visibleCount = 0;
+  cards.forEach(card=>{
+    const title = card.querySelector('.p-title')?.textContent || '';
+    const seller = card.querySelector('.p-seller')?.textContent || '';
+    const text = (title + ' ' + seller).toLowerCase();
+    const show = !q || text.includes(q);
+    card.style.display = show ? '' : 'none';
+    if(show) visibleCount++;
+  });
+  // aria-live feedback could be added here if needed
 }
+
+function doSearch(){ filterProducts(searchInput.value); }
 if(searchBtn) searchBtn.addEventListener('click', doSearch);
 if(searchInput){
-  searchInput.addEventListener('input', () => { if(searchInput.value.length===0) renderProducts(products); });
+  searchInput.addEventListener('input', () => { if(searchInput.value.length===0) filterProducts(''); });
   searchInput.addEventListener('keydown', (e)=> { if(e.key==='Enter') doSearch(); });
 }
+
+/* Show All */
+const showAllBtn = document.getElementById('showAll');
+if(showAllBtn) showAllBtn.addEventListener('click', ()=> { filterProducts(''); searchInput.value=''; grid?.scrollIntoView({behavior:'smooth'}); });
 
 /* ========== Deal countdown (example: ends in 6 hours) ========== */
 function startCountdown(el, seconds){
@@ -453,20 +700,13 @@ if(tlist){
 const newsletterBtn = document.getElementById('newsletterBtn');
 if(newsletterBtn){
   newsletterBtn.addEventListener('click', ()=>{
-    const email = document.getElementById('emailInput').value.trim();
+    const input = document.getElementById('emailInput');
+    const email = (input?.value || '').trim();
     if(!email || !email.includes('@')) return alert('Enter a valid email');
     alert('Thanks! Subscribed: ' + email);
-    document.getElementById('emailInput').value='';
+    input.value='';
   });
 }
-
-/* ========== Small helpers ========== */
-const showAllBtn = document.getElementById('showAll');
-if(showAllBtn) showAllBtn.addEventListener('click', ()=> alert('Show all products — implement with pagination or /api/products/'));
-
-const startSellingBtn = document.getElementById('startSellingBtn');
-if(startSellingBtn) startSellingBtn.addEventListener('click', ()=> document.getElementById('register').scrollIntoView({behavior:'smooth'}));
-
 </script>
 </body>
 </html>
