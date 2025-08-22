@@ -9,9 +9,12 @@ from django.conf import settings
 import requests,uuid
 from django.urls import reverse
 import io
-from django.core.mail import EmailMessage
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+from reportlab.platypus import Table, TableStyle
+from django.core.mail import EmailMessage
 #users to add products images
 
 @login_required
@@ -254,54 +257,95 @@ def initiate_payment(request):
     else:
         return render(request, "payment_failed.html", {"error": res_data.get("message", "Payment init failed.")})
 
-@login_required(login_url="login",redirect_field_name="next")
+@login_required(login_url="login", redirect_field_name="next")
 def verify_payment(request):
     reference = request.GET.get("reference")
     if not reference:
         return render(request, "payment_failed.html", {"error": "No payment reference provided."})
+
     payment = get_object_or_404(Payment, reference=reference, user=request.user)
     headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
     url = f"https://api.paystack.co/transaction/verify/{reference}"
+
     try:
         response = requests.get(url, headers=headers, timeout=10)
         res_data = response.json()
     except Exception as e:
         return render(request, "payment_failed.html", {"error": f"Connection error: {str(e)}"})
+
     if res_data.get("status") and res_data["data"]["status"] == "success":
         payment.verified = True
-        payment.amount = res_data["data"]["amount"] / 100
+        payment.amount = res_data["data"]["amount"] / 100  # kobo → naira
         payment.channel = res_data["data"].get("channel", "")
         payment.paid_at = res_data["data"].get("paid_at")
         payment.save()
-        # clear cart
-        Cart_Items.objects.filter(user=request.user).delete()
-        # Generate PDF Receipt
+
+        # ✅ Fetch purchased items before clearing cart
+        cart_items = list(Cart_Items.objects.filter(user=request.user))
+
+        # ---- Generate PDF Receipt ----
         buffer = io.BytesIO()
         p = canvas.Canvas(buffer, pagesize=A4)
         width, height = A4
-        p.setFont("Helvetica-Bold", 16)
-        p.drawString(200, height - 50, "TrustBuySell Receipt")
+
+        # Header
+        p.setFont("Helvetica-Bold", 18)
+        p.drawCentredString(width / 2, height - 50, "TrustBuySell Receipt")
+
+        # Customer Info
         p.setFont("Helvetica", 12)
-        p.drawString(50, height - 120, f"Customer: {request.user.username}")
-        p.drawString(50, height - 150, f"Email: {request.user.email}")
-        p.drawString(50, height - 180, f"Reference: {payment.reference}")
-        p.drawString(50, height - 210, f"Amount Paid: ₦{payment.amount:,.2f}")
-        p.drawString(50, height - 240, f"Payment Channel: {payment.channel}")
-        p.drawString(50, height - 270, f"Date: {payment.paid_at}")
-        p.drawString(50, height - 320, "Thank you for shopping with TrustBuySell!")
+        p.drawString(50, height - 100, f"Customer: {request.user.get_full_name() or request.user.username}")
+        p.drawString(50, height - 120, f"Email: {request.user.email}")
+        p.drawString(50, height - 140, f"Reference: {payment.reference}")
+        p.drawString(50, height - 160, f"Payment Channel: {payment.channel}")
+        p.drawString(50, height - 180, f"Date: {payment.paid_at}")
+
+        # Product Table
+        data = [["Product", "Qty", "Unit Price (₦)", "Total (₦)"]]
+        for item in cart_items:
+            data.append([
+                item.product.name,
+                str(item.quantity),
+                f"{item.product.discountedprice:,.2f}",
+                f"{item.quantity * item.product.discountedprice:,.2f}"
+            ])
+        data.append(["", "", "Grand Total", f"{payment.amount:,.2f}"])
+
+        table = Table(data, colWidths=[200, 60, 100, 100])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#2563eb")),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        table.wrapOn(p, width, height)
+        table.drawOn(p, 50, height - 400)
+
+        # Footer
+        p.setFont("Helvetica-Oblique", 11)
+        p.drawCentredString(width / 2, 100, "Thank you for shopping with TrustBuySell!")
+
         p.showPage()
         p.save()
         buffer.seek(0)
+
+        # ---- Email Receipt ----
         email = EmailMessage(
             "TrustBuySell Receipt",
-            f"Hi {request.user.username},\n\nThank you for your purchase. Find your receipt attached.",
+            f"Hi {request.user.username},\n\nThank you for your purchase. Please find your receipt attached.",
             settings.DEFAULT_FROM_EMAIL,
             [request.user.email],
         )
         email.attach(f"receipt_{payment.reference}.pdf", buffer.getvalue(), "application/pdf")
         email.send()
+
+        #  Clear cart after receipt is sent
+        Cart_Items.objects.filter(user=request.user).delete()
+
         return render(request, "payment_success.html", {"payment": payment})
+
     else:
         error_message = res_data.get("message", "Payment verification failed.")
         return render(request, "payment_failed.html", {"payment": payment, "error": error_message})
-

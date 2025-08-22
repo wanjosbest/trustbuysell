@@ -23,6 +23,7 @@ urlpatterns = [
     path("", include("user.urls")),
     path("", include("Products.urls")),
     
+    
 ]
 admin.site.site_header = "TrustBuySell"
 admin.site.site_title = "TrustBuySell"
