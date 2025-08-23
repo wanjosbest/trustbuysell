@@ -108,6 +108,7 @@
     <nav id="navA" class="links" aria-label="Primary">
       <a href="#featuredA">Featured</a>
       {% if user.is_authenticated %}
+      <a href="{% url 'seller_dashboard' %}">🏛 Dashboard</a>
       <a href="{% url 'cart' %}">🛒View Cart</a>
       <a href="{% url 'logout' %}">Log Out</a>
       {% else %}
