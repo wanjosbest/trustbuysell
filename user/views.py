@@ -10,6 +10,7 @@ def register_view(request):
         firstname = request.POST.get('firstname')
         lastname = request.POST.get('lastname')
         username = request.POST.get('username')
+        phone_number = request.POST.get('phone_number')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
         email = request.POST.get('email')
@@ -27,6 +28,7 @@ def register_view(request):
             username=username,
             email = email,
             shopowner = seller,
+            phone_number = phone_number,
         )
         user.set_password(password)
         user.save()

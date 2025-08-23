@@ -1,8 +1,4 @@
-<!-- =============================================
-VARIANT A — "Clean Commerce"
-Minimal, airy layout with hero search, category chips, and a tight product grid.
-Copy this into a Django template (e.g., templates/index.html)
-============================================= -->
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -11,11 +7,11 @@ Copy this into a Django template (e.g., templates/index.html)
 <title>TrustBuySell — Adamawa Marketplace</title>
 <style>
   :root{
-    --primary:#1e293b; /* slate-800 */
-    --accent:#f97316;  /* orange-500 */
-    --fg:#0f172a;      /* slate-900 */
-    --muted:#64748b;   /* slate-500 */
-    --bg:#f6f7fb;      /* subtle gray */
+    --primary:#1e293b; 
+    --accent:#f97316;  
+    --fg:#0f172a;     
+    --muted:#64748b;   
+    --bg:#f6f7fb;      
     --card:#ffffff;
     --ring:rgba(2,6,23,.08);
     --radius:14px;
@@ -105,14 +101,14 @@ Copy this into a Django template (e.g., templates/index.html)
   <div class="wrap nav" role="navigation" aria-label="Main">
     <div class="brand"><a href="{% url 'index' %}"><span class="logo">TB</span> TrustBuySell</a></div>
     <button class="hamb" id="hambA" aria-expanded="false" aria-controls="navA">☰</button>
-    <div class="searchbar" style="flex:1;min-width:220px">
-      <input id="qA" placeholder="Search products, categories, sellers…" />
-      <button id="qABtn">Search</button>
-    </div>
+    <form class="searchbar" action="{% url 'search' %}" method="get" style="flex:1;min-width:220px">
+  <input name="q" placeholder="Search products, categories, sellers…" value="{{ request.GET.q }}">
+  <button type="submit">Search</button>
+</form>
     <nav id="navA" class="links" aria-label="Primary">
       <a href="#featuredA">Featured</a>
-      <a href="#catsA">Categories</a>
       {% if user.is_authenticated %}
+      <a href="{% url 'cart' %}">🛒View Cart</a>
       <a href="{% url 'logout' %}">Log Out</a>
       {% else %}
       <a href="{% url 'login' %}">Login</a>
@@ -136,7 +132,7 @@ Copy this into a Django template (e.g., templates/index.html)
   </div>
   <div class="chip-row" id="catsA">
     {% for category in categories %}
-      <a class="chip" href="#" data-cat="{{ category.name|default:'' }}">{{ category.name }}</a>
+      <a class="chip" href="{% url 'category_products' category.id%}" data-cat="{{ category.name|default:'' }}">{{ category.name }}</a>
     {% empty %}
       <span class="chip">No categories yet</span>
     {% endfor %}
@@ -148,16 +144,20 @@ Copy this into a Django template (e.g., templates/index.html)
   <div id="featuredA" class="grid" aria-live="polite">
     {% for product in FeaturedProduct %}
     <article class="card">
+       <a class="btn btn-outline" href="{% url 'product_detail' product.slug %}">
       <div class="media"><img loading="lazy" src="{{ product.product_image.image.url }}" alt="{{ product.title }}"></div>
+         </a>
       <div class="body">
-        <div class="p-title">{{ product.title }}</div>
+        <div class="p-title">{{ product.name }}</div>
         <div class="muted">{{ product.seller.name }}</div>
         <div class="price">₦{{ product.discountedprice|floatformat:0 }}</div>
+     
         <div class="actions">
           <a class="btn btn-accent" href="{% url 'add-to-cart' product.id %}">Add to Cart</a>
           <a class="btn btn-outline" href="{% url 'product_detail' product.slug %}">View</a>
         </div>
       </div>
+      
     </article>
     {% empty %}
       <p class="muted">No featured products available at the moment.</p>

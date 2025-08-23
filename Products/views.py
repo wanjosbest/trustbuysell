@@ -15,6 +15,10 @@ from reportlab.lib.units import inch
 from reportlab.lib import colors
 from reportlab.platypus import Table, TableStyle
 from django.core.mail import EmailMessage
+from django.db.models import Q
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+from django.core.paginator import Paginator
 #users to add products images
 
 @login_required
@@ -27,15 +31,12 @@ def upload_image(request):
                 image=image_file
             )
             return redirect("addproductimage")  # reload same page or redirect elsewhere
-
     images = Product_image.objects.filter(user=request.user)
     return render(request, "upload_image.html", {"images": images})
 
-
-#global displaying products
-
+#user product list
 @login_required
-def product_list(request):
+def user_product_list(request):
     # Handle product creation inside the same page)
     if request.method == "POST":
         name = request.POST.get("name")
@@ -55,8 +56,6 @@ def product_list(request):
         # Relations
         category_obj = category.objects.get(id=category_id) if category_id else None
         image_obj = request.FILES.get("product_image")
-      
-
         # Save product
         product = Products.objects.create(
             user=request.user,
@@ -76,14 +75,13 @@ def product_list(request):
             stock = stock,
         )
         return redirect("product_list")
-
     products = Products.objects.filter(user=request.user).order_by("-published")
     categories = category.objects.all()
     images = Product_image.objects.filter(user=request.user)
 
     return render(
         request,
-        "product_list.html",
+        "user/product_list.html",
         {
             "products": products,
             "categories": categories,
@@ -107,7 +105,6 @@ def product_detail(request, slug):
 @login_required
 def product_update(request, slug):
     product = get_object_or_404(Products, slug=slug)
-
     if request.method == "POST":
         product.name = request.POST.get("name")
         product.description = request.POST.get("description")
@@ -168,28 +165,15 @@ def add_to_cart(request,product_id):
         cart_item.quantity +=1
         cart_item.save()
     return redirect("cart")
-@login_required(login_url="login",redirect_field_name="next")
-def view_cart(request):
-    cart_items = Cart_Items.objects.filter(user = request.user)
-    total = sum(item.get_total() for item in cart_items)
-    context = {
-        "cart_items":cart_items,
-        "total":total,
-    }
-    
-    return render(request, "cart.html", context)
 
-@login_required(login_url="login")
-def remove_item(request, product_id):
-    if request.method =="POST":
-        remove_cart_item = get_object_or_404(
-        Cart_Items, 
-        product_id=product_id, 
-        user=request.user
-    )
-        remove_cart_item.delete()
-   
-    return redirect("cart")
+
+@login_required
+def view_cart(request):
+    cart_items = Cart_Items.objects.filter(user=request.user)
+    subtotal = sum(item.get_total() for item in cart_items)
+    return render(request, "cart.html", {"cart_items": cart_items, "subtotal": subtotal})
+
+
 @login_required
 def shipping_view(request):
     cartitems = Cart_Items.objects.filter(user=request.user)
@@ -349,3 +333,98 @@ def verify_payment(request):
     else:
         error_message = res_data.get("message", "Payment verification failed.")
         return render(request, "payment_failed.html", {"payment": payment, "error": error_message})
+
+def search_view(request):
+    query = request.GET.get("q", "")
+    products = Products.objects.filter(
+        Q(name__icontains=query) | Q(description__icontains=query)
+    ).distinct() if query else Products.objects.none()
+
+    categories = category.objects.filter(
+        Q(name__icontains=query)  
+    ).distinct() if query else category.objects.none()
+
+    return render(request, "search_result.html", {
+        "query": query,
+        "products": products,
+        "categories": categories,
+    })
+
+
+@login_required
+def update_cart_quantity(request, product_id):
+    if request.method == "POST":
+        action = request.POST.get("action")
+        try:
+            cart_item = Cart_Items.objects.get(user=request.user, product_id=product_id)
+            if action == "increase":
+                cart_item.quantity += 1
+            elif action == "decrease" and cart_item.quantity > 1:
+                cart_item.quantity -= 1
+            cart_item.save()
+
+            # calculate totals
+            cart_items = Cart_Items.objects.filter(user=request.user)
+            subtotal = sum(item.get_total for item in cart_items)
+
+            return JsonResponse({
+                "status": "success",
+                "quantity": cart_items.quantity,
+                "item_total": cart_items.get_total,
+                "subtotal": subtotal
+            })
+        except Cart_Items.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Item not found"})
+    return JsonResponse({"status": "error", "message": "Invalid request"})
+@login_required(login_url="login")
+def increase_quantity(request, item_id):
+    item = get_object_or_404(Cart_Items, id=item_id, user=request.user)
+    item.quantity += 1
+    item.save()
+    return redirect("cart")  # refresh cart page
+
+@login_required(login_url="login")
+def decrease_quantity(request, item_id):
+    item = get_object_or_404(Cart_Items, id=item_id, user=request.user)
+    if item.quantity > 1:
+        item.quantity -= 1
+        item.save()
+    else:
+        item.delete()  
+    return redirect("cart")
+
+@login_required(login_url="login")
+def remove_item(request, product_id):
+    item = get_object_or_404(Cart_Items, product_id=product_id, user=request.user)
+    item.delete()
+    return redirect("cart")
+
+#global product list 
+def product_list(request):
+    products = Products.objects.all()
+    paginator = Paginator(products, 8)  # show 8 products per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request, "product_list.html", {"page_obj": page_obj})
+
+def category_products(request, category_id):
+    Category = get_object_or_404(category, id=category_id)
+    products = Products.objects.filter(category=Category)
+
+    return render(request, "products/category_products.html", {
+        "category": Category,
+        "products": products
+    })
+
+@login_required(login_url="login")
+def seller_dashboard(request):
+    products = Products.objects.filter(user=request.user)
+    total_products = products.count()
+    sold_out = products.filter(stock=0).count()
+
+    context = {
+        "products": products,
+        "total_products": total_products,
+        "sold_out": sold_out,
+    }
+    return render(request, "dashboard/seller_dashboard.html", context)

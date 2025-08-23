@@ -1,181 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Cart</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    margin: 0;
-    padding: 0;
-  }
-
-  .container {
-    max-width: 600px;
-    margin: auto;
-    padding: 15px;
-  }
-
-  h2 {
-    text-align: center;
-    font-size: 1.4rem;
-    margin-bottom: 15px;
-  }
-
-  .cart-item {
-    display: flex;
-    align-items: center;
-    background: white;
-    border-radius: 12px;
-    padding: 12px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-  }
-
-  .cart-item img {
-    width: 70px;
-    height: 70px;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-right: 12px;
-  }
-
-  .item-info {
-    flex: 1;
-  }
-
-  .item-info h4 {
-    margin: 0;
-    font-size: 1rem;
-    color: #333;
-  }
-
-  .item-info p {
-    margin: 5px 0;
-    font-size: 0.9rem;
-    color: #666;
-  }
-
-  .item-actions {
-    text-align: right;
-  }
-
-  .quantity {
-    display: flex;
-    align-items: center;
-    margin-bottom: 6px;
-  }
-
-  .quantity button {
-    background: #4CAF50;
-    border: none;
-    color: white;
-    padding: 4px 8px;
-    font-size: 16px;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  .quantity span {
-    margin: 0 8px;
-    font-size: 1rem;
-  }
-
-  .remove-btn {
-    background: #e3342f;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.85rem;
-  }
-
-  .cart-summary {
-    background: white;
-    border-radius: 12px;
-    padding: 15px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    margin-top: 20px;
-  }
-
-  .summary-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    font-size: 1rem;
-  }
-
-  .checkout-btn {
-    width: 100%;
-    padding: 12px;
-    font-size: 1rem;
-    border: none;
-    border-radius: 10px;
-    background: #4CAF50;
-    color: white;
-    cursor: pointer;
-  }
-
-  .checkout-btn:hover {
-    background: #45a049;
-  }
-button {
-      margin-top: 20px;
-      width: 100%;
-      background: #2563eb;
-      color: white;
-      border: none;
-      padding: 14px;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #1e4fc5;
-    }
-
-  /* Tablet and up */
-  @media (min-width: 768px) {
-    .cart-item {
-      padding: 16px;
-    }
-    .cart-item img {
-      width: 90px;
-      height: 90px;
-    }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Cart</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: auto; padding: 15px; }
+    h2 { text-align: center; font-size: 1.4rem; margin-bottom: 15px; }
+    .cart-item { display: flex; align-items: center; background: white; border-radius: 12px; padding: 12px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .cart-item img { width: 70px; height: 70px; object-fit: cover; border-radius: 10px; margin-right: 12px; }
+    .item-info { flex: 1; }
+    .item-info h4 { margin: 0; font-size: 1rem; color: #333; }
+    .item-info p { margin: 5px 0; font-size: 0.9rem; color: #666; }
+    .item-actions { text-align: right; }
+    .quantity { display: flex; align-items: center; margin-bottom: 6px; }
+    .quantity form { display: inline; margin: 0 3px; }
+    .quantity button { background: #4CAF50; border: none; color: white; padding: 4px 8px; font-size: 16px; border-radius: 6px; cursor: pointer; }
+    .remove-btn { background: #e3342f; color: white; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+    .cart-summary { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-top: 20px; }
+    .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1rem; }
+    .checkout-btn { width: 100%; padding: 12px; font-size: 1rem; border: none; border-radius: 10px; background: #2563eb; color: white; cursor: pointer; }
+    .checkout-btn:hover { background: #1e4fc5; }
+  </style>
 </head>
 <body>
+
 {% if cart_items %}
 <div class="container">
   <h2>🛒 My Cart</h2>
-  
-  <div class="cart-item">
-   
-    <div class="item-info">
 
   {% for item in cart_items %}
   <div class="cart-item">
     <img src="{{ item.product.product_image.image.url }}" alt="{{ item.product.name }}">
     <div class="item-info">
       <h4>{{ item.product.name }}</h4>
-      <p>₦{{ item.product.discountedprice }}</p>
+      <p>₦{{ item.get_total }}</p>
     </div>
     <div class="item-actions">
       <div class="quantity">
-        <button onclick="decreaseQty(this)">-</button>
+        <!-- Decrease -->
+        <form action="{% url 'decrease_quantity' item.id %}" method="post">
+          {% csrf_token %}
+          <button type="submit">-</button>
+        </form>
+
         <span>{{ item.quantity }}</span>
-        <button onclick="increaseQty(this)">+</button>
+
+        <!-- Increase -->
+        <form action="{% url 'increase_quantity' item.id %}" method="post">
+          {% csrf_token %}
+          <button type="submit">+</button>
+        </form>
       </div>
-      <form action="{% url 'remove_item' item.product.id %}"method="post">
-        {% csrf_token%}
+
+      <!-- Remove -->
+      <form action="{% url 'remove_item' item.product.id %}" method="post">
+        {% csrf_token %}
         <button class="remove-btn">Remove</button>
       </form>
-    
     </div>
   </div>
   {% endfor %}
@@ -184,38 +67,26 @@ button {
   <div class="cart-summary">
     <div class="summary-row">
       <span>Subtotal</span>
-      <span>₦ 0.00</span>
+      <span>₦{{ subtotal }}</span>
     </div>
     <div class="summary-row">
       <span>Shipping</span>
-      <span>₦ 0.00</span>
+      <span>₦0.00</span>
     </div>
-    {% for item in cart_items %}
     <div class="summary-row" style="font-weight: bold;">
       <span>Total</span>
-      <span>₦{{ item.get_total }}</span>
+      <span>₦{{ subtotal }}</span>
     </div>
-     {% endfor %}
-      
   </div>
-</div><a href="{% url 'shipping' %}"><button type="submit"> Check Out</button></a>
+
+  <a href="{% url 'shipping' %}">
+    <button class="checkout-btn">Checkout</button>
+  </a>
+</div>
 {% else %}
-<h2>Cart is Empty </h2>
+<h2>Cart is Empty</h2>
+<h3><a href="{% url 'index' %}">Shop Products</a></h3>
 {% endif %}
-<script>
-  function increaseQty(btn) {
-    let span = btn.parentNode.querySelector('span');
-    span.textContent = parseInt(span.textContent) + 1;
-  }
-  function decreaseQty(btn) {
-    let span = btn.parentNode.querySelector('span');
-    let val = parseInt(span.textContent);
-    if (val > 1) span.textContent = val - 1;
-  }
-  function removeItem(btn) {
-    btn.closest('.cart-item').remove();
-  }
-</script>
 
 </body>
 </html>

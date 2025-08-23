@@ -144,5 +144,5 @@ EMAIL_HOST_USER = 'josephwandiyahyel3@gmail.com'
 EMAIL_HOST_PASSWORD ='sranztwrlxvcclwl' 
 EMAIL_USE_SSL=False
 DEFAULT_FROM_EMAIL = "TrustBuySell <josephwandiyahyel3@gmail.com>"
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/login/"
+LOGIN_URL = 'login'
+LOGOUT_REDIRECT_URL = "login"
