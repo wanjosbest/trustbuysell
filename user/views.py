@@ -50,7 +50,7 @@ def login_view(request):
             return redirect('login')
         else:
             login(request,user)
-            return redirect("index")
+            return redirect("seller_dashboard")
     return render(request, 'user/login.html')
 
 # logout user

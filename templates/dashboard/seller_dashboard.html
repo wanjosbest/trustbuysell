@@ -235,11 +235,10 @@ header {
     <div class="sidebar" id="sidebar">
         <h2>Seller Menu</h2>
         <div class="menu">
-            <a href="{% url 'seller_dashboard' %}">🏠 Dashboard</a>
-            <a href="{% url 'product_lists' %}">📦 My Products</a>
-            <a href="">➕ Upload Product</a>
+            <a href="{% url 'index' %}">🏠 Home</a>
+            <a href="{% url 'seller_dashboard' %}">🏛 Dashboard</a>
+            <a href="{% url 'product_lists' %}">📦 Products</a>
             <a href="{% url 'addproductimage' %}">🖼 Upload Image</a>
-            <a href="">✅ Sold Products</a>
             <a href="">⚙️ Account Settings</a>
         </div>
     </div>
@@ -280,7 +279,7 @@ header {
                 </div>
             </div>
             {% empty %}
-            <p>No products yet. <a href="{% url 'add_product' %}">Add one</a></p>
+            <p>No products yet. <a href="{% url 'product_lists' %}">Add one</a></p>
             {% endfor %}
         </div>
     </div>
