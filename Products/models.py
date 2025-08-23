@@ -2,15 +2,6 @@ from django.db import models
 from user.models import User
 
 
-class herobackimg(models.Model):
-    image = models.ImageField( upload_to="img/", null=True) 
-
-    class Meta:
-        verbose_name="herobackimg"
-        verbose_name_plural="Hero image"
-
-
-
 #global class
 class category(models.Model):
     name = models.CharField(max_length=30, null = True)
@@ -26,14 +17,31 @@ class category(models.Model):
 #userbase
 class Product_image(models.Model):
     user = models.ForeignKey(User, related_name="user_image",on_delete=models.CASCADE)
-    image = models.ImageField( upload_to="img/", null=True)
+    image = models.ImageField( upload_to="img/product_images/", null=True)
     image_url = models.URLField(max_length=500, blank=True, null=True) 
+    Ishero = models.BooleanField(default=False)
     def __str__(self):
         return 'image' 
    
     class Meta:
         verbose_name="Product_image"
         verbose_name_plural="Product Images"
+
+class HeroImage(models.Model):
+    title = models.CharField(max_length=200, blank=True, null=True)
+    subtitle = models.CharField(max_length=300, blank=True, null=True)
+    image = models.ImageField(upload_to="hero_images/")
+    is_active = models.BooleanField(default=True)
+    updated = models.DateTimeField(auto_now=True)
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Hero Image"
+        verbose_name_plural = "Hero Images"
+
+    def __str__(self):
+        return self.title or f"Hero {self.id}"
+
 
 class Products(models.Model):
     STATUS_CHOICES = (
@@ -65,17 +73,60 @@ class Products(models.Model):
         verbose_name="Products"
         verbose_name_plural="Products"
 
+class Payment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="payments")
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    reference = models.CharField(max_length=50, unique=True)
+    verified = models.BooleanField(default=False)
+    channel = models.CharField(max_length=50, blank=True,null=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.reference} ({'verified' if self.verified else 'pending'})"
+
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")  # buyer
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    status = models.CharField(
+        max_length=20,
+        choices=(("pending", "Pending"), ("completed", "Completed"), ("cancelled", "Cancelled")),
+        default="completed",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Order #{self.id} by {self.user.username}"
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey("Products", on_delete=models.CASCADE)
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sales")
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=12, decimal_places=2)  # unit price at time of sale
+
+    def __str__(self):
+        return f"{self.product.name} x {self.quantity}"
+
+    def get_total(self):
+        return (self.price or Decimal("0.00")) * self.quantity
+
 
 class Cart_Items(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
-    product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name="cartitemsproduct")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    product = models.ForeignKey("Products", on_delete=models.CASCADE, related_name="cartitemsproduct")
     quantity = models.PositiveIntegerField(default=1)
+    purchased = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.product.name} by {self.user}"
-    
+
     def get_total(self):
-        return self.product.discountedprice * self.quantity
+        price = self.product.discountedprice or self.product.actualprice or Decimal("0.00")
+        return price * self.quantity
+
     
 class shipping(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
@@ -89,15 +140,3 @@ class shipping(models.Model):
 
     def __str__(self):
         return f'shipping to {self.user}| {self.state} |{self.lga}| {self.address}'
-class Payment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    reference = models.CharField(max_length=100, unique=True)
-    verified = models.BooleanField(default=False)
-    channel = models.CharField(max_length=50, blank=True, null=True)
-    paid_at = models.DateTimeField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.reference} - {'Verified' if self.verified else 'Pending'}"
-    

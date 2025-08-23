@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Update Hero Image</title>
+  <style>
+    body { font-family: sans-serif; margin: 30px; background:#f9fafb; }
+    .card { background: #fff; padding: 20px; border-radius: 12px; max-width: 600px; margin:auto; box-shadow:0 4px 20px rgba(0,0,0,0.1);}
+    label { display:block; margin-top:12px; font-weight:700; }
+    input, textarea { width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; }
+    button { margin-top:20px; padding:10px 16px; border:0; border-radius:8px; background:#2563eb; color:#fff; font-weight:700; cursor:pointer; }
+    button:hover { background:#1d4ed8; }
+    .preview img{max-width:100%; margin-top:12px; border-radius:8px;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Update Hero Image</h2>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <label>Title</label>
+      <input type="text" name="title" value="{{ hero.title|default:'' }}">
+      
+      <label>Subtitle</label>
+      <textarea name="subtitle">{{ hero.subtitle|default:'' }}</textarea>
+      
+      <label>Upload Image</label>
+      <input type="file" name="image" accept="image/*">
+
+      {% if hero and hero.image %}
+        <div class="preview">
+          <p>Current Hero Image:</p>
+          <img src="{{ hero.image.url }}" alt="Hero Image">
+        </div>
+      {% endif %}
+
+      <button type="submit">Save</button>
+    </form>
+  </div>
+</body>
+</html>

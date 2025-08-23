@@ -1,276 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seller Dashboard</title>
-    <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seller Dashboard</title>
+<style>
+:root {
+    --primary: #2563eb;
+    --primary-light: #3b82f6;
+    --bg: #f4f6f8;
+    --card: #fff;
+    --text-dark: #111827;
+    --muted: #6b7280;
+    --radius: 12px;
+    --shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+* { box-sizing: border-box; margin:0; padding:0; font-family: 'Inter', sans-serif; }
+
+body { background: var(--bg); color: var(--text-dark); }
+
+/* Header */
+header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    background: var(--card);
+    padding: 12px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+header h1 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-right: auto;
+}
+
 /* Sidebar */
 .sidebar {
     width: 220px;
-    background: #2563eb;
+    background: var(--primary);
     color: white;
-    height: 100vh;
-    padding: 20px 10px;
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 200;
-    transform: translateX(0);
-    transition: width 0.3s ease, transform 0.3s ease;
-    overflow: hidden;
+    height: 100%;
+    padding: 20px;
+    transition: transform 0.3s ease;
+    overflow-y: auto;
 }
 
-/* Collapsed sidebar (desktop only) */
-.sidebar.collapsed {
-    width: 70px;
-}
-
-/* Sidebar title */
 .sidebar h2 {
-    margin: 0 0 20px;
+    margin-bottom: 20px;
     font-size: 1.2rem;
-    transition: opacity 0.3s ease;
+    font-weight: 600;
 }
 
-/* Hide text when collapsed */
-.sidebar.collapsed h2 {
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* Menu links */
-.menu a {
+.sidebar .menu a {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: var(--radius);
+    background: rgba(255,255,255,0.1);
+    text-decoration: none;
+    color: white;
+    transition: background 0.3s;
+}
+
+.sidebar .menu a:hover {
+    background: var(--primary-light);
+}
+
+/* Analytics badges */
+.sidebar .menu a span {
+    margin-left: auto;
+    background: white;
+    color: var(--primary);
+    font-weight: bold;
+    padding: 2px 6px;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    font-size: 0.95rem;
-    transition: background 0.3s, padding 0.3s;
-    white-space: nowrap;
-    overflow: hidden;
+    font-size: 0.8rem;
 }
 
-/* Only center icons when collapsed */
-.sidebar.collapsed .menu a {
-    justify-content: center;
-    padding: 10px;
-}
-
-/* Hide text labels in collapsed state */
-.sidebar.collapsed .menu a span {
-    display: none;
-}
-
-/* Overlay (mobile only) */
+/* Overlay for mobile */
 .overlay {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 150;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 90;
 }
 
-.overlay.active {
-    display: block;
-}
+.overlay.active { display: block; }
 
-/* Content */
+/* Main Content */
 .content {
     margin-left: 220px;
-    padding: 15px;
-    flex: 1;
+    padding: 20px;
     transition: margin-left 0.3s ease;
-    width: 100%;
-}
-
-/* Shift content when sidebar collapsed */
-.sidebar.collapsed ~ .content {
-    margin-left: 70px;
-}
-
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.menu-btn {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: #2563eb;
-    cursor: pointer;
-}
-
-/* Stats */
-.stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.stat-card {
-    background: white;
-    padding: 15px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-}
-
-.stat-card h3 {
-    margin: 0;
-    font-size: 1.1rem;
-}
-
-.stat-card p {
-    font-size: 1.3rem;
-    font-weight: bold;
-    color: #2563eb;
 }
 
 /* Product Grid */
 .products {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 15px;
 }
 
 .product-card {
-    background: white;
-    padding: 12px;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    background: var(--card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s;
 }
+
+.product-card:hover { transform: translateY(-5px); }
 
 .product-card img {
     width: 100%;
     height: 120px;
     object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 8px;
+}
+
+.product-card .info {
+    padding: 10px;
+    flex: 1;
 }
 
 .product-card h4 {
-    font-size: 1rem;
-    margin: 0 0 5px;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    color: var(--text-dark);
 }
 
 .product-card .price {
-    font-size: 0.9rem;
-    color: #2563eb;
-    font-weight: bold;
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-weight: 600;
+    margin-bottom: 8px;
 }
 
 .product-card .actions {
-    margin-top: 8px;
     display: flex;
     gap: 6px;
 }
 
-.btn {
+.product-card .btn {
     flex: 1;
     padding: 6px;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius);
     cursor: pointer;
+    transition: background 0.3s;
 }
 
-.btn-primary {
-    background: #2563eb;
-    color: white;
-}
+.product-card .btn-primary { background: var(--primary); color: white; }
+.product-card .btn-primary:hover { background: var(--primary-light); }
 
-.btn-outline {
-    background: #f3f4f6;
-    color: #333;
-}
+.product-card .btn-outline { background: #f3f4f6; color: var(--text-dark); }
+.product-card .btn-outline:hover { background: #e5e7eb; }
 
 /* Responsive */
-@media (max-width: 1024px) {
-    .products {
-        grid-template-columns: repeat(2, 1fr);
-    }
+@media (max-width: 1600px) { .products { grid-template-columns: repeat(6, 1fr); } }
+@media (max-width: 1200px) { .products { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 992px)  { .products { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px)  { .products { grid-template-columns: repeat(2, 1fr); } 
+    .sidebar { transform: translateX(-100%); width: 220px; }
+    .sidebar.active { transform: translateX(0); }
+    .overlay.active { display: block; }
+    .content { margin-left: 0; }
 }
-
-@media (max-width: 768px) {
-    .sidebar {
-        transform: translateX(-100%);
-        width: 220px; /* full width on open */
-    }
-
-    .sidebar.active {
-        transform: translateX(0);
-    }
-
-    .sidebar.collapsed {
-        width: 220px; /* collapsed not used on mobile */
-    }
-
-    .content {
-        margin-left: 0 !important;
-    }
-
-    .products {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-    </style>
+@media (max-width: 480px)  { .products { grid-template-columns: 1fr; } }
+</style>
 </head>
-
 <body>
 
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <h2>Seller Menu</h2>
-        <div class="menu">
-            <a href="{% url 'index' %}">🏠 Home</a>
-            <a href="{% url 'seller_dashboard' %}">🏛 Dashboard</a>
-            <a href="{% url 'product_lists' %}">📦 Products</a>
-            <a href="{% url 'addproductimage' %}">🖼 Upload Image</a>
-            <a href="">⚙️ Account Settings</a>
-        </div>
+<div class="sidebar" id="sidebar">
+    <h2>Seller Menu</h2>
+    <div class="menu">
+        <a href="{% url 'index' %}">🏠 Home</a>
+        <a href="{% url 'seller_dashboard' %}">📊 Dashboard</a>
+        <a href="{% url 'product_lists' %}">📦 Products</a>
+        <a href="{% url 'addproductimage' %}">🖼 Upload Image</a>
+        <a href="{% url 'sell-analytics' %}">📈 Analytics <span>{{ analytics_count }}</span></a>
+        <a href="">⚙️ Account Settings</a>
     </div>
+</div>
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
 
-    <!-- Overlay -->
-    <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+<div class="content">
+    <header>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <h1>Seller Dashboard</h1>
+    </header>
 
-    <!-- Main Content -->
-    <div class="content">
-        <header>
-            <button class="menu-btn" onclick="toggleMenu()">☰</button>
-            <h1>📊 Seller Dashboard</h1>
-        </header>
-
-        <!-- Stats -->
-        <div class="stats">
-            <div class="stat-card">
-                <h3>Total Products</h3>
-                <p>{{ total_products }}</p>
-            </div>
-            <div class="stat-card">
-                <h3>Sold Out</h3>
-                <p>{{ sold_out }}</p>
-            </div>
-        </div>
-
-        <!-- Product List -->
-        <h2 style="font-size:1.2rem; margin-bottom:10px;">My Products</h2>
-        <div class="products">
-            {% for product in products %}
-            <div class="product-card">
-                <img src="{{ product.product_image.image.url }}" alt="{{ product.name }}">
+    <h2>My Products</h2>
+    <div class="products">
+        {% for product in products %}
+        <div class="product-card">
+            <img src="{{ product.product_image.image.url }}" alt="{{ product.name }}">
+            <div class="info">
                 <h4>{{ product.name }}</h4>
                 <div class="price">₦{{ product.discountedprice }}</div>
                 <div class="actions">
@@ -278,33 +216,25 @@ header {
                     <a href="{% url 'product_update' product.slug %}"><button class="btn btn-primary">Edit</button></a>
                 </div>
             </div>
-            {% empty %}
-            <p>No products yet. <a href="{% url 'product_lists' %}">Add one</a></p>
-            {% endfor %}
         </div>
+        {% empty %}
+        <p>No products yet. <a href="{% url 'product_lists' %}">Add one</a></p>
+        {% endfor %}
     </div>
+</div>
+
 <script>
-    function toggleMenu() {
-        const sidebar = document.getElementById("sidebar");
-        const overlay = document.getElementById("overlay");
-
-        if (window.innerWidth <= 768) {
-            // Mobile: slide in/out
-            sidebar.classList.toggle("active");
-            overlay.classList.toggle("active");
-        } else {
-            // Desktop: collapse/expand
-            sidebar.classList.toggle("collapsed");
-        }
-    }
-
-    function closeMenu() {
-        // Mobile only
-        document.getElementById("sidebar").classList.remove("active");
-        document.getElementById("overlay").classList.remove("active");
-    }
+function toggleMenu() {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+    sidebar.classList.toggle("active");
+    overlay.classList.toggle("active");
+}
+function closeMenu() {
+    document.getElementById("sidebar").classList.remove("active");
+    document.getElementById("overlay").classList.remove("active");
+}
 </script>
 
 </body>
-
 </html>

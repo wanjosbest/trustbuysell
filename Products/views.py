@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import (Product_image,Products,category,Cart_Items,shipping,Payment)
+from .models import (Product_image,Products,category,Cart_Items,shipping,Payment,HeroImage,Order,OrderItem)
 from user.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -19,6 +19,10 @@ from django.db.models import Q
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.core.paginator import Paginator
+from django.db.models import Sum, Count, Q, F
+from decimal import Decimal
+
+
 #users to add products images
 
 @login_required
@@ -37,7 +41,6 @@ def upload_image(request):
 #user product list
 @login_required
 def user_product_list(request):
-    # Handle product creation inside the same page)
     if request.method == "POST":
         name = request.POST.get("name")
         description = request.POST.get("description")
@@ -48,14 +51,20 @@ def user_product_list(request):
         status = request.POST.get("status")
         featured = bool(request.POST.get("featured"))
         category_id = request.POST.get("category")
-        image_id = request.POST.get("product_image")
-        image_id2 = request.FILES.get("product_image2")
-        image_id3 = request.FILES.get("product_image3")
         slug = slugify(name)
-        stock = request.POST.get("stock")
+        stock = int(request.POST.get("stock"))
+
         # Relations
         category_obj = category.objects.get(id=category_id) if category_id else None
-        image_obj = request.FILES.get("product_image")
+
+        image_id1 = request.POST.get("product_image")
+        image_id2 = request.POST.get("product_image2")
+        image_id3 = request.POST.get("product_image3")
+
+        image_obj1 = Product_image.objects.filter(id=image_id1, user=request.user).first() if image_id1 else None
+        image_obj2 = Product_image.objects.filter(id=image_id2, user=request.user).first() if image_id2 else None
+        image_obj3 = Product_image.objects.filter(id=image_id3, user=request.user).first() if image_id3 else None
+
         # Save product
         product = Products.objects.create(
             user=request.user,
@@ -68,13 +77,14 @@ def user_product_list(request):
             status=status,
             featured=featured,
             category=category_obj,
-            product_image=image_obj,
-            product_image2=image_id2,
-            product_image3=image_id3,
+            product_image=image_obj1,
+            product_image2=image_obj2,
+            product_image3=image_obj3,
             slug=slug,
-            stock = stock,
+            stock=stock,
         )
-        return redirect("product_list")
+        return redirect("product_lists")
+
     products = Products.objects.filter(user=request.user).order_by("-published")
     categories = category.objects.all()
     images = Product_image.objects.filter(user=request.user)
@@ -88,6 +98,7 @@ def user_product_list(request):
             "images": images,
         },
     )
+
 
 def product_detail(request, slug):
     product = get_object_or_404(Products, slug=slug, status="published")
@@ -129,7 +140,7 @@ def product_update(request, slug):
         product.product_image3 = Product_image.objects.get(id=product_image3_id) if product_image3_id else None
 
         product.save()
-        return redirect("product_list")
+        return redirect("product_lists")
 
     categories = category.objects.all()
     images = Product_image.objects.filter(user=request.user)
@@ -149,7 +160,7 @@ def product_delete(request, slug):
     product = get_object_or_404(Products, slug=slug)
     if request.method == "POST":
         product.delete()
-        return redirect("product_list")
+        return redirect("product_lists")
     return render(request, "product_delete.html", {"product": product})
 
 #add to cart
@@ -248,6 +259,7 @@ def verify_payment(request):
         return render(request, "payment_failed.html", {"error": "No payment reference provided."})
 
     payment = get_object_or_404(Payment, reference=reference, user=request.user)
+
     headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
     url = f"https://api.paystack.co/transaction/verify/{reference}"
 
@@ -258,16 +270,54 @@ def verify_payment(request):
         return render(request, "payment_failed.html", {"error": f"Connection error: {str(e)}"})
 
     if res_data.get("status") and res_data["data"]["status"] == "success":
+        # Update payment
         payment.verified = True
-        payment.amount = res_data["data"]["amount"] / 100  # kobo → naira
-        payment.channel = res_data["data"].get("channel", "")
+        payment.amount = Decimal(res_data["data"]["amount"]) / Decimal("100")  # kobo → naira
+        payment.channel = res_data["data"].get("channel", "") or ""
         payment.paid_at = res_data["data"].get("paid_at")
         payment.save()
 
-        # ✅ Fetch purchased items before clearing cart
-        cart_items = list(Cart_Items.objects.filter(user=request.user))
+        # Fetch cart items BEFORE clearing
+        cart_items = list(Cart_Items.objects.select_related("product", "product__user")
+                          .filter(user=request.user, purchased=False))
 
-        # ---- Generate PDF Receipt ----
+        if not cart_items:
+            # Nothing to convert; show success anyway
+            return render(request, "payment_success.html", {"payment": payment})
+
+        # Create order
+        total_amount = sum((item.product.discountedprice or item.product.actualprice or Decimal("0.00")) * item.quantity
+                           for item in cart_items)
+
+        order = Order.objects.create(
+            user=request.user,
+            total_amount=total_amount,
+            status="completed"
+        )
+
+        # Convert cart items → order items, reduce stock
+        for item in cart_items:
+            unit_price = item.product.discountedprice or item.product.actualprice or Decimal("0.00")
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                seller=item.product.user,  # seller is the product owner
+                quantity=item.quantity,
+                price=unit_price,
+            )
+
+            # Reduce stock safely
+            if item.product.stock is not None:
+                new_stock = max(0, (item.product.stock or 0) - item.quantity)
+                if new_stock != item.product.stock:
+                    item.product.stock = new_stock
+                    item.product.save(update_fields=["stock"])
+
+            # Mark purchased (optional; we’ll delete cart rows after)
+            item.purchased = True
+            item.save(update_fields=["purchased"])
+
+        # Generate & email PDF receipt (optional but kept since you had it)
         buffer = io.BytesIO()
         p = canvas.Canvas(buffer, pagesize=A4)
         width, height = A4
@@ -276,7 +326,7 @@ def verify_payment(request):
         p.setFont("Helvetica-Bold", 18)
         p.drawCentredString(width / 2, height - 50, "TrustBuySell Receipt")
 
-        # Customer Info
+        # Customer info
         p.setFont("Helvetica", 12)
         p.drawString(50, height - 100, f"Customer: {request.user.get_full_name() or request.user.username}")
         p.drawString(50, height - 120, f"Email: {request.user.email}")
@@ -284,18 +334,20 @@ def verify_payment(request):
         p.drawString(50, height - 160, f"Payment Channel: {payment.channel}")
         p.drawString(50, height - 180, f"Date: {payment.paid_at}")
 
-        # Product Table
+        # Product table
         data = [["Product", "Qty", "Unit Price (₦)", "Total (₦)"]]
         for item in cart_items:
+            unit_price = item.product.discountedprice or item.product.actualprice or Decimal("0.00")
+            line_total = unit_price * item.quantity
             data.append([
                 item.product.name,
                 str(item.quantity),
-                f"{item.product.discountedprice:,.2f}",
-                f"{item.quantity * item.product.discountedprice:,.2f}"
+                f"{unit_price:,.2f}",
+                f"{line_total:,.2f}",
             ])
-        data.append(["", "", "Grand Total", f"{payment.amount:,.2f}"])
+        data.append(["", "", "Grand Total", f"{total_amount:,.2f}"])
 
-        table = Table(data, colWidths=[200, 60, 100, 100])
+        table = Table(data, colWidths=[200, 60, 120, 120])
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#2563eb")),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
@@ -305,7 +357,7 @@ def verify_payment(request):
             ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
         ]))
         table.wrapOn(p, width, height)
-        table.drawOn(p, 50, height - 400)
+        table.drawOn(p, 50, height - 420)
 
         # Footer
         p.setFont("Helvetica-Oblique", 11)
@@ -315,24 +367,26 @@ def verify_payment(request):
         p.save()
         buffer.seek(0)
 
-        # ---- Email Receipt ----
-        email = EmailMessage(
-            "TrustBuySell Receipt",
-            f"Hi {request.user.username},\n\nThank you for your purchase. Please find your receipt attached.",
-            settings.DEFAULT_FROM_EMAIL,
-            [request.user.email],
-        )
-        email.attach(f"receipt_{payment.reference}.pdf", buffer.getvalue(), "application/pdf")
-        email.send()
+        # Email receipt
+        if request.user.email:
+            email = EmailMessage(
+                "TrustBuySell Receipt",
+                f"Hi {request.user.username},\n\nThank you for your purchase. Please find your receipt attached.",
+                settings.DEFAULT_FROM_EMAIL,
+                [request.user.email],
+            )
+            email.attach(f"receipt_{payment.reference}.pdf", buffer.getvalue(), "application/pdf")
+            email.send(fail_silently=True)
 
-        #  Clear cart after receipt is sent
-        Cart_Items.objects.filter(user=request.user).delete()
+        # Clear cart
+        Cart_Items.objects.filter(user=request.user, purchased=True).delete()
 
-        return render(request, "payment_success.html", {"payment": payment})
+        # ✅ At this point, Order + OrderItems exist → Seller analytics will reflect this.
+        return render(request, "payment_success.html", {"payment": payment, "order": order})
 
-    else:
-        error_message = res_data.get("message", "Payment verification failed.")
-        return render(request, "payment_failed.html", {"payment": payment, "error": error_message})
+    # Payment failed
+    error_message = res_data.get("message", "Payment verification failed.")
+    return render(request, "payment_failed.html", {"payment": payment, "error": error_message})
 
 def search_view(request):
     query = request.GET.get("q", "")
@@ -428,3 +482,71 @@ def seller_dashboard(request):
         "sold_out": sold_out,
     }
     return render(request, "dashboard/seller_dashboard.html", context)
+
+@login_required
+def hero_image_update(request):
+    hero = HeroImage.objects.filter(is_active=True).first()
+
+    if request.method == "POST":
+        title = request.POST.get("title")
+        subtitle = request.POST.get("subtitle")
+        image = request.FILES.get("image")
+
+        if hero:  
+            # update existing
+            hero.title = title
+            hero.subtitle = subtitle
+            if image:
+                hero.image = image
+            hero.save()
+        else:
+            # create new
+            hero = HeroImage.objects.create(
+                title=title,
+                subtitle=subtitle,
+                image=image,
+                uploaded_by=request.user,
+                is_active=True
+            )
+        return redirect("index")  # reload page
+
+    return render(request, "user/hero_image_form.html", {"hero": hero})
+
+@login_required
+def seller_analytics(request):
+    # All items sold by this seller
+    items = (
+        OrderItem.objects
+        .filter(seller=request.user, order__status="completed")
+        .select_related("product", "order")
+        .order_by("-order__created_at")
+    )
+
+    # KPIs
+    totals = items.aggregate(
+        total_revenue=Sum(F("price") * F("quantity")),
+        total_units=Sum("quantity"),
+        total_orders=Count("order", distinct=True),
+    )
+    total_revenue = totals["total_revenue"] or 0
+    total_units = totals["total_units"] or 0
+    total_orders = totals["total_orders"] or 0
+
+    # Top products by revenue
+    top_products = (
+        items.values("product__id", "product__name")
+        .annotate(
+            revenue=Sum(F("price") * F("quantity")),
+            units=Sum("quantity"),
+        )
+        .order_by("-revenue")[:10]
+    )
+
+    context = {
+        "items": items[:50],  # recent 50 sales lines
+        "total_revenue": total_revenue,
+        "total_units": total_units,
+        "total_orders": total_orders,
+        "top_products": top_products,
+    }
+    return render(request, "analytics/seller_analytics.html", context)

@@ -3,7 +3,7 @@ from.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, logout,login
-from Products.models import category,herobackimg, Products
+from Products.models import category, Products,Product_image,HeroImage
 
 def register_view(request):
     if request.method == 'POST':
@@ -64,7 +64,9 @@ def index(request):
     #Output categories
     categories = category.objects.all()
     #output featured products
+    hero = HeroImage.objects.filter(is_active=True).first()
     FeaturedProduct = Products.objects.filter(featured = True).order_by("-published")[:8]
    
-    context = {"categories":categories,"FeaturedProduct":FeaturedProduct}
+    context = {"categories":categories,"FeaturedProduct":FeaturedProduct,"hero":hero}
     return render(request,"index.html", context)
+

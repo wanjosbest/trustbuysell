@@ -5,31 +5,148 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Update Product</title>
   <style>
-    body { font-family: "Segoe UI", sans-serif; background: #f3f6fa; margin: 0; padding: 0; }
-    .container { max-width: 800px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1); animation: fadeIn 0.6s ease-in-out; }
-    h2 { margin-bottom: 20px; color: #1e3a8a; text-align: center; }
-    .form-group { margin-bottom: 18px; position: relative; }
-    label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #333; }
-    input, textarea, select { width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #d1d5db;
-      outline: none; font-size: 15px; transition: 0.3s; }
-    input:focus, textarea:focus, select:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.2); }
-    textarea { resize: vertical; min-height: 80px; }
-    .checkbox { display: flex; align-items: center; gap: 8px; font-size: 14px; }
-    .btn { display: inline-block; background: #2563eb; color: #fff; padding: 12px 20px; border-radius: 8px;
-      border: none; font-size: 15px; cursor: pointer; transition: 0.3s; width: 100%; }
-    .btn:hover { background: #1e40af; }
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6);
-      justify-content: center; align-items: center; z-index: 9999; }
-    .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 90%; max-width: 700px;
-      max-height: 80vh; overflow-y: auto; animation: slideUp 0.4s ease; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; }
-    .grid img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer; transition: 0.3s;
-      border: 3px solid transparent; }
-    .grid img:hover { transform: scale(1.05); border-color: #2563eb; }
-    .close { float: right; font-size: 20px; cursor: pointer; color: #333; }
-    .selected-preview { margin-top: 10px; text-align: center; }
-    .selected-preview img { max-width: 150px; border-radius: 10px; }
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #f3f6fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 50px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    h2 {
+      margin-bottom: 25px;
+      color: #1e3a8a;
+      text-align: center;
+      font-size: 1.8rem;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      outline: none;
+      font-size: 15px;
+      transition: 0.3s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #2563eb;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: none;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.3s;
+      width: 100%;
+    }
+
+    .btn:hover {
+      background: #1e40af;
+    }
+
+    /* Image Grid Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: slideUp 0.4s ease;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+    }
+
+    .grid img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      border: 3px solid transparent;
+    }
+
+    .grid img:hover {
+      transform: scale(1.05);
+      border-color: #2563eb;
+    }
+
+    .close {
+      float: right;
+      font-size: 20px;
+      cursor: pointer;
+      color: #333;
+    }
+
+    .selected-preview {
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .selected-preview img {
+      max-width: 150px;
+      border-radius: 10px;
+    }
+
     @keyframes fadeIn { from {opacity: 0; transform: translateY(15px);} to {opacity: 1; transform: translateY(0);} }
     @keyframes slideUp { from {opacity: 0; transform: translateY(30px);} to {opacity: 1; transform: translateY(0);} }
   </style>
@@ -87,35 +204,20 @@
         </select>
       </div>
 
-      <!-- Product Image 1 -->
+      <!-- Product Images -->
+      {% for i in "123" %}
       <div class="form-group">
-        <label>Update Product Image 1</label>
-        <input type="hidden" name="product_image" id="productImageInput1" value="{{ product.product_image.id }}">
-        <button type="button" class="btn" onclick="openModal('productImageInput1','selectedPreview1')">Select Image</button>
+        <label>Update Product Image {{ i }}</label>
+        <input type="hidden" name="product_image{{ i }}" id="productImageInput{{ i }}"
+          value="{% if i == '1' and product.product_image %}{{ product.product_image.id }}{% elif i == '2' and product.product_image2 %}{{ product.product_image2.id }}{% elif i == '3' and product.product_image3 %}{{ product.product_image3.id }}{% endif %}">
+        <button type="button" class="btn" onclick="openModal('productImageInput{{ i }}','selectedPreview{{ i }}')">Select Image</button>
         <div class="selected-preview">
-          <img id="selectedPreview1" src="{% if product.product_image %}{{ product.product_image.image.url }}{% endif %}" {% if not product.product_image %}style="display:none;"{% endif %}>
+          <img id="selectedPreview{{ i }}"
+            src="{% if i == '1' and product.product_image %}{{ product.product_image.image.url }}{% elif i == '2' and product.product_image2 %}{{ product.product_image2.image.url }}{% elif i == '3' and product.product_image3 %}{{ product.product_image3.image.url }}{% endif %}"
+            {% if i == '1' and not product.product_image %}{% elif i == '2' and not product.product_image2 %}{% elif i == '3' and not product.product_image3 %}style="display:none;"{% endif %}>
         </div>
       </div>
-
-      <!-- Product Image 2 -->
-      <div class="form-group">
-        <label>Update Product Image 2</label>
-        <input type="hidden" name="product_image2" id="productImageInput2" value="{{ product.product_image2.id }}">
-        <button type="button" class="btn" onclick="openModal('productImageInput2','selectedPreview2')">Select Image</button>
-        <div class="selected-preview">
-          <img id="selectedPreview2" src="{% if product.product_image2 %}{{ product.product_image2.image.url }}{% endif %}" {% if not product.product_image2 %}style="display:none;"{% endif %}>
-        </div>
-      </div>
-
-      <!-- Product Image 3 -->
-      <div class="form-group">
-        <label>Update Product Image 3</label>
-        <input type="hidden" name="product_image3" id="productImageInput3" value="{{ product.product_image3.id }}">
-        <button type="button" class="btn" onclick="openModal('productImageInput3','selectedPreview3')">Select Image</button>
-        <div class="selected-preview">
-          <img id="selectedPreview3" src="{% if product.product_image3 %}{{ product.product_image3.image.url }}{% endif %}" {% if not product.product_image3 %}style="display:none;"{% endif %}>
-        </div>
-      </div>
+      {% endfor %}
 
       <div class="checkbox">
         <input type="checkbox" name="featured" {% if product.featured %}checked{% endif %}>
@@ -157,10 +259,8 @@
       let imgId = img.getAttribute("data-id");
       let imgSrc = img.getAttribute("src");
 
-      // update hidden input
       document.getElementById(currentInputId).value = imgId;
 
-      // update preview
       let preview = document.getElementById(currentPreviewId);
       preview.src = imgSrc;
       preview.style.display = "block";

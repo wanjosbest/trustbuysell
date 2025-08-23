@@ -1,0 +1,154 @@
+<!-- templates/seller_analytics.html -->
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Seller Analytics</title>
+<style>
+  :root{
+    --primary:#2563eb; --primary-600:#1d4ed8; --bg:#f8fafc; --card:#fff; --text:#0f172a; --muted:#64748b; --radius:14px;
+  }
+  *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+  header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #e5e7eb}
+  .h-wrap{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:36px;height:36px;border-radius:10px;background:var(--primary);box-shadow:inset 0 -8px 18px rgba(0,0,0,.18)}
+  h1{margin:0;font-size:1.1rem}
+  .cta{padding:9px 12px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;cursor:pointer}
+  .container{padding:16px;max-width:1100px;margin:auto}
+
+  .kpis{display:grid;gap:12px;grid-template-columns:1fr}
+  @media(min-width:640px){.kpis{grid-template-columns:repeat(3,1fr)}}
+  .kpi{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:0 6px 20px rgba(0,0,0,.06)}
+  .kpi .label{color:var(--muted);font-size:.9rem}
+  .kpi .value{font-weight:800;font-size:1.4rem;margin-top:6px}
+
+  .section{margin-top:18px}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:0 6px 20px rgba(0,0,0,.06);overflow:hidden}
+  .card h3{margin:0;padding:12px 14px;border-bottom:1px solid #eef2f7;font-size:1rem}
+  .list{display:grid}
+  .sale{display:flex;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid #f1f5f9}
+  .sale:last-child{border-bottom:none}
+  .meta{color:var(--muted);font-size:.9rem}
+
+  /* desktop table */
+  @media(min-width:900px){
+    .list{display:none}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:12px 14px;white-space:nowrap;border-bottom:1px solid #eef2f7}
+    th{background:#f1f5f9;text-transform:uppercase;font-size:.75rem;letter-spacing:.4px}
+  }
+  @media(max-width:899px){.table-wrap{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="h-wrap">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <h1>Seller Analytics</h1>
+        <div class="meta">Performance overview</div>
+      </div>
+    </div>
+    <button class="cta" onclick="location.reload()">Refresh</button>
+  </div>
+</header>
+
+<main class="container">
+  <!-- KPIs -->
+  <section class="kpis">
+    <div class="kpi">
+      <div class="label">Total Revenue</div>
+      <div class="value">₦{{ total_revenue|floatformat:2 }}</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Units Sold</div>
+      <div class="value">{{ total_units|default:0 }}</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Orders</div>
+      <div class="value">{{ total_orders|default:0 }}</div>
+    </div>
+  </section>
+
+  <!-- Recent sales (mobile list) -->
+  <section class="section card">
+    <h3>Recent Sales</h3>
+    <div class="list">
+      {% for it in items %}
+      <div class="sale">
+        <div>
+          <div><strong>{{ it.product.name }}</strong></div>
+          <div class="meta">{{ it.order.created_at|date:"M d, Y" }} • Qty {{ it.quantity }}</div>
+        </div>
+        <div><strong>₦{{ it.get_total|floatformat:2 }}</strong></div>
+      </div>
+      {% empty %}
+      <div class="sale"><div class="meta">No sales yet.</div></div>
+      {% endfor %}
+    </div>
+
+    <!-- Desktop table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Product</th><th>Qty</th><th>Unit (₦)</th><th>Total (₦)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for it in items %}
+          <tr>
+            <td>{{ it.order.created_at|date:"M d, Y" }}</td>
+            <td>{{ it.product.name }}</td>
+            <td>{{ it.quantity }}</td>
+            <td>₦{{ it.price|floatformat:2 }}</td>
+            <td>₦{{ it.get_total|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5">No sales yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Top products -->
+  <section class="section card" style="margin-top:14px">
+    <h3>Top Products</h3>
+    <div class="list">
+      {% for p in top_products %}
+      <div class="sale">
+        <div>
+          <div><strong>{{ p.product__name }}</strong></div>
+          <div class="meta">Units {{ p.units }}</div>
+        </div>
+        <div><strong>₦{{ p.revenue|floatformat:2 }}</strong></div>
+      </div>
+      {% empty %}
+      <div class="sale"><div class="meta">No products yet.</div></div>
+      {% endfor %}
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Product</th><th>Units</th><th>Revenue (₦)</th></tr></thead>
+        <tbody>
+          {% for p in top_products %}
+          <tr>
+            <td>{{ p.product__name }}</td>
+            <td>{{ p.units }}</td>
+            <td>₦{{ p.revenue|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3">No products yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</body>
+</html>

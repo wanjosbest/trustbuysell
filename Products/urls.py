@@ -21,4 +21,5 @@ urlpatterns = [
     path("products/", views.product_list, name="product_list"),
     path("categories/<int:category_id>/", views.category_products, name="category_products"),
     path("Seller-dashboard/", views.seller_dashboard, name="seller_dashboard"),
+    path("sell-analytics/",views.seller_analytics, name="sell-analytics"),
 ]

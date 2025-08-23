@@ -73,6 +73,7 @@
     <h2>✅ Payment Successful</h2>
     <p><strong>Reference:</strong> {{ payment.reference }}</p>
     <p><strong>Amount:</strong> ₦{{ payment.amount|floatformat:2 }}</p>
+    <h3>Receipts has been sent to your Email </h3>
     <a href="{% url 'index' %}">Continue Shopping</a>
   </div>
 
