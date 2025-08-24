@@ -1,240 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seller Dashboard</title>
-<style>
-:root {
-    --primary: #2563eb;
-    --primary-light: #3b82f6;
-    --bg: #f4f6f8;
-    --card: #fff;
-    --text-dark: #111827;
-    --muted: #6b7280;
-    --radius: 12px;
-    --shadow: 0 4px 20px rgba(0,0,0,0.05);
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seller Dashboard</title>
+  <style>
+    :root {
+        --primary: #2563eb;
+        --primary-light: #3b82f6;
+        --bg: #f4f6f8;
+        --card: #fff;
+        --text-dark: #111827;
+        --muted: #6b7280;
+        --radius: 12px;
+        --shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    * { box-sizing: border-box; margin:0; padding:0; font-family: 'Inter', sans-serif; }
 
-* { box-sizing: border-box; margin:0; padding:0; font-family: 'Inter', sans-serif; }
+    body { background: var(--bg); color: var(--text-dark); }
 
-body { background: var(--bg); color: var(--text-dark); }
+    /* Header */
+    header {
+        display: flex;
+        align-items: center;
+        background: var(--card);
+        padding: 12px 20px;
+        border-bottom: 1px solid #e5e7eb;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+    header h1 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--primary);
+    }
 
-/* Header */
-header {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    background: var(--card);
-    padding: 12px 20px;
-    border-bottom: 1px solid #e5e7eb;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
+    /* Sidebar */
+    .sidebar {
+        width: 220px;
+        background: var(--primary);
+        color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        padding: 20px;
+        transition: transform 0.3s ease;
+        overflow-y: auto;
+        z-index: 200;
+    }
+    .sidebar h2 { margin-bottom: 20px; font-size: 1.2rem; }
+    .sidebar .menu a {
+        display: block;
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        border-radius: var(--radius);
+        background: rgba(255,255,255,0.1);
+        text-decoration: none;
+        color: white;
+        transition: background 0.3s;
+    }
+    .sidebar .menu a:hover { background: var(--primary-light); }
 
-header h1 {
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: var(--primary);
-    margin-right: auto;
-}
-
-/* Sidebar */
-.sidebar {
-    width: 220px;
-    background: var(--primary);
-    color: white;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    padding: 20px;
-    transition: transform 0.3s ease;
-    overflow-y: auto;
-}
-
-.sidebar h2 {
-    margin-bottom: 20px;
-    font-size: 1.2rem;
-    font-weight: 600;
-}
-
-.sidebar .menu a {
-    display: flex;
-    align-items: center;
-    padding: 12px 15px;
-    margin-bottom: 10px;
-    border-radius: var(--radius);
-    background: rgba(255,255,255,0.1);
-    text-decoration: none;
-    color: white;
-    transition: background 0.3s;
-}
-
-.sidebar .menu a:hover {
-    background: var(--primary-light);
-}
-
-/* Analytics badges */
-.sidebar .menu a span {
-    margin-left: auto;
-    background: white;
-    color: var(--primary);
-    font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 8px;
-    font-size: 0.8rem;
-}
-
-/* Overlay for mobile */
-.overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 90;
-}
-
-.overlay.active { display: block; }
-
-/* Main Content */
-.content {
-    margin-left: 220px;
-    padding: 20px;
-    transition: margin-left 0.3s ease;
-}
-
-/* Product Grid */
-.products {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 15px;
-}
-
-.product-card {
-    background: var(--card);
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.2s;
-}
-
-.product-card:hover { transform: translateY(-5px); }
-
-.product-card img {
-    width: 100%;
-    height: 120px;
-    object-fit: cover;
-}
-
-.product-card .info {
-    padding: 10px;
-    flex: 1;
-}
-
-.product-card h4 {
-    font-size: 0.9rem;
-    margin-bottom: 6px;
-    color: var(--text-dark);
-}
-
-.product-card .price {
-    font-size: 0.85rem;
-    color: var(--primary);
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.product-card .actions {
-    display: flex;
-    gap: 6px;
-}
-
-.product-card .btn {
-    flex: 1;
-    padding: 6px;
-    font-size: 0.75rem;
-    border: none;
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.product-card .btn-primary { background: var(--primary); color: white; }
-.product-card .btn-primary:hover { background: var(--primary-light); }
-
-.product-card .btn-outline { background: #f3f4f6; color: var(--text-dark); }
-.product-card .btn-outline:hover { background: #e5e7eb; }
-
-/* Responsive */
-@media (max-width: 1600px) { .products { grid-template-columns: repeat(6, 1fr); } }
-@media (max-width: 1200px) { .products { grid-template-columns: repeat(4, 1fr); } }
-@media (max-width: 992px)  { .products { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 768px)  { .products { grid-template-columns: repeat(2, 1fr); } 
-    .sidebar { transform: translateX(-100%); width: 220px; }
-    .sidebar.active { transform: translateX(0); }
+    /* Overlay */
+    .overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 150;
+    }
     .overlay.active { display: block; }
-    .content { margin-left: 0; }
-}
-@media (max-width: 480px)  { .products { grid-template-columns: 1fr; } }
-</style>
+
+    /* Content */
+    .content {
+        margin-left: 220px;
+        padding: 20px;
+        transition: margin-left 0.3s ease;
+    }
+
+    /* Products grid */
+    .products {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+    }
+    .product-card {
+        background: var(--card);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: transform 0.2s;
+    }
+    .product-card:hover { transform: translateY(-5px); }
+    .product-card img {
+        width: 100%; height: 120px; object-fit: cover;
+    }
+    .product-card .info { padding: 10px; }
+    .product-card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+    .product-card .price { color: var(--primary); font-weight: 600; margin-bottom: 8px; }
+
+    .actions {
+        display: flex;
+        gap: 6px;
+    }
+    .btn {
+        flex: 1;
+        padding: 6px;
+        font-size: 0.75rem;
+        border: none;
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-light); }
+    .btn-outline { background: #f3f4f6; color: var(--text-dark); }
+    .btn-outline:hover { background: #e5e7eb; }
+
+    /* Menu button */
+    .menu-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--primary);
+        margin-right: 15px;
+        display: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .sidebar { transform: translateX(-100%); }
+        .sidebar.active { transform: translateX(0); }
+        .content { margin-left: 0; }
+        .menu-btn { display: block; }
+        .products { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 500px) {
+        .products { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="sidebar" id="sidebar">
-    <h2>Seller Menu</h2>
-    <div class="menu">
-        <a href="{% url 'index' %}">🏠 Home</a>
-        <a href="{% url 'seller_dashboard' %}">📊 Dashboard</a>
-        <a href="{% url 'product_lists' %}">📦 Products</a>
-        <a href="{% url 'addproductimage' %}">🖼 Upload Image</a>
-        <a href="{% url 'sell-analytics' %}">📈 Analytics <span>{{ analytics_count }}</span></a>
-        <a href="">⚙️ Account Settings</a>
-    </div>
-</div>
-<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+      <h2>Seller Menu</h2>
+      <div class="menu">
+          <a href="{% url 'index' %}">🏠 Home</a>
+          <a href="{% url 'seller_dashboard' %}">📊 Dashboard</a>
+          <a href="{% url 'product_lists' %}">📦 Products</a>
+          <a href="{% url 'addproductimage' %}">🖼 Upload Image</a>
+          <a href="{% url 'sell-analytics' %}">📈 Analytics <span>{{ analytics_count }}</span></a>
+          <a href="#">⚙️ Account Settings</a>
+      </div>
+  </div>
 
-<div class="content">
-    <header>
-        <button class="menu-btn" onclick="toggleMenu()">☰</button>
-        <h1>Seller Dashboard</h1>
-    </header>
+  <div class="overlay" id="overlay" onclick="closeMenu()"></div>
 
-    <h2>My Products</h2>
-    <div class="products">
-        {% for product in products %}
-        <div class="product-card">
-            <img src="{{ product.product_image.image.url }}" alt="{{ product.name }}">
-            <div class="info">
-                <h4>{{ product.name }}</h4>
-                <div class="price">₦{{ product.discountedprice }}</div>
-                <div class="actions">
-                    <a href="{% url 'product_detail' product.slug %}"><button class="btn btn-outline">View</button></a>
-                    <a href="{% url 'product_update' product.slug %}"><button class="btn btn-primary">Edit</button></a>
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <p>No products yet. <a href="{% url 'product_lists' %}">Add one</a></p>
-        {% endfor %}
-    </div>
-</div>
+  <!-- Main content -->
+  <div class="content">
+      <header>
+          <button class="menu-btn" onclick="toggleMenu()">☰</button>
+          <h1>Seller Dashboard</h1>
+      </header>
 
-<script>
-function toggleMenu() {
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("overlay");
-    sidebar.classList.toggle("active");
-    overlay.classList.toggle("active");
-}
-function closeMenu() {
-    document.getElementById("sidebar").classList.remove("active");
-    document.getElementById("overlay").classList.remove("active");
-}
-</script>
+      <h2>My Products</h2>
+      <div class="products">
+          {% for product in products %}
+          <div class="product-card">
+              <img src="{{ product.product_image.image.url }}" alt="{{ product.name }}">
+              <div class="info">
+                  <h4>{{ product.name }}</h4>
+                  <div class="price">₦{{ product.discountedprice }}</div>
+                  <div class="actions">
+                      <a href="{% url 'product_detail' product.slug %}">
+                          <button class="btn btn-outline">View</button>
+                      </a>
+                      <a href="{% url 'product_update' product.slug %}">
+                          <button class="btn btn-primary">Edit</button>
+                      </a>
+                  </div>
+              </div>
+          </div>
+          {% empty %}
+          <p>No products yet. <a href="{% url 'product_lists' %}">Add one</a></p>
+          {% endfor %}
+      </div>
+  </div>
 
+  <!-- JavaScript -->
+  <script>
+    function toggleMenu() {
+        document.getElementById("sidebar").classList.toggle("active");
+        document.getElementById("overlay").classList.toggle("active");
+    }
+    function closeMenu() {
+        document.getElementById("sidebar").classList.remove("active");
+        document.getElementById("overlay").classList.remove("active");
+    }
+    // Close sidebar when clicking a link (on mobile)
+    document.querySelectorAll(".sidebar .menu a").forEach(link => {
+        link.addEventListener("click", () => {
+            closeMenu();
+        });
+    });
+  </script>
 </body>
 </html>
