@@ -1,7 +1,6 @@
 from django.db import models
 from user.models import User
 
-
 #global class
 class category(models.Model):
     name = models.CharField(max_length=30, null = True)
