@@ -44,9 +44,11 @@ def register_view(request):
     return render(request, 'user/register.html')
 
 def login_view(request):
+    next_url = request.GET.get("next","")
     if request.method == "POST":
         username = request.POST.get('username')
         password = request.POST.get('password')
+        next_url = request.POST.get("next")
         if not User.objects.filter(username=username).exists():
             messages.error(request, 'Invalid username')
             return redirect('login')
@@ -57,13 +59,15 @@ def login_view(request):
             return redirect('login')
         else:
             login(request,user)
-            if user.is_seller == True:
+            if next_url:
+                return redirect(next_url)
+            elif user.is_seller == True:
                return redirect("seller_dashboard")
-            elif user.is_buyer == True:
-                return redirect("buyer_dashboard")
             else:
-                return redirect("")
-    return render(request, 'user/login.html')
+                return redirect("buyer_dashboard")
+    return render(request, 'user/login.html',{"next_url":next_url})
+
+
 
 # logout user
 @login_required(login_url='login')

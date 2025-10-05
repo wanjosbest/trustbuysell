@@ -178,7 +178,7 @@ def add_to_cart(request,product_id):
     return redirect("cart")
 
 
-@login_required
+@login_required(login_url="login")
 def view_cart(request):
     cart_items = Cart_Items.objects.filter(user=request.user)
     subtotal = sum(item.get_total() for item in cart_items)

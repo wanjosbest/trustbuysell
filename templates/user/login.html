@@ -84,7 +84,7 @@
     <h2>Login</h2>
     <form method="POST">
         {%csrf_token%}
-        <input type="hidden" name="next" value="{{ request.GET.next }}">
+        <input type="hidden" name="next" value="{{next_url}}">
         <label for="username">User Name</label>
         <input type="username" id="email" name="username" placeholder="Enter your username" required>
 
