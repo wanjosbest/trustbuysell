@@ -100,8 +100,8 @@
 <body>
     <div>
         {% for message in messages %}
-         {{message}}
-         {% endfor %}
+        {{message}}
+        {% endfor %}
     </div>
     <div class="register-container">
         <h2>Create Account</h2>
@@ -109,21 +109,22 @@
             {% csrf_token %}
             <label for="firstname">Full Name</label>
             <input type="text" id="firstname" name="firstname" placeholder="First name" required>
-             <label for="lastname">Full Name</label>
+            <label for="lastname">Full Name</label>
             <input type="text" id="lastname" name="lastname" placeholder="Last name" required>
-             <label for="lastname">UserName</label>
+            <label for="lastname">UserName</label>
             <input type="text" id="username" name="username" placeholder="User name" required>
             <label for="phonenumber">Phone Number</label>
             <input type="number" id="username" name="phone_number" placeholder="Phone Number" required>
-            
+
             <label for="email">Email Address</label>
             <input type="email" id="email" name="email" placeholder="Enter your email" required>
-            <label>User Type</label>
+            <label>User </label>
             <div class="user-type">
-                <label><input type="radio" name="seller" value="True"> Seller Account</label>
-                
+                <label><input type="radio" name="user_type" value="seller" required> Seller</label>
             </div>
-
+            <div class="user-type">
+                <label><input type="radio" name="user_type" value="buyer" required> Buyer</label>
+            </div>
             <label for="password">Password</label>
             <input type="password" id="password" name="password" placeholder="Enter password" required>
 

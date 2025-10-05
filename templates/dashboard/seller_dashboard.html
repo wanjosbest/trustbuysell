@@ -191,7 +191,7 @@
 
   <header>
     <div class="wrap nav" role="navigation" aria-label="Main">
-      <div class="brand"><a href="{% url 'index' %}"><span class="logo">TB</span> TrustBuySell</a></div>
+      <div class="brand"><a href="{% url 'index' %}"><span class="logo">D</span> {% if user.is_authenticated%} {{user.username}} Seller Dashboard {% endif %}</a></div>
       <button class="hamb" id="hambA" aria-expanded="false" aria-controls="navA" onclick="openSidebar()">☰</button>
       <form class="searchbar" action="{% url 'search' %}" method="get" style="flex:1;min-width:220px">
         <input name="q" placeholder="Search products, categories, sellers…" value="{{ request.GET.q }}">
@@ -215,7 +215,7 @@
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
       <span class="close-btn" onclick="closeSidebar()">×</span>
-      <h2>TrustBuySell</h2>
+      <h2>Menu</h2>
       <a href="{% url 'seller_dashboard' %}">Dashboard</a>
       <a href="#">Products</a>
       <a href="#">Orders</a>
