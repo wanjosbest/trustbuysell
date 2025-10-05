@@ -1,34 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Cart</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
-    .container { max-width: 600px; margin: auto; padding: 15px; }
-    h2 { text-align: center; font-size: 1.4rem; margin-bottom: 15px; }
-    .cart-item { display: flex; align-items: center; background: white; border-radius: 12px; padding: 12px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-    .cart-item img { width: 70px; height: 70px; object-fit: cover; border-radius: 10px; margin-right: 12px; }
-    .item-info { flex: 1; }
-    .item-info h4 { margin: 0; font-size: 1rem; color: #333; }
-    .item-info p { margin: 5px 0; font-size: 0.9rem; color: #666; }
-    .item-actions { text-align: right; }
-    .quantity { display: flex; align-items: center; margin-bottom: 6px; }
-    .quantity form { display: inline; margin: 0 3px; }
-    .quantity button { background: #4CAF50; border: none; color: white; padding: 4px 8px; font-size: 16px; border-radius: 6px; cursor: pointer; }
-    .remove-btn { background: #e3342f; color: white; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
-    .cart-summary { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-top: 20px; }
-    .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1rem; }
-    .checkout-btn { width: 100%; padding: 12px; font-size: 1rem; border: none; border-radius: 10px; background: #2563eb; color: white; cursor: pointer; }
-    .checkout-btn:hover { background: #1e4fc5; }
-  </style>
-</head>
-<body>
+{% extends "base.html" %}
+{% load static %}
+ 
+{% block header %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Cart{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'css/cart.css' %}">
+{% include "header.html"%}
+
+{% endblock %}
+{% block content %}
 
 {% if cart_items %}
 <div class="container">
-  <h2>🛒 My Cart</h2>
+  <h2 class="cart_title">🛒 My Cart</h2>
 
   {% for item in cart_items %}
   <div class="cart-item">
@@ -84,9 +69,8 @@
   </a>
 </div>
 {% else %}
-<h2>Cart is Empty</h2>
-<h3><a href="{% url 'index' %}">Shop Products</a></h3>
+<h2 class="cart_title">Cart is Empty</h2>
+<h3 class="cart_title"><a href="{% url 'index' %}">Shop Products</a></h3>
 {% endif %}
 
-</body>
-</html>
+{% endblock %}

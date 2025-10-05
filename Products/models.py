@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from user.models import User
 

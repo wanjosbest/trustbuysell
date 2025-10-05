@@ -34,7 +34,7 @@ def upload_image(request):
                 user=request.user,
                 image=image_file
             )
-            return redirect("addproductimage")  # reload same page or redirect elsewhere
+            return redirect("addproductimage") 
     images = Product_image.objects.filter(user=request.user)
     return render(request, "upload_image.html", {"images": images})
 
@@ -475,11 +475,14 @@ def seller_dashboard(request):
     products = Products.objects.filter(user=request.user)
     total_products = products.count()
     sold_out = products.filter(stock=0).count()
+    pending_orders = Order.objects.all().filter(status = "pending").count()
+   
 
     context = {
         "products": products,
         "total_products": total_products,
         "sold_out": sold_out,
+        "pending_orders":pending_orders,
     }
     return render(request, "dashboard/seller_dashboard.html", context)
 

@@ -1,94 +1,19 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Search Results — TrustBuySell</title>
-  <style>
-    :root{
-      --primary:#1e293b; /* slate-800 */
-      --accent:#f97316;  /* orange-500 */
-      --fg:#0f172a;      /* slate-900 */
-      --muted:#64748b;   /* slate-500 */
-      --bg:#f6f7fb;      /* subtle gray */
-      --card:#ffffff;
-      --ring:rgba(2,6,23,.08);
-      --radius:14px;
-      --gap:14px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--fg);
-      background:var(--bg);
-      -webkit-font-smoothing:antialiased;
-    }
-    a{text-decoration:none;color:inherit}
-    img{max-width:100%;display:block}
+{% extends "base.html" %}
+{% load static %}
+  {% block header %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Search Result Page {% endblock %}</title>
+    {% include "header.html"%}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/search_rp.css' %}">
+    {% endblock %}
 
-    header{
-      position:sticky;top:0;z-index:100;
-      background:linear-gradient(90deg,#0b3a74,#0a2d59);
-      color:#fff;
-      padding:12px;
-    }
-    .wrap{max-width:1200px;margin:0 auto;display:flex;gap:10px;align-items:center}
-    .brand{font-weight:900;letter-spacing:.2px}
-    .brand a{display:flex;align-items:center;gap:8px;color:#fff}
-    .brand .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(180deg,#60a5fa,#2563eb);display:grid;place-items:center;font-weight:900;color:#fff}
-    .searchbar{flex:1;display:flex;gap:6px;background:#fff;border-radius:999px;padding:6px 8px;box-shadow:0 6px 16px var(--ring)}
-    .searchbar input{border:0;flex:1;outline:none;padding:8px;font-size:.95rem}
-    .searchbar button{border:0;background:var(--accent);color:#fff;border-radius:999px;padding:8px 14px;font-weight:700;cursor:pointer}
+{% block content %}
+  <main>
+    <h2>Search Results for “{{ query }}”</h2>
 
-    main{max-width:1200px;margin:16px auto;padding:0 12px}
-    h2{margin-bottom:10px;color:#0f2a54;font-size:clamp(1.1rem,2.6vw,1.6rem)}
-
-    /* Grid for results */
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(2,1fr); /* always 2 on mobile */
-      gap:12px;
-    }
-    @media(min-width:800px){.grid{grid-template-columns:repeat(3,1fr)}}
-    @media(min-width:1100px){.grid{grid-template-columns:repeat(4,1fr)}}
-
-    .card{
-      background:var(--card);
-      border-radius:12px;
-      box-shadow:0 8px 20px var(--ring);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-    }
-    .media{height:150px;background:#eef2ff;display:grid;place-items:center;overflow:hidden}
-    .media img{width:100%;height:100%;object-fit:cover}
-    .body{padding:10px;display:flex;flex-direction:column;gap:6px;flex:1}
-    .p-title{font-weight:700;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-    .price{color:#10387b;font-weight:900}
-    .muted{color:var(--muted);font-size:.9rem}
-    .actions{margin-top:auto;display:flex;gap:6px;flex-wrap:wrap}
-    .btn{padding:8px 12px;border-radius:10px;font-weight:700;cursor:pointer;text-align:center;flex:1}
-    .btn-accent{background:var(--accent);color:#fff}
-    .btn-outline{border:1px solid rgba(2,6,23,.15);background:transparent}
-  </style>
-</head>
-<body>
-
-<header>
-  <div class="wrap">
-    <div class="brand"><a href="{% url 'index' %}"><span class="logo">TB</span> TrustBuySell</a></div>
-    <form method="get" action="{% url 'search' %}" class="searchbar">
-      <input type="text" name="q" placeholder="Search products, categories…" value="{{ query|default:'' }}">
-      <button type="submit">Search</button>
-    </form>
-  </div>
-</header>
-
-<main>
-  <h2>Search Results for “{{ query }}”</h2>
-
-  {% if products %}
+    {% if products %}
     <div class="grid">
       {% for product in products %}
       <article class="card">
@@ -107,10 +32,10 @@
       </article>
       {% endfor %}
     </div>
-  {% else %}
+    {% else %}
     <p class="muted">No products found matching your search.</p>
-  {% endif %}
-</main>
+    {% endif %}
+  </main>
+  
 
-</body>
-</html>
+{% endblock %}

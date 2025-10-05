@@ -70,3 +70,7 @@ def index(request):
     context = {"categories":categories,"FeaturedProduct":FeaturedProduct,"hero":hero}
     return render(request,"index.html", context)
 
+# def header(request):
+#     categories = category.objects.all()
+#     context = {"categories":categories }
+#     return render(request,"footer.html", context)

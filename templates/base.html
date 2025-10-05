@@ -1,29 +1,44 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
+    {% block header %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}TrustBuySell{% endblock %}</title>
-    
-    <!-- External CSS -->
-    <link rel="stylesheet" href="{% static 'Products/css/style.css' %}">
-
+    {% include "header.html"%}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% endblock %}
 </head>
+
 <body>
 
-    <!-- Navbar or Sidebar -->
+
+    <!-- Optional Sidebar -->
     {% block sidebar %}
-    <!-- Default sidebar can go here if needed -->
     {% endblock %}
 
-    <!-- Page Content -->
+    <!-- Main Content -->
     <main class="content">
         {% block content %}
+
         {% endblock %}
     </main>
 
-    <!-- JS Scripts -->
-    <script src="{% static 'Products/js/main.js' %}"></script>
+    <!-- Footer -->
+
+    <footer>
+        {% block footer %}
+
+        {% include "footer.html"%}
+
+        {% endblock %}
+
+    </footer>
+
+
 </body>
+
 </html>
