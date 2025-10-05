@@ -486,6 +486,11 @@ def seller_dashboard(request):
     }
     return render(request, "dashboard/seller_dashboard.html", context)
 
+@login_required(login_url="login")
+def buyer_dashboard(request):
+   
+    return render(request, "dashboard/buyer_dashboard.html")
+
 @login_required
 def hero_image_update(request):
     hero = HeroImage.objects.filter(is_active=True).first()

@@ -1,0 +1,353 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buyer Dashboard</title>
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --secondary: #34495e;
+      --accent: #3498db;
+      --light: #ecf0f1;
+      --success: #2ecc71;
+      --danger: #e74c3c;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--primary);
+      color: white;
+      transition: transform 0.3s ease;
+      padding-top: 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 12px 20px;
+      text-decoration: none;
+      color: white;
+    }
+
+    .sidebar a:hover {
+      background: var(--secondary);
+    }
+
+    .close-btn {
+      display: none;
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    /* Top nav */
+    .topnav {
+      height: 60px;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+    }
+
+    .hamburger {
+      display: none;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    /* Main */
+    .main {
+      flex-grow: 1;
+      margin-left: 260px;
+      padding: 80px 20px 20px;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Cards */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background: var(--secondary);
+      color: white;
+    }
+
+    /* Quick actions */
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .btn-track {
+      background: var(--accent);
+    }
+
+    .btn-wishlist {
+      background: var(--success);
+    }
+
+    .btn-remove {
+      background: var(--danger);
+    }
+
+    /* Responsive */
+    @media(max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        z-index: 999;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .hamburger {
+        display: block;
+      }
+
+      .close-btn {
+        display: block;
+      }
+
+      .main {
+        margin-left: 0;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="{% static 'css/seller_dashboard.css'%}">
+</head>
+
+<body>
+
+  <header>
+    <div class="wrap nav" role="navigation" aria-label="Main">
+      <div class="brand"><a href="{% url 'index' %}"><span class="logo">D</span> {% if user.is_authenticated%} {{user.username}} Buyer Dashboard {% endif %}</a></div>
+      <button class="hamb" id="hambA" aria-expanded="false" aria-controls="navA" onclick="openSidebar()">☰</button>
+      <form class="searchbar" action="{% url 'search' %}" method="get" style="flex:1;min-width:220px">
+        <input name="q" placeholder="Search products, categories, sellers…" value="{{ request.GET.q }}">
+        <button type="submit">Search</button>
+      </form>
+      <nav id="navA" class="links" aria-label="Primary">
+        <a href="#featuredA">Featured</a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'buyer_dashboard' %}">🏛 Dashboard</a>
+        <a href="{% url 'cart' %}">🛒 Cart</a>
+        <a href="{% url 'logout' %}">Log Out</a>
+        {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'register' %}">Register</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <span class="close-btn" onclick="closeSidebar()">×</span>
+      <h2>Menu</h2>
+      <a href="{% url 'buyer_dashboard' %}">Dashboard</a>
+      <a href="{% url 'cart' %}">My Cart</a>
+      <a href="#">Orders</a>
+      <a href="#">Wallet</a>
+      <a href="#">Messages</a>
+      <a href="#">Wishlist</a>
+      <a href="#">Settings</a>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <!-- Top Stats -->
+      <div class="cards">
+        <div class="card">
+          <h3>My Orders</h3>
+          <p>{{ orders_count }}</p>
+        </div>
+        <div class="card">
+          <h3>Pending Deliveries</h3>
+          <p>{{ pending_deliveries }}</p>
+        </div>
+        <div class="card">
+          <h3>Wallet</h3>
+          <p>₦{{ wallet_balance }}</p>
+        </div>
+        <div class="card">
+          <h3>Messages</h3>
+          <p>{{ message_count }}</p>
+        </div>
+      </div>
+
+      <!-- Alerts -->
+      {% if pending_deliveries > 0 %}
+      <div class="card" style="background:#fff8e1;">
+        ⚠️ You have {{ pending_deliveries }} pending deliveries!
+      </div>
+      {% endif %}
+
+      <!-- Orders -->
+      <div class="card">
+        <h3>Recent Orders</h3>
+        <table>
+          <tr>
+            <th>Product</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+          {% for order in recent_orders %}
+          <tr>
+            <td>{{ order.product.name }}</td>
+            <td>{{ order.status }}</td>
+            <td><button class="btn btn-track">Track</button></td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3">No recent orders.</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      <!-- Wallet Transactions -->
+      <div class="card">
+        <h3>Wallet Transactions</h3>
+        <table>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Amount</th>
+          </tr>
+          {% for tx in wallet_transactions %}
+          <tr>
+            <td>{{ tx.date }}</td>
+            <td>{{ tx.type }}</td>
+            <td>₦{{ tx.amount }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3">No wallet transactions.</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      <!-- Wishlist -->
+      <div class="card">
+        <h3>My Wishlist</h3>
+        <table>
+          <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Action</th>
+          </tr>
+          {% for item in wishlist_items %}
+          <tr>
+            <td>{{ item.product.name }}</td>
+            <td>₦{{ item.product.price }}</td>
+            <td>
+              <button class="btn btn-wishlist">Add to Cart</button>
+              <button class="btn btn-remove">Remove</button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3">Your wishlist is empty.</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      <!-- Messages -->
+      <div class="card">
+        <h3>Recent Messages</h3>
+        <ul>
+          {% for msg in recent_messages %}
+          <li><strong>{{ msg.sender }}</strong>: {{ msg.content|truncatechars:50 }}</li>
+          {% empty %}
+          <li>No messages yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openSidebar() {
+      document.getElementById('sidebar').classList.add('active');
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('active');
+    }
+  </script>
+
+</body>
+</html>
