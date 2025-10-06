@@ -258,14 +258,17 @@ def initiate_payment(request):
 
 @login_required
 def verify_payment(request):
-    reference = request.GET.get("reference")
+    # Paystack sometimes returns `trxref`, sometimes `reference`
+    reference = request.GET.get("reference") or request.GET.get("trxref")
+
     if not reference:
         return render(request, "payment_failed.html", {"error": "Missing payment reference."})
 
-    payment = get_object_or_404(Payment, reference=reference, user=request.user)
+    # Try to find payment by reference only (not by user)
+    payment = get_object_or_404(Payment, reference=reference)
 
-    # If already verified, show success page
-    if getattr(payment, "verified", False):
+    # Already verified?
+    if payment.verified:
         return render(request, "payment_success.html", {"payment": payment})
 
     # Verify with Paystack
@@ -278,66 +281,56 @@ def verify_payment(request):
     except Exception as e:
         return render(request, "payment_failed.html", {"error": f"Network error: {e}"})
 
-    # Check if payment successful
-    if not (result.get("status") and result["data"].get("status") == "success"):
-        return render(request, "payment_failed.html", {"error": "Payment verification failed."})
+    # Check verification success
+    if not result.get("status") or result["data"].get("status") != "success":
+        return render(request, "payment_failed.html", {"error": "Payment not successful."})
 
+    # Extract Paystack data
     data = result["data"]
     amount = Decimal(data["amount"]) / 100
-    paid_at = parse_datetime(data.get("paid_at", "")) or None
+    paid_at = parse_datetime(data.get("paid_at", ""))
 
     with transaction.atomic():
-        # ✅ Update Payment
+        # ✅ Update payment info
         payment.verified = True
         payment.amount = amount
         payment.channel = data.get("channel", "")
         payment.paid_at = paid_at
         payment.save()
 
-        # ✅ Get cart items
-        cart_items = list(
-            Cart_Items.objects.select_related("product", "product__user")
-            .filter(user=request.user, purchased=False)
-        )
-
-        # If no cart items, just show success
-        if not cart_items:
+        # ✅ Get unpaid cart items
+        cart_items = Cart_Items.objects.filter(user=payment.user, purchased=False)
+        if not cart_items.exists():
             return render(request, "payment_success.html", {"payment": payment})
-
-        # ✅ Calculate total
-        total = sum(
-            Decimal(getattr(item.product, "discountedprice", item.product.actualprice or 0)) * item.quantity
-            for item in cart_items
-        )
 
         # ✅ Create order
         order = Order.objects.create(
-            user=request.user,
-            total_amount=total,
-            status="completed",
+            user=payment.user,
+            total_amount=amount,
+            status="completed"
         )
 
-        # ✅ Create order items & update stock
+        # ✅ Create each order item
         for item in cart_items:
-            price = Decimal(getattr(item.product, "discountedprice", item.product.actualprice or 0))
+            price = getattr(item.product, "discountedprice", item.product.actualprice)
             OrderItem.objects.create(
                 order=order,
                 product=item.product,
                 seller=item.product.user,
                 quantity=item.quantity,
-                price=price,
+                price=price
             )
 
             # Reduce stock
             if hasattr(item.product, "stock"):
-                item.product.stock = max(0, (item.product.stock or 0) - item.quantity)
+                item.product.stock = max(0, item.product.stock - item.quantity)
                 item.product.save(update_fields=["stock"])
 
             item.purchased = True
             item.save(update_fields=["purchased"])
 
-    # ✅ Clear purchased items from cart
-    Cart_Items.objects.filter(user=request.user, purchased=True).delete()
+        # ✅ Clear cart
+        cart_items.delete()
 
     return render(request, "payment_success.html", {"payment": payment, "order": order})
 
