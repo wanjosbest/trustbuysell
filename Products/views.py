@@ -21,6 +21,8 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.db.models import Sum, Count, Q, F
 from decimal import Decimal
+from django.db import transaction
+from django.utils.dateparse import parse_datetime
 
 
 #users to add products images
@@ -252,35 +254,7 @@ def initiate_payment(request):
     else:
         return render(request, "payment_failed.html", {"error": res_data.get("message", "Payment init failed.")})
 
-import io
-import requests
-from decimal import Decimal, InvalidOperation
-from django.conf import settings
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.core.mail import EmailMessage
-from django.db import transaction
-from django.utils.dateparse import parse_datetime
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
-from reportlab.platypus import Table, TableStyle
-from reportlab.lib import colors
 
-from .models import Payment, Cart_Items, Order, OrderItem  # adjust import path to your app
-# Note: if your models live in other apps, import accordingly
-
-from decimal import Decimal
-from django.shortcuts import render, get_object_or_404
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from django.db import transaction
-from django.core.mail import EmailMessage
-from django.utils.dateparse import parse_datetime
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-import requests, io
-
-from .models import Payment, Cart_Items, Order, OrderItem
 
 @login_required
 def verify_payment(request):
@@ -321,8 +295,12 @@ def verify_payment(request):
         payment.save()
 
         # ✅ Get cart items
-        cart_items = list(Cart_Items.objects.select_related("product", "product__user")
-                          .filter(user=request.user, purchased=False))
+        cart_items = list(
+            Cart_Items.objects.select_related("product", "product__user")
+            .filter(user=request.user, purchased=False)
+        )
+
+        # If no cart items, just show success
         if not cart_items:
             return render(request, "payment_success.html", {"payment": payment})
 
@@ -333,9 +311,13 @@ def verify_payment(request):
         )
 
         # ✅ Create order
-        order = Order.objects.create(user=request.user, total_amount=total, status="completed")
+        order = Order.objects.create(
+            user=request.user,
+            total_amount=total,
+            status="completed",
+        )
 
-        # ✅ Create order items & reduce stock
+        # ✅ Create order items & update stock
         for item in cart_items:
             price = Decimal(getattr(item.product, "discountedprice", item.product.actualprice or 0))
             OrderItem.objects.create(
@@ -345,52 +327,14 @@ def verify_payment(request):
                 quantity=item.quantity,
                 price=price,
             )
-            # Reduce stock safely
+
+            # Reduce stock
             if hasattr(item.product, "stock"):
                 item.product.stock = max(0, (item.product.stock or 0) - item.quantity)
                 item.product.save(update_fields=["stock"])
+
             item.purchased = True
             item.save(update_fields=["purchased"])
-
-    # ✅ Generate receipt PDF (optional)
-    try:
-        buffer = io.BytesIO()
-        p = canvas.Canvas(buffer, pagesize=A4)
-        width, height = A4
-
-        p.setFont("Helvetica-Bold", 18)
-        p.drawCentredString(width / 2, height - 50, "TrustBuySell Receipt")
-
-        p.setFont("Helvetica", 12)
-        p.drawString(50, height - 100, f"Customer: {request.user.username}")
-        p.drawString(50, height - 120, f"Reference: {payment.reference}")
-        p.drawString(50, height - 140, f"Amount Paid: ₦{amount:,.2f}")
-        p.drawString(50, height - 160, f"Channel: {payment.channel}")
-        p.drawString(50, height - 180, f"Date: {paid_at}")
-
-        y = height - 220
-        for item in cart_items:
-            p.drawString(50, y, f"{item.product.name} x{item.quantity} - ₦{item.product.actualprice}")
-            y -= 20
-
-        p.drawString(50, y - 20, f"Total: ₦{total:,.2f}")
-        p.showPage()
-        p.save()
-        buffer.seek(0)
-
-        # Email the receipt
-        if request.user.email:
-            email = EmailMessage(
-                "TrustBuySell Receipt",
-                f"Hi {request.user.username},\n\nThank you for your purchase. Your receipt is attached.",
-                settings.DEFAULT_FROM_EMAIL,
-                [request.user.email],
-            )
-            email.attach(f"receipt_{payment.reference}.pdf", buffer.getvalue(), "application/pdf")
-            email.send(fail_silently=True)
-
-    except Exception:
-        pass  # Don’t break if PDF fails
 
     # ✅ Clear purchased items from cart
     Cart_Items.objects.filter(user=request.user, purchased=True).delete()
@@ -487,8 +431,8 @@ def seller_dashboard(request):
     total_products = products.count()
     sold_out = products.filter(stock=0).count()
     pending_orders = Order.objects.all().filter(status = "pending").count()
-    order_count = Order.objects.all().count()
-    recent_order = OrderItem.objects.all().order_by("-created_at")[:3]
+    order_count = Order.objects.filter(user = request.user).count()
+    recent_order = OrderItem.objects.filter(seller = request.user).order_by("-created_at")[:3]
 
     context = {
         "products": products,

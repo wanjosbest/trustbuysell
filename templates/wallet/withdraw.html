@@ -1,0 +1,16 @@
+<h2>Withdraw to Bank</h2>
+
+{% if bank_account %}
+  <p>Bank: {{ bank_account.account_name }} ({{ bank_account.account_number }})</p>
+  <p>Status: {{ bank_account.verified|yesno:"Verified,Unverified" }}</p>
+
+  <form method="POST">
+    {% csrf_token %}
+    <label>Amount (₦):</label>
+    <input type="number" name="amount" step="0.01" required>
+    <button type="submit">Withdraw Now</button>
+  </form>
+{% else %}
+  <p>No bank account linked yet.</p>
+  <a href="#">Add Bank Account</a>
+{% endif %}

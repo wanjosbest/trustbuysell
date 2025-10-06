@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Wallet</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background: #f8f8f8; }
+    .wallet-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    h2 { color: #333; }
+    .balance { font-size: 22px; font-weight: bold; color: #27ae60; }
+    a.button { background: #27ae60; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; }
+    a.button:hover { background: #219150; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    table th, table td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+  </style>
+</head>
+<body>
+
+<div class="wallet-box">
+  <h2>Welcome, {{ request.user.username }}</h2>
+  <p>Your current balance:</p>
+  <p class="balance">₦{{ wallet.balance }}</p>
+
+  <a href="{% url 'fund_wallet' %}" class="button">Fund Wallet</a>
+
+  <h3>Transaction History</h3>
+  <table>
+    <tr>
+      <th>Type</th>
+      <th>Amount (₦)</th>
+      <th>Description</th>
+      <th>Date</th>
+    </tr>
+    {% for tx in transactions %}
+    <tr>
+      <td>{{ tx.transaction_type|title }}</td>
+      <td>{{ tx.amount }}</td>
+      <td>{{ tx.description }}</td>
+      <td>{{ tx.created_at|date:"M d, Y - H:i" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">No transactions yet.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+</body>
+</html>

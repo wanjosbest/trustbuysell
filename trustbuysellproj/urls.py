@@ -22,9 +22,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("user.urls")),
     path("", include("Products.urls")),
-     path("", include("chat.urls")),
-   
-    
+    path("", include("chat.urls")),
+    path("", include("wallet.urls")), 
     
 ]
 admin.site.site_header = "TrustBuySell"
