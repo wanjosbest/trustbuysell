@@ -269,202 +269,134 @@ from reportlab.lib import colors
 from .models import Payment, Cart_Items, Order, OrderItem  # adjust import path to your app
 # Note: if your models live in other apps, import accordingly
 
+from decimal import Decimal
+from django.shortcuts import render, get_object_or_404
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.core.mail import EmailMessage
+from django.utils.dateparse import parse_datetime
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+import requests, io
+
+from .models import Payment, Cart_Items, Order, OrderItem
+
 @login_required
 def verify_payment(request):
     reference = request.GET.get("reference")
     if not reference:
-        return render(request, "payment_failed.html", {"error": "No payment reference provided."})
+        return render(request, "payment_failed.html", {"error": "Missing payment reference."})
 
-    # Find payment for this user
     payment = get_object_or_404(Payment, reference=reference, user=request.user)
 
-    # Prevent double-processing
+    # If already verified, show success page
     if getattr(payment, "verified", False):
-        # Optionally fetch order related to this payment if you store it
-        # return existing success page
         return render(request, "payment_success.html", {"payment": payment})
 
     # Verify with Paystack
-    headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
     url = f"https://api.paystack.co/transaction/verify/{reference}"
+    headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
 
     try:
         response = requests.get(url, headers=headers, timeout=10)
-        res_data = response.json()
+        result = response.json()
     except Exception as e:
-        return render(request, "payment_failed.html", {"error": f"Connection error: {str(e)}"})
+        return render(request, "payment_failed.html", {"error": f"Network error: {e}"})
 
-    # Check Paystack response
-    if res_data.get("status") and res_data.get("data", {}).get("status") == "success":
-        data = res_data["data"]
+    # Check if payment successful
+    if not (result.get("status") and result["data"].get("status") == "success"):
+        return render(request, "payment_failed.html", {"error": "Payment verification failed."})
 
-        # Parse paid_at (if present)
-        paid_at_raw = data.get("paid_at")
-        paid_at_dt = None
-        if paid_at_raw:
-            try:
-                paid_at_dt = parse_datetime(paid_at_raw)
-            except Exception:
-                paid_at_dt = None
+    data = result["data"]
+    amount = Decimal(data["amount"]) / 100
+    paid_at = parse_datetime(data.get("paid_at", "")) or None
 
-        # Convert amount (Paystack returns amount in kobo)
-        try:
-            amount_naira = (Decimal(data.get("amount")) / Decimal("100")) if data.get("amount") is not None else Decimal("0.00")
-        except (InvalidOperation, TypeError):
-            amount_naira = Decimal("0.00")
+    with transaction.atomic():
+        # ✅ Update Payment
+        payment.verified = True
+        payment.amount = amount
+        payment.channel = data.get("channel", "")
+        payment.paid_at = paid_at
+        payment.save()
 
-        # Start DB transaction to avoid partial writes
-        with transaction.atomic():
-            # Update payment record
-            payment.verified = True
-            payment.amount = amount_naira
-            payment.channel = data.get("channel") or ""
-            if paid_at_dt:
-                payment.paid_at = paid_at_dt
-            payment.save(update_fields=["verified", "amount", "channel", "paid_at"])
+        # ✅ Get cart items
+        cart_items = list(Cart_Items.objects.select_related("product", "product__user")
+                          .filter(user=request.user, purchased=False))
+        if not cart_items:
+            return render(request, "payment_success.html", {"payment": payment})
 
-            # Fetch cart items BEFORE clearing (only un-purchased items)
-            cart_items_qs = Cart_Items.objects.select_related("product", "product__user") \
-                                .filter(user=request.user, purchased=False)
-            cart_items = list(cart_items_qs)
+        # ✅ Calculate total
+        total = sum(
+            Decimal(getattr(item.product, "discountedprice", item.product.actualprice or 0)) * item.quantity
+            for item in cart_items
+        )
 
-            # If cart empty, still show success
-            if not cart_items:
-                return render(request, "payment_success.html", {"payment": payment})
+        # ✅ Create order
+        order = Order.objects.create(user=request.user, total_amount=total, status="completed")
 
-            # Calculate total_amount safely (use Decimal)
-            total_amount = Decimal("0.00")
-            for item in cart_items:
-                # Ensure unit price is Decimal
-                unit_raw = getattr(item.product, "discountedprice", None) or getattr(item.product, "actualprice", None) or Decimal("0.00")
-                try:
-                    unit_price = Decimal(unit_raw)
-                except (InvalidOperation, TypeError):
-                    unit_price = Decimal("0.00")
-                line_total = unit_price * (item.quantity or 0)
-                total_amount += line_total
-
-            # Create order
-            order = Order.objects.create(
-                user=request.user,
-                total_amount=total_amount,
-                status="completed"  # adjust status as you prefer
+        # ✅ Create order items & reduce stock
+        for item in cart_items:
+            price = Decimal(getattr(item.product, "discountedprice", item.product.actualprice or 0))
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                seller=item.product.user,
+                quantity=item.quantity,
+                price=price,
             )
+            # Reduce stock safely
+            if hasattr(item.product, "stock"):
+                item.product.stock = max(0, (item.product.stock or 0) - item.quantity)
+                item.product.save(update_fields=["stock"])
+            item.purchased = True
+            item.save(update_fields=["purchased"])
 
-            # Convert cart items into order items and update stock
-            for item in cart_items:
-                unit_raw = getattr(item.product, "discountedprice", None) or getattr(item.product, "actualprice", None) or Decimal("0.00")
-                try:
-                    unit_price = Decimal(unit_raw)
-                except (InvalidOperation, TypeError):
-                    unit_price = Decimal("0.00")
+    # ✅ Generate receipt PDF (optional)
+    try:
+        buffer = io.BytesIO()
+        p = canvas.Canvas(buffer, pagesize=A4)
+        width, height = A4
 
-                OrderItem.objects.create(
-                    order=order,
-                    product=item.product,
-                    seller=getattr(item.product, "user", None),
-                    quantity=item.quantity,
-                    price=unit_price,
-                )
+        p.setFont("Helvetica-Bold", 18)
+        p.drawCentredString(width / 2, height - 50, "TrustBuySell Receipt")
 
-                # Reduce stock if applicable
-                prod = item.product
-                if getattr(prod, "stock", None) is not None:
-                    try:
-                        current = int(prod.stock or 0)
-                        new_stock = max(0, current - int(item.quantity or 0))
-                        if new_stock != current:
-                            prod.stock = new_stock
-                            prod.save(update_fields=["stock"])
-                    except Exception:
-                        # If stock field isn't integer-like, skip silently (or log)
-                        pass
+        p.setFont("Helvetica", 12)
+        p.drawString(50, height - 100, f"Customer: {request.user.username}")
+        p.drawString(50, height - 120, f"Reference: {payment.reference}")
+        p.drawString(50, height - 140, f"Amount Paid: ₦{amount:,.2f}")
+        p.drawString(50, height - 160, f"Channel: {payment.channel}")
+        p.drawString(50, height - 180, f"Date: {paid_at}")
 
-                # Mark cart item purchased so it won't be picked again
-                item.purchased = True
-                item.save(update_fields=["purchased"])
+        y = height - 220
+        for item in cart_items:
+            p.drawString(50, y, f"{item.product.name} x{item.quantity} - ₦{item.product.actualprice}")
+            y -= 20
 
-        # ---------- Generate PDF receipt ----------
-        try:
-            buffer = io.BytesIO()
-            p = canvas.Canvas(buffer, pagesize=A4)
-            width, height = A4
+        p.drawString(50, y - 20, f"Total: ₦{total:,.2f}")
+        p.showPage()
+        p.save()
+        buffer.seek(0)
 
-            # Header
-            p.setFont("Helvetica-Bold", 18)
-            p.drawCentredString(width / 2, height - 50, "TrustBuySell Receipt")
+        # Email the receipt
+        if request.user.email:
+            email = EmailMessage(
+                "TrustBuySell Receipt",
+                f"Hi {request.user.username},\n\nThank you for your purchase. Your receipt is attached.",
+                settings.DEFAULT_FROM_EMAIL,
+                [request.user.email],
+            )
+            email.attach(f"receipt_{payment.reference}.pdf", buffer.getvalue(), "application/pdf")
+            email.send(fail_silently=True)
 
-            # Customer info
-            p.setFont("Helvetica", 12)
-            p.drawString(50, height - 100, f"Customer: {request.user.get_full_name() or request.user.username}")
-            p.drawString(50, height - 120, f"Email: {request.user.email or ''}")
-            p.drawString(50, height - 140, f"Reference: {payment.reference}")
-            p.drawString(50, height - 160, f"Payment Channel: {payment.channel}")
-            p.drawString(50, height - 180, f"Date: {payment.paid_at or ''}")
+    except Exception:
+        pass  # Don’t break if PDF fails
 
-            # Product table
-            data_table = [["Product", "Qty", "Unit Price (₦)", "Total (₦)"]]
-            for item in cart_items:
-                try:
-                    unit_price = Decimal(getattr(item.product, "discountedprice", None) or getattr(item.product, "actualprice", None) or "0.00")
-                except Exception:
-                    unit_price = Decimal("0.00")
-                line_total = unit_price * (item.quantity or 0)
-                data_table.append([
-                    str(item.product.name),
-                    str(item.quantity),
-                    f"{unit_price:,.2f}",
-                    f"{line_total:,.2f}",
-                ])
-            data_table.append(["", "", "Grand Total", f"{total_amount:,.2f}"])
+    # ✅ Clear purchased items from cart
+    Cart_Items.objects.filter(user=request.user, purchased=True).delete()
 
-            table = Table(data_table, colWidths=[200, 60, 120, 120])
-            table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#2563eb")),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-            ]))
-            table.wrapOn(p, width, height)
-            # Draw table lower on page (adjust as needed)
-            table.drawOn(p, 50, height - 420)
+    return render(request, "payment_success.html", {"payment": payment, "order": order})
 
-            # Footer
-            p.setFont("Helvetica-Oblique", 11)
-            p.drawCentredString(width / 2, 100, "Thank you for shopping with TrustBuySell!")
-
-            p.showPage()
-            p.save()
-            buffer.seek(0)
-
-            # Email receipt (optional)
-            if request.user.email:
-                email = EmailMessage(
-                    "TrustBuySell Receipt",
-                    f"Hi {request.user.username},\n\nThank you for your purchase. Please find your receipt attached.",
-                    settings.DEFAULT_FROM_EMAIL,
-                    [request.user.email],
-                )
-                email.attach(f"receipt_{payment.reference}.pdf", buffer.getvalue(), "application/pdf")
-                email.send(fail_silently=True)
-        except Exception:
-            # If PDF/email generation fails, we still proceed (do not break order creation).
-            pass
-
-        # Clear purchased cart items
-        try:
-            Cart_Items.objects.filter(user=request.user, purchased=True).delete()
-        except Exception:
-            # If deletion fails, leave for later cleanup and optionally log
-            pass
-
-        return render(request, "payment_success.html", {"payment": payment, "order": order})
-
-    # Payment verification failed
-    error_message = res_data.get("message", "Payment verification failed.") if isinstance(res_data, dict) else "Payment verification failed."
-    return render(request, "payment_failed.html", {"payment": payment, "error": error_message})
 
 
 def search_view(request):
