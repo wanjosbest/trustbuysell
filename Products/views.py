@@ -555,13 +555,16 @@ def seller_dashboard(request):
     total_products = products.count()
     sold_out = products.filter(stock=0).count()
     pending_orders = Order.objects.all().filter(status = "pending").count()
-   
+    order_count = Order.objects.all().count()
+    recent_order = OrderItem.objects.all().order_by("-created_at")[:3]
 
     context = {
         "products": products,
         "total_products": total_products,
         "sold_out": sold_out,
         "pending_orders":pending_orders,
+        "order_count":order_count,
+        "recent_order": recent_order,
     }
     return render(request, "dashboard/seller_dashboard.html", context)
 

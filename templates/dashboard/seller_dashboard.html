@@ -217,7 +217,7 @@
       <span class="close-btn" onclick="closeSidebar()">×</span>
       <h2>Menu</h2>
       <a href="{% url 'seller_dashboard' %}">Dashboard</a>
-      <a href="#">Products</a>
+      <a href="{% url 'product_lists'%}">Products</a>
       <a href="#">Orders</a>
       <a href="#">Wallet</a>
       <a href="#">Messages</a>
@@ -230,11 +230,11 @@
       <div class="cards">
         <div class="card">
           <h3>My Products</h3>
-          <p>{{ product_count }}</p>
+          <p><h2>{{total_products }}</h2></p>
         </div>
         <div class="card">
-          <h3>Orders</h3>
-          <p>{{ order_count }}</p>
+          <h3> Orders</h3>
+          <p><h3>{{order_count}}</h3></p>
         </div>
         <div class="card">
           <h3>Wallet</h3>
@@ -296,11 +296,11 @@
             <th>Status</th>
             <th>Date</th>
           </tr>
-          {% for order in recent_orders %}
+          {% for order in recent_order%}
           <tr>
             <td>{{ order.product.name }}</td>
-            <td>{{ order.status }}</td>
-            <td>{{ order.date }}</td>
+            <td>{{ order.order.status }}</td>
+            <td>{{ order.created_at }}</td>
           </tr>
           {% empty %}
           <tr>
