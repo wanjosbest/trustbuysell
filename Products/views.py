@@ -171,7 +171,6 @@ def add_product(request):
     categories = category.objects.all()
     return render(request, "user/add_product.html", {"categories": categories})
 
-@login_required(login_url='login')
 def product_detail(request, slug):
     product = get_object_or_404(Products, slug=slug, status="published")
     related_product = (
