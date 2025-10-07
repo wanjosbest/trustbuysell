@@ -6,5 +6,6 @@ urlpatterns = [
     path('wallet/fund/', views.fund_wallet, name='fund_wallet'),
     path('wallet/verify-payment/', views.verify_payment, name='verify-payment'),
     path('withdraw/', views.withdraw_wallet, name='withdraw_wallet'),
+    path('add-bank-account/', views.add_bank_account, name='add_bank_account'),
 
 ]

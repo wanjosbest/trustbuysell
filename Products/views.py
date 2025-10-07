@@ -23,6 +23,7 @@ from django.db.models import Sum, Count, Q, F
 from decimal import Decimal
 from django.db import transaction
 from django.utils.dateparse import parse_datetime
+from wallet.models import Wallet, Transaction
 
 
 #users to add products images
@@ -258,16 +259,14 @@ def initiate_payment(request):
 
 @login_required
 def verify_payment(request):
-    # Paystack sometimes returns `trxref`, sometimes `reference`
     reference = request.GET.get("reference") or request.GET.get("trxref")
 
     if not reference:
         return render(request, "payment_failed.html", {"error": "Missing payment reference."})
 
-    # Try to find payment by reference only (not by user)
     payment = get_object_or_404(Payment, reference=reference)
 
-    # Already verified?
+    # ✅ Avoid double-verification
     if payment.verified:
         return render(request, "payment_success.html", {"payment": payment})
 
@@ -281,55 +280,53 @@ def verify_payment(request):
     except Exception as e:
         return render(request, "payment_failed.html", {"error": f"Network error: {e}"})
 
-    # Check verification success
     if not result.get("status") or result["data"].get("status") != "success":
         return render(request, "payment_failed.html", {"error": "Payment not successful."})
 
-    # Extract Paystack data
     data = result["data"]
     amount = Decimal(data["amount"]) / 100
     paid_at = parse_datetime(data.get("paid_at", ""))
 
     with transaction.atomic():
-        # ✅ Update payment info
+        # ✅ Update payment record
         payment.verified = True
         payment.amount = amount
         payment.channel = data.get("channel", "")
         payment.paid_at = paid_at
         payment.save()
 
-        # ✅ Get unpaid cart items
+        # ✅ Get cart items
         cart_items = Cart_Items.objects.filter(user=payment.user, purchased=False)
         if not cart_items.exists():
             return render(request, "payment_success.html", {"payment": payment})
 
-        # ✅ Create order
+        # ✅ Create Order
         order = Order.objects.create(
             user=payment.user,
             total_amount=amount,
-            status="completed"
+            status="completed",
         )
 
-        # ✅ Create each order item
+        # ✅ Create OrderItem for each cart item
         for item in cart_items:
             price = getattr(item.product, "discountedprice", item.product.actualprice)
-            OrderItem.objects.create(
+            order_item = OrderItem.objects.create(
                 order=order,
                 product=item.product,
                 seller=item.product.user,
                 quantity=item.quantity,
-                price=price
+                price=price,
             )
 
-            # Reduce stock
+            # Add product to M2M field in Order
+            order.product.add(item.product)
+
+            # Update stock if applicable
             if hasattr(item.product, "stock"):
                 item.product.stock = max(0, item.product.stock - item.quantity)
                 item.product.save(update_fields=["stock"])
 
-            item.purchased = True
-            item.save(update_fields=["purchased"])
-
-        # ✅ Clear cart
+        # ✅ Delete all cart items after creating order
         cart_items.delete()
 
     return render(request, "payment_success.html", {"payment": payment, "order": order})
@@ -424,9 +421,11 @@ def seller_dashboard(request):
     total_products = products.count()
     sold_out = products.filter(stock=0).count()
     pending_orders = Order.objects.all().filter(status = "pending").count()
-    order_count = Order.objects.filter(user = request.user).count()
-    recent_order = OrderItem.objects.filter(seller = request.user).order_by("-created_at")[:3]
-
+    order = request.user.sales
+    recent_order = order.all()[:3]
+    order_count = order.count()
+    wallet = request.user.wallet
+    Transactions = Transaction.objects.filter(wallet = wallet)
     context = {
         "products": products,
         "total_products": total_products,
@@ -434,13 +433,19 @@ def seller_dashboard(request):
         "pending_orders":pending_orders,
         "order_count":order_count,
         "recent_order": recent_order,
+        "wallet":wallet,
+        "Transactions":Transactions,
     }
     return render(request, "dashboard/seller_dashboard.html", context)
 
+
 @login_required(login_url="login")
 def buyer_dashboard(request):
+    total_items_ordered = request.user.orders.all()
+
+    context ={"orders":total_items_ordered}
    
-    return render(request, "dashboard/buyer_dashboard.html")
+    return render(request, "dashboard/buyer_dashboard.html", context)
 
 @login_required
 def hero_image_update(request):

@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.db import models
 from user.models import User
+from django.urls import reverse
 
 #global class
 class category(models.Model):
@@ -87,6 +88,7 @@ class Payment(models.Model):
 
 
 class Order(models.Model):
+    product = models.ManyToManyField(Products, related_name="ordered_product")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")  # buyer
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     status = models.CharField(
@@ -116,7 +118,7 @@ class OrderItem(models.Model):
 
 
 class Cart_Items(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True,related_name="cartitems")
     product = models.ForeignKey("Products", on_delete=models.CASCADE, related_name="cartitemsproduct")
     quantity = models.PositiveIntegerField(default=1)
     purchased = models.BooleanField(default=False)

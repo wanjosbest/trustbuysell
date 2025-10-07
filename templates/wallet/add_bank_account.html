@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="max-width: 500px; margin: 30px auto;">
+    <h2>{{ bank_account|yesno:"Update Bank Account,Add Bank Account" }}</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div>
+            <label for="account_name">Account Name</label>
+            <input type="text" id="account_name" name="account_name"
+                   value="{{ bank_account.account_name|default_if_none:'' }}" required>
+        </div>
+
+        <div>
+            <label for="account_number">Account Number</label>
+            <input type="text" id="account_number" name="account_number"
+                   value="{{ bank_account.account_number|default_if_none:'' }}" required>
+        </div>
+
+        <div>
+            <label for="bank_code">Bank Code</label>
+            <input type="text" id="bank_code" name="bank_code"
+                   value="{{ bank_account.bank_code|default_if_none:'' }}" required>
+        </div>
+
+        <button type="submit">Save</button>
+    </form>
+
+    {% if bank_account %}
+    <p style="margin-top: 15px;">
+        <strong>Status:</strong> 
+        {% if bank_account.verified %}✅ Verified{% else %}❌ Not Verified{% endif %}
+    </p>
+    {% endif %}
+</div>
+{% endblock %}

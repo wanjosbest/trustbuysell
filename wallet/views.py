@@ -152,3 +152,50 @@ def withdraw_wallet(request):
         return redirect('wallet_dashboard')
 
     return render(request, 'wallet/withdraw.html', {'wallet': wallet, 'bank_account': bank_account})
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import BankAccount
+
+@login_required
+def add_bank_account(request):
+    """Allow user to add or update their bank account"""
+    try:
+        bank_account = request.user.bank_account  # via related_name
+    except BankAccount.DoesNotExist:
+        bank_account = None
+
+    if request.method == "POST":
+        account_name = request.POST.get("account_name")
+        account_number = request.POST.get("account_number")
+        bank_code = request.POST.get("bank_code")
+
+        if not (account_name and account_number and bank_code):
+            messages.error(request, "All fields are required.")
+            return redirect("add_bank_account")
+
+        if bank_account:
+            # Update existing account
+            bank_account.account_name = account_name
+            bank_account.account_number = account_number
+            bank_account.bank_code = bank_code
+            bank_account.save()
+            messages.success(request, "Bank account updated successfully.")
+        else:
+            # Create new account
+            BankAccount.objects.create(
+                user=request.user,
+                account_name=account_name,
+                account_number=account_number,
+                bank_code=bank_code,
+                verified = True,
+            )
+            messages.success(request, "Bank account added successfully.")
+        return redirect("add_bank_account")
+
+    context = {
+        "bank_account": bank_account,
+    }
+    return render(request, "wallet/add_bank_account.html", context)

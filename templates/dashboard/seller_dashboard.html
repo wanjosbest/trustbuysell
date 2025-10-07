@@ -219,7 +219,7 @@
       <a href="{% url 'seller_dashboard' %}">Dashboard</a>
       <a href="{% url 'product_lists'%}">Products</a>
       <a href="#">Orders</a>
-      <a href="#">Wallet</a>
+      <a href="{% url 'wallet_dashboard' %}">Wallet</a>
       <a href="#">Messages</a>
       <a href="#">Settings</a>
     </div>
@@ -238,7 +238,7 @@
         </div>
         <div class="card">
           <h3>Wallet</h3>
-          <p>₦{{ wallet_balance }}</p>
+          <p>₦{{wallet.balance}}</p>
         </div>
         <div class="card">
           <h3>Messages</h3>
@@ -273,10 +273,10 @@
             <th>Type</th>
             <th>Amount</th>
           </tr>
-          {% for tx in recent_transactions %}
+          {% for tx in Transactions %}
           <tr>
-            <td>{{ tx.date }}</td>
-            <td>{{ tx.type }}</td>
+            <td>{{ tx.created_at }}</td>
+            <td>{{ tx.transaction_type }}</td>
             <td>₦{{ tx.amount }}</td>
           </tr>
           {% empty %}

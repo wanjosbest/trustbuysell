@@ -12,5 +12,5 @@
   </form>
 {% else %}
   <p>No bank account linked yet.</p>
-  <a href="#">Add Bank Account</a>
+  <a href="{% url 'add_bank_account' %}">Add Bank Account</a>
 {% endif %}
