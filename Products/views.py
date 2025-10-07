@@ -23,7 +23,7 @@ from django.db.models import Sum, Count, Q, F
 from decimal import Decimal
 from django.db import transaction
 from django.utils.dateparse import parse_datetime
-from wallet.models import Wallet, Transaction
+from wallet.models import Wallet, Transaction,PendingWallet
 
 
 #users to add products images
@@ -304,7 +304,7 @@ def verify_payment(request):
         order = Order.objects.create(
             user=payment.user,
             total_amount=amount,
-            status="completed",
+            status="paid",
         )
 
         # ✅ Create OrderItem for each cart item
@@ -320,6 +320,12 @@ def verify_payment(request):
 
             # Add product to M2M field in Order
             order.product.add(item.product)
+            # Credit seller pending wallet
+            seller_pending_wallet, _ = PendingWallet.objects.get_or_create(user=item.product.user)
+            seller_pending_wallet.credit(
+                amount=price * item.quantity,
+                description=f"Pending payment for Order #{order.id} - {item.product.name}"
+            )
 
             # Update stock if applicable
             if hasattr(item.product, "stock"):
@@ -330,15 +336,42 @@ def verify_payment(request):
         cart_items.delete()
 
     return render(request, "payment_success.html", {"payment": payment, "order": order})
+# buyer must confirm delivery
+@login_required
+def confirm_item_delivery(request, item_id):
+    item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
 
+    if item.status == "delivered":
+        messages.info(request, "This item is already confirmed as delivered.")
+        return redirect("buyer_dashboard")
 
+    # Update item status
+    item.status = "delivered"
+    item.save()
 
+    # Handle wallet transfers
+    pending_wallet, _ = PendingWallet.objects.get_or_create(user=item.seller)
+    seller_wallet, _ = Wallet.objects.get_or_create(user=item.seller)
+
+    amount = item.get_total()
+    if pending_wallet.balance >= amount:
+        pending_wallet.debit(amount, description=f"Released for {item.product.name}")
+        seller_wallet.credit(amount, description=f"Earnings from {item.product.name}")
+
+    # If all items in the order are delivered, update the order itself
+    order = item.order
+    if not order.items.filter(status="pending").exists():
+        order.status = "delivered"
+        order.save()
+
+    messages.success(request, f"Delivery confirmed for {item.product.name}. Seller paid successfully.")
+    return redirect("buyer_dashboard")
+                                                                                  
 def search_view(request):
     query = request.GET.get("q", "")
     products = Products.objects.filter(
         Q(name__icontains=query) | Q(description__icontains=query)
     ).distinct() if query else Products.objects.none()
-
     categories = category.objects.filter(
         Q(name__icontains=query)  
     ).distinct() if query else category.objects.none()
@@ -348,8 +381,6 @@ def search_view(request):
         "products": products,
         "categories": categories,
     })
-
-
 @login_required
 def update_cart_quantity(request, product_id):
     if request.method == "POST":
@@ -422,10 +453,11 @@ def seller_dashboard(request):
     sold_out = products.filter(stock=0).count()
     pending_orders = Order.objects.all().filter(status = "pending").count()
     order = request.user.sales
-    recent_order = order.all()[:3]
+    recent_order = order.all().order_by("-created_at")[:3]
     order_count = order.count()
     wallet = request.user.wallet
     Transactions = Transaction.objects.filter(wallet = wallet)
+    pending_wallet = request.user.pending_wallet
     context = {
         "products": products,
         "total_products": total_products,
@@ -435,15 +467,19 @@ def seller_dashboard(request):
         "recent_order": recent_order,
         "wallet":wallet,
         "Transactions":Transactions,
+        "pending_wallet":pending_wallet,
     }
     return render(request, "dashboard/seller_dashboard.html", context)
 
 
 @login_required(login_url="login")
 def buyer_dashboard(request):
-    total_items_ordered = request.user.orders.all()
+    total_items_ordered = (request.user.orders.prefetch_related("product").order_by("-created_at"))[:5]
 
     context ={"orders":total_items_ordered}
+    # # Debug: print products for each order
+    # for order in total_items_ordered:
+    #     print(f"Order {order.id}: {[p.name for p in order.product.all()]}")
    
     return render(request, "dashboard/buyer_dashboard.html", context)
 

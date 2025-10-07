@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Wallet, Transaction, Payment, BankAccount, Withdrawal
+from .models import Wallet, Transaction, Payment, BankAccount, Withdrawal,PendingWallet
 
 
 @admin.register(Wallet)
@@ -37,3 +37,9 @@ class WithdrawalAdmin(admin.ModelAdmin):
     list_filter = ('status', 'created_at')
     search_fields = ('user__username', 'reference')
     readonly_fields = ('reference', 'created_at')
+
+@admin.register(PendingWallet)
+class PendingWalletAdmin(admin.ModelAdmin):
+    list_display = ('user', 'balance', 'updated_at')
+    
+    search_fields = ('user__username', 'balance')

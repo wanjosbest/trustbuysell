@@ -93,7 +93,7 @@ class Order(models.Model):
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     status = models.CharField(
         max_length=20,
-        choices=(("pending", "Pending"), ("completed", "Completed"), ("cancelled", "Cancelled")),
+        choices=(("pending", "Pending"), ("delivery_pending", "Delivery_Pending"), ("cancelled", "Cancelled"),("delivered", "Delivered"),("paid", "Paid")),
         default="completed",
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -103,18 +103,30 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("delivered", "Delivered"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    order = models.ForeignKey("Order", on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey("Products", on_delete=models.CASCADE)
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sales")
     quantity = models.PositiveIntegerField(default=1)
-    price = models.DecimalField(max_digits=12, decimal_places=2) 
-    created_at = models.DateTimeField(auto_now_add=True,null=True)
+    price = models.DecimalField(max_digits=12, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
-        return f"{self.product.name} x {self.quantity}"
+        return f"{self.product.name} x {self.quantity} ({self.status})"
 
     def get_total(self):
         return (self.price or Decimal("0.00")) * self.quantity
+
+    def mark_delivered(self):
+        """Mark this item as delivered."""
+        self.status = "delivered"
+        self.save()
 
 
 class Cart_Items(models.Model):

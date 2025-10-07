@@ -191,7 +191,8 @@
 
   <header>
     <div class="wrap nav" role="navigation" aria-label="Main">
-      <div class="brand"><a href="{% url 'index' %}"><span class="logo">D</span> {% if user.is_authenticated%} {{user.username}} Buyer Dashboard {% endif %}</a></div>
+      <div class="brand"><a href="{% url 'index' %}"><span class="logo">D</span> {% if user.is_authenticated%}
+          {{user.username}} Buyer Dashboard {% endif %}</a></div>
       <button class="hamb" id="hambA" aria-expanded="false" aria-controls="navA" onclick="openSidebar()">☰</button>
       <form class="searchbar" action="{% url 'search' %}" method="get" style="flex:1;min-width:220px">
         <input name="q" placeholder="Search products, categories, sellers…" value="{{ request.GET.q }}">
@@ -254,18 +255,23 @@
       </div>
       {% endif %}
 
-      <!-- Orders -->
       <div class="card">
         <h3>Recent Orders</h3>
         <table>
           <tr>
-            <th>Product</th>
+            <th>Product(s)</th>
             <th>Status</th>
             <th>Action</th>
           </tr>
           {% for order in orders %}
           <tr>
-            <td>{{ order.product.name }}</td>
+            <td>
+              {% for product in order.product.all %}
+              {{ product.name }}{% if not forloop.last %}, {% endif %}
+              {% empty %}
+              No products
+              {% endfor %}
+            </td>
             <td>{{ order.status }}</td>
             <td><button class="btn btn-track">Track</button></td>
           </tr>
@@ -276,7 +282,6 @@
           {% endfor %}
         </table>
       </div>
-
       <!-- Wallet Transactions -->
       <div class="card">
         <h3>Wallet Transactions</h3>
@@ -350,4 +355,5 @@
   </script>
 
 </body>
+
 </html>

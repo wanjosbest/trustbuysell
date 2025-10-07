@@ -108,3 +108,51 @@ class Withdrawal(models.Model):
     def __str__(self):
         return f"{self.user.username} - ₦{self.amount} ({self.status})"
 
+
+class PendingWallet(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="pending_wallet")
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s pending wallet - ₦{self.balance}"
+
+    def credit(self, amount, description=""):
+        """Add money to pending wallet"""
+        self.balance += amount
+        self.save()
+        PendingTransaction.objects.create(
+            pending_wallet=self,
+            amount=amount,
+            transaction_type="credit",
+            description=description,
+        )
+
+    def debit(self, amount, description=""):
+        """Remove money from pending wallet"""
+        if self.balance >= amount:
+            self.balance -= amount
+            self.save()
+            PendingTransaction.objects.create(
+                pending_wallet=self,
+                amount=amount,
+                transaction_type="debit",
+                description=description,
+            )
+        else:
+            raise ValueError("Insufficient pending balance")
+        
+class PendingTransaction(models.Model):
+    TRANSACTION_TYPES = (
+        ("credit", "Credit"),
+        ("debit", "Debit"),
+    )
+
+    pending_wallet = models.ForeignKey(PendingWallet, on_delete=models.CASCADE, related_name="transactions")
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
+    description = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.transaction_type.title()} ₦{self.amount} - {self.pending_wallet.user.username}"
