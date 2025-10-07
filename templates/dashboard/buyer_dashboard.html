@@ -219,7 +219,7 @@
       <h2>Menu</h2>
       <a href="{% url 'buyer_dashboard' %}">Dashboard</a>
       <a href="{% url 'cart' %}">My Cart</a>
-      <a href="#">Orders</a>
+      <a href="{% url 'ordered_items'%}">Ordered Items</a>
       <a href="#">Wallet</a>
       <a href="#">Messages</a>
       <a href="#">Wishlist</a>
@@ -273,7 +273,7 @@
               {% endfor %}
             </td>
             <td>{{ order.status }}</td>
-            <td><button class="btn btn-track">Track</button></td>
+            <td><a href="{% url 'ordered_items'%}"><button class="btn btn-track">Track</button></a></td>
           </tr>
           {% empty %}
           <tr>

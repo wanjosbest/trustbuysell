@@ -326,8 +326,8 @@
       <div class="card">
         <h3>Quick Actions</h3>
         <div class="actions">
-          <button class="btn btn-add">+ Add Product</button>
-          <button class="btn btn-withdraw">Withdraw</button>
+          <a href="{% url 'product_lists'%}"><button class="btn btn-add">+ Add Product</button></a>
+          <a href="{% url 'withdraw_wallet' %}"><button class="btn btn-withdraw">Withdraw</button></a>
           <button class="btn btn-boost">Boost Product</button>
         </div>
       </div>

@@ -24,4 +24,5 @@ urlpatterns = [
     path("Buyer-dashboard/", views.buyer_dashboard, name="buyer_dashboard"),
     path("sell-analytics/",views.seller_analytics, name="sell-analytics"),
     path("confirm_item_delivery/<item_id>/", views.confirm_item_delivery, name="confirm_delivery"),
+    path("ordered-items/", views.ordered_items_view, name="ordered_items"),
 ]

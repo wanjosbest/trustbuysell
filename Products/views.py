@@ -366,6 +366,7 @@ def confirm_item_delivery(request, item_id):
 
     messages.success(request, f"Delivery confirmed for {item.product.name}. Seller paid successfully.")
     return redirect("buyer_dashboard")
+    
                                                                                   
 def search_view(request):
     query = request.GET.get("q", "")
@@ -550,3 +551,20 @@ def seller_analytics(request):
         "top_products": top_products,
     }
     return render(request, "analytics/seller_analytics.html", context)
+
+# lists of all ordered items
+@login_required(login_url='login')
+def ordered_items_view(request):
+    """
+    Display all ordered items for the logged-in buyer.
+    """
+    # Fetch all items belonging to the logged-in buyer (via order relation)
+    ordered_items = OrderItem.objects.filter(order__user=request.user).select_related('product', 'seller', 'order')
+
+    #order by latest orders
+    ordered_items = ordered_items.order_by('-created_at')
+
+    context = {
+        "ordered_items": ordered_items
+    }
+    return render(request, "products/ordered_items.html", context)

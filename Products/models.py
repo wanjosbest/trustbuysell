@@ -107,6 +107,7 @@ class OrderItem(models.Model):
         ("pending", "Pending"),
         ("delivered", "Delivered"),
         ("cancelled", "Cancelled"),
+        ("waiting_for_delivery", "Waiting _For_Delivery"),
     ]
 
     order = models.ForeignKey("Order", on_delete=models.CASCADE, related_name="items")
@@ -114,7 +115,7 @@ class OrderItem(models.Model):
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sales")
     quantity = models.PositiveIntegerField(default=1)
     price = models.DecimalField(max_digits=12, decimal_places=2)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="waiting_for_delivery")
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
