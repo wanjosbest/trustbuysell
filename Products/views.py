@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import (Product_image,Products,category,Cart_Items,shipping,Payment,HeroImage,Order,OrderItem,Review
+from .models import (ProductImage,Products,category,Cart_Items,shipping,Payment,HeroImage,Order,OrderItem,Review
 )
 from django.core.paginator import Paginator
 from user.models import User
@@ -28,19 +28,33 @@ from django.utils.dateparse import parse_datetime
 from wallet.models import Wallet, Transaction,PendingWallet
 
 #users to add products images
-
 @login_required
 def upload_image(request):
+    products = Products.objects.filter(user=request.user)
+
     if request.method == "POST":
-        if "image" in request.FILES:
-            image_file = request.FILES["image"]
-            Product_image.objects.create(
+        product_id = request.POST.get("product")
+        image_files = request.FILES.getlist("image")  # Support multiple uploads
+
+        if not product_id:
+            messages.error(request, "Please select a product.")
+            return redirect("addproductimage")
+
+        product = get_object_or_404(Products, id=product_id, user=request.user)
+
+        for image_file in image_files:
+            ProductImage.objects.create(
                 user=request.user,
+                product=product,
                 image=image_file
             )
-            return redirect("addproductimage") 
-    images = Product_image.objects.filter(user=request.user)
-    return render(request, "upload_image.html", {"images": images})
+
+        messages.success(request, "✅ Image(s) uploaded successfully.")
+        return redirect("addproductimage")
+
+    images = ProductImage.objects.filter(user=request.user)
+    return render(request, "upload_image.html", {"images": images, "products": products})
+
 
 #user product list
 @login_required
@@ -53,23 +67,85 @@ def user_product_list(request):
         actualprice = request.POST.get("actualprice")
         discountedprice = request.POST.get("discountedprice")
         status = request.POST.get("status")
-        featured = bool(request.POST.get("featured"))
         category_id = request.POST.get("category")
+        stock = int(request.POST.get("stock") or 0)
         slug = slugify(name)
-        stock = int(request.POST.get("stock"))
 
-        # Relations
-        category_obj = category.objects.get(id=category_id) if category_id else None
+        # Get category object
+        category_obj = category.objects.filter(id=category_id).first() if category_id else None
 
-        image_id1 = request.POST.get("product_image")
-        image_id2 = request.POST.get("product_image2")
-        image_id3 = request.POST.get("product_image3")
+        # Handle product image (single upload)
+        product_image_file = request.FILES.get("product_image")
 
-        image_obj1 = Product_image.objects.filter(id=image_id1, user=request.user).first() if image_id1 else None
-        image_obj2 = Product_image.objects.filter(id=image_id2, user=request.user).first() if image_id2 else None
-        image_obj3 = Product_image.objects.filter(id=image_id3, user=request.user).first() if image_id3 else None
+        image_obj = None
+        if product_image_file:
+            image_obj = ProductImage.objects.create(
+                user=request.user,
+                image=product_image_file
+            )
 
-        # Save product
+        # Create product
+        Products.objects.create(
+            user=request.user,
+            name=name,
+            description=description,
+            meta_keywords=meta_keywords,
+            meta_descriptions=meta_descriptions,
+            actualprice=actualprice,
+            discountedprice=discountedprice,
+            status=status,
+            category=category_obj,
+            product_image=image_obj,
+            slug=slug,
+            stock=stock,
+        )
+
+        return redirect("product_lists")
+
+    # Fetch data for template
+    products = Products.objects.filter(user=request.user).order_by("-published")
+    categories = category.objects.all()
+
+    return render(
+        request,
+        "user/product_list.html",
+        {
+            "products": products,
+            "categories": categories,
+        },
+    )
+
+# add products
+
+@login_required
+def add_product(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        description = request.POST.get("description")
+        meta_keywords = request.POST.get("meta_keywords")
+        meta_descriptions = request.POST.get("meta_descriptions")
+        actualprice = request.POST.get("actualprice")
+        discountedprice = request.POST.get("discountedprice")
+        status = request.POST.get("status")
+        category_id = request.POST.get("category")
+        stock = request.POST.get("stock")
+
+        # Validations
+        if not name or not actualprice:
+            messages.error(request, "Product name and price are required.")
+            return redirect("add_product")
+
+        category_obj = category.objects.filter(id=category_id).first()
+
+        # Unique slug generation
+        base_slug = slugify(name)
+        slug = base_slug
+        counter = 1
+        while Products.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+
+        # Create product
         product = Products.objects.create(
             user=request.user,
             name=name,
@@ -79,30 +155,21 @@ def user_product_list(request):
             actualprice=actualprice,
             discountedprice=discountedprice,
             status=status,
-            featured=featured,
             category=category_obj,
-            product_image=image_obj1,
-            product_image2=image_obj2,
-            product_image3=image_obj3,
             slug=slug,
-            stock=stock,
+            stock=stock or 0,
         )
+
+        # Handle multiple image uploads
+        images = request.FILES.getlist("images")
+        for img in images:
+            ProductImage.objects.create(product=product, image=img)
+
+        messages.success(request, f"✅ {product.name} added successfully!")
         return redirect("product_lists")
 
-    products = Products.objects.filter(user=request.user).order_by("-published")
     categories = category.objects.all()
-    images = Product_image.objects.filter(user=request.user)
-
-    return render(
-        request,
-        "user/product_list.html",
-        {
-            "products": products,
-            "categories": categories,
-            "images": images,
-        },
-    )
-
+    return render(request, "user/add_product.html", {"categories": categories})
 
 @login_required(login_url='login')
 def product_detail(request, slug):
@@ -114,11 +181,16 @@ def product_detail(request, slug):
     )
     reviews = Review.objects.filter(product=product).order_by("-created_at")
 
+    # Fetch all product images
+    images = ProductImage.objects.filter(product=product)
+
     if request.method == "POST":
         message = request.POST.get("message")
         rating = int(request.POST.get("rating", 0))
         if 1 <= rating <= 5:
-            Review.objects.create(user=request.user, product=product, message=message, rating=rating)
+            Review.objects.create(
+                user=request.user, product=product, message=message, rating=rating
+            )
             messages.success(request, "Your review has been submitted.")
             return redirect("product_detail", slug=slug)
         else:
@@ -126,52 +198,62 @@ def product_detail(request, slug):
 
     context = {
         "product": product,
+        "images": images,
         "related_product": related_product,
         "reviews": reviews,
     }
     return render(request, "product_detail.html", context)
 
+
 @login_required
 def product_update(request, slug):
-    product = get_object_or_404(Products, slug=slug)
+    product = get_object_or_404(Products, slug=slug, user=request.user)
+    categories = category.objects.all()
+
     if request.method == "POST":
-        product.name = request.POST.get("name")
-        product.description = request.POST.get("description")
-        product.meta_keywords = request.POST.get("meta_keywords")
-        product.meta_descriptions = request.POST.get("meta_descriptions")
-        product.actualprice = request.POST.get("actualprice")
-        product.discountedprice = request.POST.get("discountedprice")
-        product.status = request.POST.get("status")
-        product.featured = bool(request.POST.get("featured"))
+        # Basic product info
+        product.name = request.POST.get("name", "").strip()
+        product.description = request.POST.get("description", "").strip()
+        product.meta_keywords = request.POST.get("meta_keywords", "").strip()
+        product.meta_descriptions = request.POST.get("meta_descriptions", "").strip()
+        product.actualprice = request.POST.get("actualprice") or 0
+        product.discountedprice = request.POST.get("discountedprice") or 0
+        product.stock = request.POST.get("stock") or 0
+        product.status = request.POST.get("status", "draft")
 
-        # category
+        # Update slug when name changes
+        new_slug = slugify(product.name)
+        if new_slug != product.slug:
+            product.slug = new_slug
+
+        # Update category
         category_id = request.POST.get("category")
-        product.category = category.objects.get(id=category_id) if category_id else None
-
-        # images
-        product_image_id = request.POST.get("product_image")
-        product_image2_id = request.POST.get("product_image2")
-        product_image3_id = request.POST.get("product_image3")
-
-        product.product_image = Product_image.objects.get(id=product_image_id) if product_image_id else None
-        product.product_image2 = Product_image.objects.get(id=product_image2_id) if product_image2_id else None
-        product.product_image3 = Product_image.objects.get(id=product_image3_id) if product_image3_id else None
+        if category_id:
+            try:
+                product.category = category.objects.get(id=category_id)
+            except category.DoesNotExist:
+                messages.warning(request, "⚠️ Invalid category selected.")
 
         product.save()
+
+        # Handle new image uploads
+        new_images = request.FILES.getlist("product_images")
+        if new_images:
+            for img in new_images:
+                ProductImage.objects.create(
+                    user=request.user,
+                    product=product,
+                    image=img
+                )
+
+        messages.success(request, "✅ Product updated successfully!")
         return redirect("product_lists")
 
-    categories = category.objects.all()
-    images = Product_image.objects.filter(user=request.user)
-
-    return render(
-        request,
-        "product_update.html",
-        {
-            "product": product,
-            "categories": categories,
-            "images": images,
-        },
-    )
+    context = {
+        "product": product,
+        "categories": categories,
+    }
+    return render(request, "product_update.html", context)
 
 @login_required
 def product_delete(request, slug):

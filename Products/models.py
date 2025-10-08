@@ -4,6 +4,7 @@ from user.models import User
 from django.urls import reverse
 from django.conf import settings
 from django.utils import timezone
+from django.utils.text import slugify
 
 #global class
 class category(models.Model):
@@ -17,18 +18,18 @@ class category(models.Model):
         verbose_name="category"
         verbose_name_plural="Category"
 
-#userbase
-class Product_image(models.Model):
-    user = models.ForeignKey(User, related_name="user_image",on_delete=models.CASCADE)
-    image = models.ImageField( upload_to="img/product_images/", null=True)
-    image_url = models.URLField(max_length=500, blank=True, null=True) 
-    Ishero = models.BooleanField(default=False)
-    def __str__(self):
-        return 'image' 
+# #userbase
+# class Product_image(models.Model):
+#     user = models.ForeignKey(User, related_name="user_image",on_delete=models.CASCADE)
+#     image = models.ImageField( upload_to="img/product_images/", null=True)
+#     image_url = models.URLField(max_length=500, blank=True, null=True) 
+#     Ishero = models.BooleanField(default=False)
+#     def __str__(self):
+#         return 'image' 
    
-    class Meta:
-        verbose_name="Product_image"
-        verbose_name_plural="Product Images"
+#     class Meta:
+#         verbose_name="Product_image"
+#         verbose_name_plural="Product Images"
 
 class HeroImage(models.Model):
     title = models.CharField(max_length=200, blank=True, null=True)
@@ -46,40 +47,53 @@ class HeroImage(models.Model):
         return self.title or f"Hero {self.id}"
 
 
+
 class Products(models.Model):
     STATUS_CHOICES = (
-    ('draft', 'Draft'),
-    ('published', 'Published'),
+        ('draft', 'Draft'),
+        ('published', 'Published'),
     )
-    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
-    category = models.ForeignKey(category, related_name="product_category",on_delete=models.CASCADE,null=True)
-    name = models.CharField(max_length=50, null =True)
-    description = models.TextField(null =True)
-    meta_keywords = models.CharField(max_length=255, null =True, help_text="seo keywords seprated with comma")
-    meta_descriptions = models.CharField(max_length=255, null =True, help_text="seo description here")
-    product_image = models.ForeignKey(Product_image, on_delete=models.CASCADE,null= True,related_name="prod_image")
-    published = models.DateTimeField(auto_now_add =True, null=True)
-    updated = models.DateTimeField(auto_now=True,null=True)
-    slug = models.SlugField(null=True, max_length=100,unique=True)
-    actualprice = models.DecimalField(max_digits= 20, decimal_places=2,null=True)
-    discountedprice = models.DecimalField(max_digits= 20, decimal_places=2,null=True)
-    status = models.CharField(max_length=30, null =True,choices = STATUS_CHOICES,default="published")
-    featured = models.BooleanField(default=False, null=True,blank=True)
-    product_image2 = models.ForeignKey(Product_image, on_delete=models.CASCADE,null=True,related_name="prod_image2")
-    product_image3 = models.ForeignKey(Product_image, on_delete=models.CASCADE, null=True,related_name="prod_image3")
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    category = models.ForeignKey(category, related_name="product_category", on_delete=models.CASCADE, null=True)
+    name = models.CharField(max_length=100, null=True)
+    description = models.TextField(null=True)
+    meta_keywords = models.CharField(max_length=255, null=True, help_text="SEO keywords separated by commas")
+    meta_descriptions = models.CharField(max_length=255, null=True, help_text="SEO description here")
+    published = models.DateTimeField(auto_now_add=True, null=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
+    slug = models.SlugField(max_length=120, unique=True, null=True)
+    actualprice = models.DecimalField(max_digits=20, decimal_places=2, null=True)
+    discountedprice = models.DecimalField(max_digits=20, decimal_places=2, null=True)
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="published")
     stock = models.PositiveIntegerField(default=0)
+
     def __str__(self):
-        return f"{self.name} "
+        return self.name or "Unnamed Product"
+
     def get_absolute_url(self):
         return reverse("product_detail", kwargs={"slug": self.slug})
+
     class Meta:
-        verbose_name="Products"
-        verbose_name_plural="Products"
+        verbose_name = "Product"
+        verbose_name_plural = "Products"
+
     def average_rating(self):
         reviews = self.reviews.all()
         if reviews.exists():
             return round(sum(r.rating for r in reviews) / reviews.count(), 1)
         return 0
+
+
+class ProductImage(models.Model):
+    user = models.ForeignKey(User, related_name="user_image", on_delete=models.CASCADE, null=True)
+    product = models.ForeignKey(Products, related_name="images", on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="img/product_images/")
+    image_url = models.URLField(max_length=500, blank=True, null=True)
+    Ishero = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.product.name} Image"
 
 class Payment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="payments")

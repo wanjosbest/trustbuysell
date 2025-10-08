@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Upload Image</title>
+<title>Upload Product Images</title>
 <style>
   body {
-    font-family: Arial, sans-serif;
+    font-family: "Segoe UI", sans-serif;
     background: #f4f6f8;
     margin: 0;
     padding: 15px;
@@ -15,73 +15,89 @@
 
   .container {
     background: white;
-    padding: 20px;
+    padding: 25px;
     border-radius: 15px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    max-width: 600px;
+    max-width: 700px;
     margin: auto;
   }
 
   h2 {
     text-align: center;
-    font-size: 1.3rem;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #2563eb;
+  }
+
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  select, input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
     margin-bottom: 15px;
   }
 
   .upload-area {
-    border: 2px dashed #4CAF50;
+    border: 2px dashed #2563eb;
     border-radius: 10px;
     padding: 25px;
     text-align: center;
     cursor: pointer;
-    transition: background 0.3s ease;
-  }
-  .upload-area:hover {
-    background: #f9fff9;
-  }
-  .upload-area p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #555;
+    transition: 0.3s;
   }
 
-  /* Preview */
+  .upload-area:hover {
+    background: #f0f6ff;
+  }
+
+  .upload-area p {
+    color: #555;
+    margin: 0;
+  }
+
   .preview img {
     width: 100px;
     height: 100px;
-    margin-top: 12px;
+    margin: 8px;
     border-radius: 10px;
     object-fit: cover;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   }
 
   button {
     display: block;
     width: 100%;
-    margin-top: 15px;
     padding: 12px;
-    font-size: 1rem;
-    background: #4CAF50;
+    background: #2563eb;
     border: none;
-    border-radius: 10px;
     color: white;
+    font-size: 1rem;
+    border-radius: 10px;
     cursor: pointer;
   }
+
   button:hover {
-    background: #45a049;
+    background: #1e40af;
   }
 
   .gallery {
-    margin-top: 25px;
+    margin-top: 30px;
   }
+
   .gallery h3 {
-    font-size: 1.1rem;
-    margin-bottom: 12px;
+    text-align: center;
+    color: #333;
   }
 
   .image-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* mobile: 2 columns */
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 12px;
   }
 
@@ -92,104 +108,79 @@
     text-align: center;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   }
+
   .image-card img {
     width: 100%;
     border-radius: 8px;
     height: 120px;
     object-fit: cover;
   }
+
   .image-card p {
     font-size: 12px;
     color: #666;
-    margin-top: 6px;
-  }
-
-  /* Tablet and up */
-  @media (min-width: 768px) {
-    .image-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-  /* Desktop and up */
-  @media (min-width: 1024px) {
-    .image-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
+    margin-top: 5px;
   }
 </style>
 </head>
 <body>
-  <div style="margin-bottom: 15px; text-align:center;">
-    <a href="{% url 'product_lists'%}">
-      <button style="width:auto; background:#2563eb;">View Products</button>
-    </a>
-  </div>
 
-  <div class="container">
-    <h2>Upload an Image</h2>
-    <form id="uploadForm" method="POST" enctype="multipart/form-data">
-      {% csrf_token %}
-      <div class="upload-area" id="uploadArea">
-        <p>📂 Tap or Drag & Drop to Upload</p>
-        <input type="file" id="fileInput" name="image" accept="image/*" hidden>
+<div class="container">
+  <h2>Upload Product Images</h2>
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <label for="product">Select Product</label>
+    <select name="product" required>
+      <option value="">-- Choose Product --</option>
+      {% for prod in products %}
+      <option value="{{ prod.id }}">{{ prod.name }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="image">Upload Images</label>
+    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+      <p>📁 Tap or Drag & Drop to Upload Multiple Images</p>
+      <input type="file" id="fileInput" name="image" accept="image/*" multiple hidden onchange="previewImages(event)">
+    </div>
+
+    <div class="preview" id="preview"></div>
+
+    <button type="submit">Upload Images</button>
+  </form>
+
+  <div class="gallery">
+    <h3>My Uploaded Images</h3>
+    <div class="image-grid">
+      {% for img in images %}
+      <div class="image-card">
+        <img src="{{ img.image.url }}" alt="Product image">
+        <p>{{ img.product.name }}</p>
       </div>
-
-      <div class="preview" id="preview"></div>
-      <button type="submit">Upload</button>
-    </form>
-
-    <div class="gallery">
-      <h3>My Uploaded Images</h3>
-      <div class="image-grid">
-        {% for img in images %}
-        <div class="image-card">
-          <img src="{{ img.image.url }}" alt="Uploaded image">
-          <p>{{ img.user.username }}</p>
-        </div>
-        {% empty %}
-        <p>No images uploaded yet.</p>
-        {% endfor %}
-      </div>
+      {% empty %}
+      <p style="text-align:center;">No images uploaded yet.</p>
+      {% endfor %}
     </div>
   </div>
+</div>
 
 <script>
-  const uploadArea = document.getElementById('uploadArea');
-  const fileInput = document.getElementById('fileInput');
-  const preview = document.getElementById('preview');
-
-  // Open file picker
-  uploadArea.addEventListener('click', () => fileInput.click());
-
-  // Show thumbnail
-  fileInput.addEventListener('change', function() {
+  function previewImages(event) {
+    const preview = document.getElementById('preview');
     preview.innerHTML = '';
-    const file = this.files[0];
-    if (file) {
+    const files = event.target.files;
+    for (let i = 0; i < files.length; i++) {
       const reader = new FileReader();
       reader.onload = function(e) {
         const img = document.createElement('img');
         img.src = e.target.result;
         preview.appendChild(img);
       }
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(files[i]);
     }
-  });
-
-  // Drag and Drop
-  uploadArea.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    uploadArea.style.background = '#f9fff9';
-  });
-  uploadArea.addEventListener('dragleave', () => {
-    uploadArea.style.background = '';
-  });
-  uploadArea.addEventListener('drop', (e) => {
-    e.preventDefault();
-    fileInput.files = e.dataTransfer.files;
-    fileInput.dispatchEvent(new Event('change'));
-    uploadArea.style.background = '';
-  });
+  }
 </script>
+
 </body>
 </html>

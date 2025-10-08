@@ -18,360 +18,155 @@
       --radius:12px;
     }
     *{box-sizing:border-box}
-    html,body{margin:0}
-    body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:#0f172a}
-
-    /* Header */
-    header{position:sticky;top:0;z-index:20;background:var(--primary);color:#fff;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
-    header .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    body{font-family:Inter,system-ui,Roboto,Arial,sans-serif;background:var(--bg);margin:0;color:#0f172a}
+    header{position:sticky;top:0;background:var(--primary);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
     header h1{margin:0;font-size:1.1rem}
-    .actions-header{display:flex;gap:8px;flex-wrap:wrap}
     .btn{border:0;cursor:pointer;border-radius:10px;padding:10px 14px;font-weight:700;background:var(--primary);color:#fff}
     .btn:hover{background:var(--primary-600)}
     .btn-ghost{background:#fff;color:#1f2937}
     .btn-danger{background:var(--danger)}
     .btn-danger:hover{background:var(--danger-600)}
     .container{padding:16px}
-
-    /* Mobile-first product cards */
-    .product-list{display:grid;gap:12px;margin-top:12px}
-    .product-card{background:var(--card);border-radius:var(--radius);padding:12px;box-shadow:0 4px 20px var(--ring);display:flex;flex-direction:column;gap:6px}
-    .product-card h3{margin:0;font-size:1rem}
-    .meta{font-size:.86rem;color:var(--muted)}
-    .price{font-weight:800;color:#10387b}
-    .status{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800;align-self:flex-start}
-    .status.draft{background:rgba(245,158,11,.12);color:#a16207}
+    table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px var(--ring)}
+    th,td{padding:12px;text-align:left;border-bottom:1px solid #e5e7eb}
+    th{background:#f1f5f9;text-transform:uppercase;font-size:12px}
+    img.thumb{width:60px;height:60px;object-fit:cover;border-radius:6px}
+    .status{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
     .status.published{background:rgba(22,163,74,.12);color:#166534}
-    .card-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-    .card-actions .btn{flex:1}
-
-    /* Desktop table */
-    @media(min-width:900px){
-      .table-wrapper{display:block;overflow:auto;margin-top:16px}
-      .product-list{display:none}
-    }
-    @media(max-width:899px){
-      .table-wrapper{display:none}
-    }
-    table{width:100%;border-collapse:collapse;min-width:900px;background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 20px var(--ring)}
-    th,td{padding:12px;text-align:left;border-bottom:1px solid #e5e7eb;white-space:nowrap}
-    th{background:#f1f5f9;font-size:12px;text-transform:uppercase;letter-spacing:.5px}
-
-    /* Modals (backdrop + panel) */
-    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:18px;z-index:50}
-    .modal{background:#fff;border-radius:var(--radius);width:min(640px,95%);max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
-    .modal .head{padding:14px 16px;border-bottom:1px solid #eef2f7;display:flex;justify-content:space-between;align-items:center}
-    .modal .body{padding:16px}
-    .close-x{background:transparent;border:0;font-size:20px;cursor:pointer;line-height:1}
-
-    /* Form */
-    .form{display:grid;gap:12px}
-    .form label{font-weight:700;font-size:14px}
-    .form input,.form select,.form textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px}
-    .form textarea{min-height:90px;resize:vertical}
-    .form-row{display:grid;gap:10px;grid-template-columns:1fr}
-    @media(min-width:560px){.form-row{grid-template-columns:1fr 1fr}}
-
-    .form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap}
-    .form-actions .btn{min-width:120px}
-
-    /* Image Slots (three separate buttons) */
-    .slot-grid{display:grid;gap:12px;grid-template-columns:1fr}
-    @media(min-width:560px){.slot-grid{grid-template-columns:repeat(3,1fr)}}
-    .slot{background:#f9fafb;border:1.5px dashed #d1d5db;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;min-height:180px;position:relative}
-    .slot img{width:100%;height:150px;object-fit:cover;border-radius:10px;display:none}
-    .slot.filled img{display:block}
-    .slot .hint{font-size:.85rem;color:#6b7280;margin-top:6px}
-    .slot .btn{margin-top:8px}
-    .slot .clear{position:absolute;top:8px;right:8px;background:#fff;border:1px solid #e5e7eb;border-radius:999px;padding:4px 8px;font-size:12px;cursor:pointer;display:none}
-    .slot.filled .clear{display:block}
-
-    /* Image Picker Grid */
-    .picker-grid{display:grid;gap:10px;grid-template-columns:repeat(3,1fr)}
-    @media(max-width:520px){.picker-grid{grid-template-columns:repeat(2,1fr)}}
-    .pick{position:relative;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;background:#fff;cursor:pointer}
-    .pick img{width:100%;height:120px;object-fit:cover;display:block}
-    .pick .choose{position:absolute;inset:auto 8px 8px 8px;background:rgba(255,255,255,.9);border:1px solid #e5e7eb;border-radius:8px;padding:6px 8px;text-align:center;font-weight:700}
-    .empty-note{background:#fff8e1;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:10px;font-size:.9rem}
-
-    /* Utility */
-    .hide{display:none !important}
+    .status.draft{background:rgba(245,158,11,.12);color:#a16207}
+    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}
+    .modal{background:#fff;border-radius:12px;width:min(500px,90%);padding:20px;max-height:90vh;overflow:auto}
+    .form{display:grid;gap:10px}
+    input,select,textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px}
+    textarea{min-height:80px}
   </style>
 </head>
 <body>
   <header>
-    <div class="row">
-      <h1>Products Dashboard</h1>
-      <div class="actions-header">
-        <a class="btn-ghost btn" href="{% url 'addproductimage' %}">Manage / Upload Images</a>
-        <button id="openAdd" class="btn">＋ Add Product</button>
-      </div>
+    <h1>Products Dashboard</h1>
+    <div>
+      <a class="btn-ghost btn" href="{% url 'addproductimage' %}">Manage Images</a>
+      <a href="{% url 'add_product'%}"><button class="btn" >＋ Add Product</button></a>
     </div>
   </header>
 
   <div class="container">
-    <!-- Mobile-first cards -->
-    <div class="product-list" aria-live="polite">
-      {% for product in products %}
-      <article class="product-card">
-        <h3>{{ product.name }}</h3>
-        <div class="meta">
-          {{ product.category.name }} • Updated {{ product.updated|date:"M d, Y" }}
-        </div>
-        <div class="price">₦{{ product.discountedprice|default:product.actualprice }}</div>
-        <span class="status {{ product.status }}">{{ product.get_status_display }}</span>
-        <div class="card-actions">
-          <a class="btn" href="{% url 'product_update' product.slug %}">Edit</a>
-          <button class="btn btn-danger" onclick="openDeleteModal('{{ product.slug }}','{{ product.name|escapejs }}')">Delete</button>
-        </div>
-      </article>
-      {% empty %}
-      <p class="meta">No products yet.</p>
-      {% endfor %}
-    </div>
-
-    <!-- Desktop table -->
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th><th>Category</th><th>Price</th><th>Discounted</th><th>Status</th><th>Featured</th><th>Updated</th><th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for product in products %}
-          <tr>
-            <td>{{ product.name }}</td>
-            <td>{{ product.category.name }}</td>
-            <td>₦{{ product.actualprice }}</td>
-            <td>₦{{ product.discountedprice }}</td>
-            <td><span class="status {{ product.status }}">{{ product.get_status_display }}</span></td>
-            <td>{% if product.featured %}⭐ Yes{% else %}—{% endif %}</td>
-            <td>{{ product.updated|date:"M d, Y" }}</td>
-            <td>
-              <a class="btn" href="{% url 'product_update' product.slug %}">Edit</a>
-              <button class="btn btn-danger" onclick="openDeleteModal('{{ product.slug }}','{{ product.name|escapejs }}')">Delete</button>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Status</th>
+          <th>Updated</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+        <tr>
+          <td>
+            {% if product.product_image %}
+              <img src="{{ product.product_image.image.url }}" class="thumb">
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td>{{ product.name }}</td>
+          <td>{{ product.category.name }}</td>
+          <td>₦{{ product.discountedprice|default:product.actualprice }}</td>
+          <td><span class="status {{ product.status }}">{{ product.get_status_display }}</span></td>
+          <td>{{ product.updated|date:"M d, Y" }}</td>
+          <td>
+            <a class="btn" href="{% url 'product_update' product.slug %}">Edit</a>
+            <button class="btn btn-danger" onclick="openDeleteModal('{{ product.slug }}','{{ product.name|escapejs }}')">Delete</button>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" style="text-align:center;color:#64748b;">No products yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 
   <!-- Add Product Modal -->
-  <div id="addBackdrop" class="backdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="addTitle">
-      <div class="head">
-        <h3 id="addTitle" style="margin:0">Add Product</h3>
-        <button class="close-x" aria-label="Close" onclick="closeAddModal()">✕</button>
-      </div>
-      <div class="body">
-        <form method="post" class="form" id="addForm" enctype="multipart/form-data">
-          {% csrf_token %}
-          <label>Name</label>
-          <input type="text" name="name" required>
+  <div class="backdrop" id="addBackdrop">
+    <div class="modal">
+      <h2>Add Product</h2>
+      <form method="post" enctype="multipart/form-data" class="form">
+        {% csrf_token %}
+        <label>Name</label>
+        <input type="text" name="name" required>
 
-          <div class="form-row">
-            <div>
-              <label>Category</label>
-              <select name="category" required>
-                {% for c in categories %}
-                  <option value="{{ c.id }}">{{ c.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div>
-              <label>Status</label>
-              <select name="status">
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-              </select>
-            </div>
-          </div>
+        <label>Category</label>
+        <select name="category">
+          {% for c in categories %}
+          <option value="{{ c.id }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
 
-          <div class="form-row">
-            <div>
-              <label>Stock</label>
-              <input type="number" name="stock">
-            </div>
-            <div>
-              <label>Actual Price</label>
-              <input type="number" name="actualprice" step="0.01" required>
-            </div>
-            <div>
-              <label>Discounted Price</label>
-              <input type="number" name="discountedprice" step="0.01">
-            </div>
-          </div>
+        <label>Status</label>
+        <select name="status">
+          <option value="draft">Draft</option>
+          <option value="published">Published</option>
+        </select>
 
-          <label>Description</label>
-          <textarea name="description"></textarea>
+        <label>Stock</label>
+        <input type="number" name="stock">
 
-          <!-- Three separately-triggered image selectors -->
-          <label>Product Images</label>
-          <div class="slot-grid">
-            <!-- Slot 1 -->
-            <div class="slot" id="slot1">
-              <button type="button" class="clear" onclick="clearSlot(1)">Clear</button>
-              <img id="preview1" alt="Selected image 1">
-              <div class="hint">Image 1</div>
-              <button type="button" class="btn" onclick="openPickerFor(1)">Select Image</button>
-              <input type="hidden" name="product_image" id="product_image1">
-            </div>
-            <!-- Slot 2 -->
-            <div class="slot" id="slot2">
-              <button type="button" class="clear" onclick="clearSlot(2)">Clear</button>
-              <img id="preview2" alt="Selected image 2">
-              <div class="hint">Image 2</div>
-              <button type="button" class="btn" onclick="openPickerFor(2)">Select Image</button>
-              <input type="hidden" name="product_image2" id="product_image2">
-            </div>
-            <!-- Slot 3 -->
-            <div class="slot" id="slot3">
-              <button type="button" class="clear" onclick="clearSlot(3)">Clear</button>
-              <img id="preview3" alt="Selected image 3">
-              <div class="hint">Image 3</div>
-              <button type="button" class="btn" onclick="openPickerFor(3)">Select Image</button>
-              <input type="hidden" name="product_image3" id="product_image3">
-            </div>
-          </div>
+        <label>Actual Price</label>
+        <input type="number" name="actualprice" step="0.01">
 
-          <label><input type="checkbox" name="featured"> Featured</label>
+        <label>Discounted Price</label>
+        <input type="number" name="discountedprice" step="0.01">
 
-          <div class="form-actions">
-            <button type="button" class="btn btn-ghost" onclick="closeAddModal()">Cancel</button>
-            <button type="submit" class="btn">Save</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+        <label>Description</label>
+        <textarea name="description"></textarea>
 
-  <!-- Image Picker Modal -->
-  <div id="pickerBackdrop" class="backdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
-      <div class="head">
-        <h3 id="pickerTitle" style="margin:0">Select an Image</h3>
-        <button class="close-x" aria-label="Close" onclick="closePicker()">✕</button>
-      </div>
-      <div class="body">
-        {% with image_list=images|default:user.user_image.all %}
-          {% if image_list %}
-          <div class="picker-grid" id="pickerGrid">
-            {% for img in image_list %}
-              <div class="pick" onclick="selectImage('{{ img.id }}','{{ img.image.url }}')">
-                <img src="{{ img.image.url }}" alt="Image {{ forloop.counter }}">
-                <div class="choose">Use this</div>
-              </div>
-            {% endfor %}
-          </div>
-          {% else %}
-          <div class="empty-note">
-            You have no uploaded images yet. <a href="{% url 'addproductimage' %}">Upload images</a> first, then come back to select them.
-          </div>
-          {% endif %}
-        {% endwith %}
-      </div>
+        <label>Product Image</label>
+        <input type="file" name="product_image" accept="image/*">
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;">
+          <button type="button" class="btn-ghost btn" onclick="closeAddModal()">Cancel</button>
+          <button type="submit" class="btn">Save</button>
+        </div>
+      </form>
     </div>
   </div>
 
   <!-- Delete Modal -->
-  <div id="deleteBackdrop" class="backdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
-      <div class="head">
-        <h3 id="deleteTitle" style="margin:0;color:var(--danger)">Confirm Delete</h3>
-        <button class="close-x" aria-label="Close" onclick="closeDeleteModal()">✕</button>
-      </div>
-      <div class="body">
-        <p>Are you sure you want to delete <strong id="deleteName"></strong>?</p>
-        <form id="deleteForm" method="post">
-          {% csrf_token %}
-          <div class="form-actions">
-            <button type="button" class="btn btn-ghost" onclick="closeDeleteModal()">Cancel</button>
-            <button type="submit" class="btn btn-danger">Delete</button>
-          </div>
-        </form>
-      </div>
+  <div class="backdrop" id="deleteBackdrop">
+    <div class="modal">
+      <h2 style="color:#dc2626;">Confirm Delete</h2>
+      <p>Are you sure you want to delete <strong id="deleteName"></strong>?</p>
+      <form method="post" id="deleteForm">
+        {% csrf_token %}
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button type="button" class="btn-ghost btn" onclick="closeDeleteModal()">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
     </div>
   </div>
 
   <script>
-    /* ===== Add Product Modal ===== */
-    const addBackdrop = document.getElementById('addBackdrop');
-    const openAddBtn = document.getElementById('openAdd');
-    function openAddModal(){ addBackdrop.style.display='flex'; addBackdrop.setAttribute('aria-hidden','false'); }
-    function closeAddModal(){ addBackdrop.style.display='none'; addBackdrop.setAttribute('aria-hidden','true'); }
-    openAddBtn?.addEventListener('click', openAddModal);
+    const addBackdrop=document.getElementById('addBackdrop');
+    const deleteBackdrop=document.getElementById('deleteBackdrop');
+    const deleteForm=document.getElementById('deleteForm');
+    const deleteName=document.getElementById('deleteName');
 
-    /* ===== Delete Modal ===== */
-    const deleteBackdrop = document.getElementById('deleteBackdrop');
-    const deleteForm = document.getElementById('deleteForm');
-    const deleteName = document.getElementById('deleteName');
-    function openDeleteModal(slug, name){
-      deleteForm.action = `{% url 'product_delete' 'slug-placeholder' %}`.replace('slug-placeholder', slug);
-      deleteName.textContent = name;
+    document.getElementById('openAdd').onclick=()=>{addBackdrop.style.display='flex';};
+    function closeAddModal(){addBackdrop.style.display='none';}
+
+    function openDeleteModal(slug,name){
+      deleteForm.action=`{% url 'product_delete' 'slug-placeholder' %}`.replace('slug-placeholder',slug);
+      deleteName.textContent=name;
       deleteBackdrop.style.display='flex';
-      deleteBackdrop.setAttribute('aria-hidden','false');
     }
-    function closeDeleteModal(){
-      deleteBackdrop.style.display='none';
-      deleteBackdrop.setAttribute('aria-hidden','true');
-    }
+    function closeDeleteModal(){deleteBackdrop.style.display='none';}
 
-    /* Close any modal by clicking backdrop */
-    [addBackdrop, deleteBackdrop].forEach(b =>
-      b.addEventListener('click', (e)=>{ if(e.target===b){ b.style.display='none'; b.setAttribute('aria-hidden','true'); } })
-    );
-
-    /* ===== Image Picker (for already-uploaded images) ===== */
-    const pickerBackdrop = document.getElementById('pickerBackdrop');
-    let currentSlot = null; // 1, 2, or 3
-
-    function openPickerFor(slotIndex){
-      currentSlot = slotIndex;
-      pickerBackdrop.style.display='flex';
-      pickerBackdrop.setAttribute('aria-hidden','false');
-    }
-    function closePicker(){
-      pickerBackdrop.style.display='none';
-      pickerBackdrop.setAttribute('aria-hidden','true');
-      currentSlot = null;
-    }
-    pickerBackdrop.addEventListener('click', (e)=>{ if(e.target===pickerBackdrop) closePicker(); });
-
-    function selectImage(id, url){
-      if(!currentSlot) return;
-      const hidden = document.getElementById('product_image'+currentSlot);
-      const img = document.getElementById('preview'+currentSlot);
-      const slot = document.getElementById('slot'+currentSlot);
-
-      hidden.value = id;
-      img.src = url;
-      img.style.display = 'block';
-      slot.classList.add('filled');
-
-      closePicker();
-    }
-
-    function clearSlot(slotIndex){
-      const hidden = document.getElementById('product_image'+slotIndex);
-      const img = document.getElementById('preview'+slotIndex);
-      const slot = document.getElementById('slot'+slotIndex);
-      hidden.value = '';
-      img.src = '';
-      img.style.display = 'none';
-      slot.classList.remove('filled');
-    }
-
-    /* Esc key closes any open modal */
-    document.addEventListener('keydown', (e)=>{
-      if(e.key==='Escape'){
-        [addBackdrop, pickerBackdrop, deleteBackdrop].forEach(b=>{
-          if(b.style.display==='flex'){ b.style.display='none'; b.setAttribute('aria-hidden','true'); }
-        });
-      }
-    });
+    [addBackdrop,deleteBackdrop].forEach(b=>b.addEventListener('click',e=>{if(e.target===b)b.style.display='none';}));
   </script>
 </body>
 </html>

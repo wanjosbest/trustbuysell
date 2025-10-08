@@ -1,36 +1,43 @@
 {% extends "base.html" %}
-
 {% load static %}
+
 {% block header %}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{% block title %}Product Details {% endblock %}</title>
+<title>{{ product.name }} - Product Details</title>
 <link rel="stylesheet" href="{% static 'css/products.css' %}">
-
-{% include "header.html"%}
-
+{% include "header.html" %}
 {% endblock %}
 
 {% block content %}
-{% for message in messages %}
-{{message}}
-{% endfor %}
 <main>
+  {% for message in messages %}
+  <div class="alert">{{ message }}</div>
+  {% endfor %}
 
   <!-- Product Gallery -->
   <section class="gallery">
-    <img id="mainImage" src="{{ product.product_image.image.url }}" alt="{{ product.name }}">
+    {% if product.images.all %}
+      {% with product.images.first as main_image %}
+        <img id="mainImage" src="{{ main_image.image.url }}" alt="{{ product.name }}">
+      {% endwith %}
+    {% else %}
+      <img id="mainImage" src="{% static 'img/no-image.png' %}" alt="No Image">
+    {% endif %}
   </section>
+
   <div class="thumbs">
-    {% if product.product_image %}<img src="{{ product.product_image.image.url }}" class="active">{% endif %}
-    {% if product.product_image2 %}<img src="{{ product.product_image2.image.url }}">{% endif %}
-    {% if product.product_image3 %}<img src="{{ product.product_image3.image.url }}">{% endif %}
+    {% for image in product.images.all %}
+      <img src="{{ image.image.url }}" class="{% if forloop.first %}active{% endif %}" alt="{{ product.name }}">
+    {% empty %}
+      <p>No images available for this product.</p>
+    {% endfor %}
   </div>
 
   <!-- Product Info -->
   <section class="info">
     <h1>{{ product.name }}</h1>
-    <div class="seller">by <strong>{{ product.user }}</strong></div>
+    <div class="seller">by <strong>{{ product.user.username }}</strong></div>
     <div class="price">₦{{ product.discountedprice }}</div>
 
     <div class="actions">
@@ -51,7 +58,11 @@
     <div class="rel-grid">
       {% for related in related_product %}
       <div class="rel-card">
-        <img src="{{ related.product_image.image.url }}" alt="{{ related.name }}">
+        {% if related.images.first %}
+          <img src="{{ related.images.first.image.url }}" alt="{{ related.name }}">
+        {% else %}
+          <img src="{% static 'img/no-image.png' %}" alt="No Image">
+        {% endif %}
         <div class="body">
           <div class="title">{{ related.name }}</div>
           <div class="price">₦{{ related.discountedprice }}</div>
@@ -60,6 +71,8 @@
       {% endfor %}
     </div>
   </section>
+
+  <!-- Reviews Section -->
   <section class="reviews-container">
     <h2 class="section-title">Customer Reviews ({{ reviews.count }})</h2>
 
@@ -103,13 +116,14 @@
     <p class="login-msg"><a href="{% url 'login' %}">Login</a> to write a review.</p>
     {% endif %}
   </section>
-
-
 </main>
 
+<!-- JavaScript -->
 <script>
+document.addEventListener("DOMContentLoaded", () => {
   const thumbs = document.querySelectorAll('.thumbs img');
   const mainImage = document.getElementById('mainImage');
+
   thumbs.forEach(t => {
     t.addEventListener('click', () => {
       thumbs.forEach(x => x.classList.remove('active'));
@@ -118,39 +132,27 @@
     });
   });
 
-  document.addEventListener("DOMContentLoaded", () => {
   const stars = document.querySelectorAll(".review-form .star");
-  const ratingInput = document.createElement("input");
-  ratingInput.type = "hidden";
-  ratingInput.name = "rating";
-  document.querySelector(".review-form").appendChild(ratingInput);
+  if (stars.length) {
+    const ratingInput = document.createElement("input");
+    ratingInput.type = "hidden";
+    ratingInput.name = "rating";
+    document.querySelector(".review-form").appendChild(ratingInput);
 
-  stars.forEach((star, index) => {
-    star.addEventListener("click", () => {
-      const value = index + 1;
-      ratingInput.value = value;
-
-      // Highlight stars up to the clicked one
-      stars.forEach((s, i) => {
-        s.classList.toggle("selected", i < value);
+    stars.forEach((star, index) => {
+      star.addEventListener("click", () => {
+        const value = index + 1;
+        ratingInput.value = value;
+        stars.forEach((s, i) => s.classList.toggle("selected", i < value));
+      });
+      star.addEventListener("mouseenter", () => {
+        stars.forEach((s, i) => s.classList.toggle("filled", i <= index));
+      });
+      star.addEventListener("mouseleave", () => {
+        stars.forEach((s, i) => s.classList.toggle("filled", i < ratingInput.value));
       });
     });
-
-    // Hover effect: preview rating before click
-    star.addEventListener("mouseenter", () => {
-      stars.forEach((s, i) => {
-        s.classList.toggle("filled", i <= index);
-      });
-    });
-
-    // Remove hover highlight when leaving the star area
-    star.addEventListener("mouseleave", () => {
-      stars.forEach((s, i) => {
-        s.classList.toggle("filled", i < ratingInput.value);
-      });
-    });
-  });
+  }
 });
 </script>
-
 {% endblock %}

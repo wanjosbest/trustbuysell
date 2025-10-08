@@ -5,8 +5,9 @@ urlpatterns = [
     #user
     path("add-product-image/", views.upload_image, name="addproductimage"),
     path("user-products/", views.user_product_list, name="product_lists"),
+    path("add-product/", views.add_product, name="add_product"),
     path("product-details/<slug>/", views.product_detail, name="product_detail"),
-    path("product-update/<slug>/",views.product_update, name="product_update"),
+    path("product/update/<slug:slug>/", views.product_update, name="product_update"),
     path("product-delete/<slug>/",views.product_delete, name="product_delete"),
     path("add-to-cart/<product_id>/", views.add_to_cart, name = "add-to-cart"),
     path("cart/",views.view_cart, name="cart"),

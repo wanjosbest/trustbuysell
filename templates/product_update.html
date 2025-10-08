@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Update Product</title>
   <style>
     body {
@@ -86,80 +86,67 @@
       background: #1e40af;
     }
 
-    /* Image Grid Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    .modal-content {
-      background: #fff;
-      padding: 20px;
+    .file-upload {
+      border: 2px dashed #d1d5db;
       border-radius: 12px;
-      width: 90%;
-      max-width: 800px;
-      max-height: 80vh;
-      overflow-y: auto;
-      animation: slideUp 0.4s ease;
+      text-align: center;
+      padding: 20px;
+      background: #f9fafb;
+      cursor: pointer;
     }
 
-    .grid {
+    .file-upload input {
+      display: none;
+    }
+
+    .preview-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 15px;
+      gap: 10px;
+      margin-top: 15px;
     }
 
-    .grid img {
+    .preview-grid img {
       width: 100%;
       height: 120px;
       object-fit: cover;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.3s;
-      border: 3px solid transparent;
-    }
-
-    .grid img:hover {
-      transform: scale(1.05);
-      border-color: #2563eb;
-    }
-
-    .close {
-      float: right;
-      font-size: 20px;
-      cursor: pointer;
-      color: #333;
-    }
-
-    .selected-preview {
-      margin-top: 10px;
-      text-align: center;
-    }
-
-    .selected-preview img {
-      max-width: 150px;
       border-radius: 10px;
     }
 
-    @keyframes fadeIn { from {opacity: 0; transform: translateY(15px);} to {opacity: 1; transform: translateY(0);} }
-    @keyframes slideUp { from {opacity: 0; transform: translateY(30px);} to {opacity: 1; transform: translateY(0);} }
+    .upload-status {
+      display: none;
+      text-align: center;
+      color: #2563eb;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(15px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        margin: 20px;
+        padding: 20px;
+      }
+      h2 {
+        font-size: 1.5rem;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Update Product</h2>
-    <form method="POST">
+
+    <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
 
       <div class="form-group">
         <label>Product Name</label>
-        <input type="text" name="name" value="{{ product.name }}" required>
+        <input type="text" name="name" value="{{ product.name }}" required />
       </div>
 
       <div class="form-group">
@@ -169,22 +156,27 @@
 
       <div class="form-group">
         <label>Meta Keywords</label>
-        <input type="text" name="meta_keywords" value="{{ product.meta_keywords }}">
+        <input type="text" name="meta_keywords" value="{{ product.meta_keywords }}" />
       </div>
 
       <div class="form-group">
         <label>Meta Description</label>
-        <input type="text" name="meta_descriptions" value="{{ product.meta_descriptions }}">
+        <input type="text" name="meta_descriptions" value="{{ product.meta_descriptions }}" />
       </div>
 
       <div class="form-group">
         <label>Actual Price</label>
-        <input type="number" name="actualprice" step="0.01" value="{{ product.actualprice }}">
+        <input type="number" name="actualprice" step="0.01" value="{{ product.actualprice }}" />
       </div>
 
       <div class="form-group">
         <label>Discounted Price</label>
-        <input type="number" name="discountedprice" step="0.01" value="{{ product.discountedprice }}">
+        <input type="number" name="discountedprice" step="0.01" value="{{ product.discountedprice }}" />
+      </div>
+
+      <div class="form-group">
+        <label>Stock Quantity</label>
+        <input type="number" name="stock" value="{{ product.stock }}" min="0" required />
       </div>
 
       <div class="form-group">
@@ -199,74 +191,61 @@
         <label>Category</label>
         <select name="category">
           {% for cat in categories %}
-            <option value="{{ cat.id }}" {% if product.category.id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+          <option value="{{ cat.id }}" {% if product.category.id == cat.id %}selected{% endif %}>
+            {{ cat.name }}
+          </option>
           {% endfor %}
         </select>
       </div>
 
-      <!-- Product Images -->
-      {% for i in "123" %}
+      <div class="form-group file-upload" onclick="document.getElementById('product_images').click()">
+        <label for="product_images">📸 Upload Multiple Product Images</label>
+        <input type="file" id="product_images" name="product_images" accept="image/*" multiple onchange="previewImages(event)" />
+        <div id="preview" class="preview-grid"></div>
+      </div>
+
+      {% if product.images.all %}
       <div class="form-group">
-        <label>Update Product Image {{ i }}</label>
-        <input type="hidden" name="product_image{{ i }}" id="productImageInput{{ i }}"
-          value="{% if i == '1' and product.product_image %}{{ product.product_image.id }}{% elif i == '2' and product.product_image2 %}{{ product.product_image2.id }}{% elif i == '3' and product.product_image3 %}{{ product.product_image3.id }}{% endif %}">
-        <button type="button" class="btn" onclick="openModal('productImageInput{{ i }}','selectedPreview{{ i }}')">Select Image</button>
-        <div class="selected-preview">
-          <img id="selectedPreview{{ i }}"
-            src="{% if i == '1' and product.product_image %}{{ product.product_image.image.url }}{% elif i == '2' and product.product_image2 %}{{ product.product_image2.image.url }}{% elif i == '3' and product.product_image3 %}{{ product.product_image3.image.url }}{% endif %}"
-            {% if i == '1' and not product.product_image %}{% elif i == '2' and not product.product_image2 %}{% elif i == '3' and not product.product_image3 %}style="display:none;"{% endif %}>
+        <h3>Existing Images</h3>
+        <div class="preview-grid">
+          {% for img in product.images.all %}
+          <img src="{{ img.image.url }}" alt="Product image" />
+          {% endfor %}
         </div>
       </div>
-      {% endfor %}
+      {% endif %}
 
       <div class="checkbox">
-        <input type="checkbox" name="featured" {% if product.featured %}checked{% endif %}>
-        <label>Featured</label>
+        <input type="checkbox" name="featured" {% if product.featured %}checked{% endif %} />
+        <label>Featured Product</label>
       </div>
+
+      <div id="upload-status" class="upload-status">Uploading, please wait...</div>
 
       <button type="submit" class="btn">Update Product</button>
     </form>
   </div>
 
-  <!-- Modal -->
-  <div id="imageModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal()">&times;</span>
-      <h3>Select an Image</h3>
-      <div class="grid">
-        {% for img in images %}
-          <img src="{{ img.image.url }}" data-id="{{ img.id }}" onclick="selectImage(this)">
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-
   <script>
-    let currentInputId = null;
-    let currentPreviewId = null;
-
-    function openModal(inputId, previewId) {
-      currentInputId = inputId;
-      currentPreviewId = previewId;
-      document.getElementById("imageModal").style.display = "flex";
+    function previewImages(event) {
+      const preview = document.getElementById("preview");
+      preview.innerHTML = "";
+      const files = event.target.files;
+      for (let i = 0; i < files.length; i++) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          preview.appendChild(img);
+        };
+        reader.readAsDataURL(files[i]);
+      }
     }
 
-    function closeModal() {
-      document.getElementById("imageModal").style.display = "none";
-    }
-
-    function selectImage(img) {
-      let imgId = img.getAttribute("data-id");
-      let imgSrc = img.getAttribute("src");
-
-      document.getElementById(currentInputId).value = imgId;
-
-      let preview = document.getElementById(currentPreviewId);
-      preview.src = imgSrc;
-      preview.style.display = "block";
-
-      closeModal();
-    }
+    const form = document.querySelector("form");
+    form.addEventListener("submit", () => {
+      document.getElementById("upload-status").style.display = "block";
+    });
   </script>
 </body>
 </html>

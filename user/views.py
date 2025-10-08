@@ -4,7 +4,7 @@ from django.db.models import Count, Q
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, logout,login
-from Products.models import category, Products,Product_image,HeroImage
+from Products.models import category, Products,ProductImage,HeroImage
 
 def register_view(request):
     if request.method == 'POST':
@@ -80,11 +80,12 @@ def logout_view(request):
 def index(request):
     #Output categories
     categories = category.objects.all()
+    allproducts = Products.objects.all().order_by("-published")[:8]
     #output featured products
     hero = HeroImage.objects.filter(is_active=True).first()
-    FeaturedProduct = Products.objects.filter(featured = True).order_by("-published")[:8]
+    # FeaturedProduct = Products.objects.filter(featured = True).order_by("-published")[:8]
     top_rated = Products.objects.annotate(five_star_count=Count("reviews", filter=Q(reviews__rating=5))).filter(five_star_count__gt=0).order_by("-five_star_count")[:10]  # Show top 10
    
-    context = {"categories":categories,"FeaturedProduct":FeaturedProduct,"hero":hero,"top_rated": top_rated}
+    context = {"categories":categories,"hero":hero,"top_rated": top_rated,"allproducts":allproducts}
     return render(request,"index.html", context)
 

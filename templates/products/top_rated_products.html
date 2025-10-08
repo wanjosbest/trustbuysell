@@ -1,13 +1,12 @@
 {% extends "base.html" %}
-
 {% load static %}
+
 {% block header %}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{% block title %}Top Rated Products {% endblock %}</title>
+<title>{% block title %}Top Rated Products{% endblock %}</title>
 <link rel="stylesheet" href="{% static 'css/main.css' %}">
-{% include "header.html"%}
-
+{% include "header.html" %}
 {% endblock %}
 
 {% block content %}
@@ -19,24 +18,33 @@
 
   {% if page_obj %}
   <div id="topRated" class="grid">
-    {% for product in page_obj %}
-    <article class="card">
-      <a class="btn btn-outline" href="{% url 'product_detail' product.slug %}">
-        <div class="media">
-          <img src="{{ product.product_image.image.url }}" alt="{{ product.name }}">
-        </div>
-      </a>
-      <div class="body">
-        <div class="p-title">{{ product.name }}</div>
-        <div class="price">₦{{ product.discountedprice|floatformat:0 }}</div>
-        <p class="rating">★ {{ product.five_star_count }} five-star{{ product.five_star_count|pluralize }}</p>
-        <div class="actions">
-          <a class="btn btn-accent" href="{% url 'add-to-cart' product.id %}">Add to Cart</a>
-          <a class="btn btn-outline" href="{% url 'product_detail' product.slug %}">View</a>
-        </div>
+   {% for product in page_obj %}
+<article class="card">
+  <a href="{% url 'product_detail' product.slug %}" class="media">
+    {% if product.images.all %}
+      <div class="image-slider">
+        {% for img in product.images.all %}
+          <img src="{{ img.image.url }}" alt="{{ product.name }}">
+        {% endfor %}
       </div>
-    </article>
-    {% endfor %}
+    {% else %}
+      <img src="{% static 'img/placeholder.png' %}" alt="No Image">
+    {% endif %}
+  </a>
+
+  <div class="body">
+    <div class="p-title">{{ product.name }}</div>
+    <div class="price">₦{{ product.discountedprice|floatformat:0 }}</div>
+    <p class="rating">★ {{ product.five_star_count }} five-star{{ product.five_star_count|pluralize }}</p>
+
+    <div class="actions">
+      <a class="btn btn-accent" href="{% url 'add-to-cart' product.id %}">Add to Cart</a>
+      <a class="btn btn-outline" href="{% url 'product_detail' product.slug %}">View</a>
+    </div>
+  </div>
+</article>
+{% endfor %}
+
   </div>
 
   <!-- Pagination -->
@@ -44,16 +52,39 @@
     {% if page_obj.has_previous %}
       <a href="?page={{ page_obj.previous_page_number }}" class="page-btn">« Prev</a>
     {% endif %}
-
     <span class="page-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-
     {% if page_obj.has_next %}
       <a href="?page={{ page_obj.next_page_number }}" class="page-btn">Next »</a>
     {% endif %}
   </div>
-
   {% else %}
   <p class="muted">No top-rated products yet.</p>
   {% endif %}
 </main>
+
+<style>
+.image-slider {
+  display: flex;
+  overflow-x: auto;
+  gap: 6px;
+  scroll-snap-type: x mandatory;
+  border-radius: 10px;
+}
+
+.image-slider img {
+  flex: 0 0 100%;
+  max-width: 100%;
+  border-radius: 10px;
+  scroll-snap-align: start;
+  object-fit: cover;
+}
+.image-slider::-webkit-scrollbar {
+  display: none;
+}
+@media (max-width: 600px) {
+  .card .media img {
+    height: 200px;
+  }
+}
+</style>
 {% endblock %}

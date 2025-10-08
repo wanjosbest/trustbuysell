@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% block header %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}TrustBuySell{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
+ <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card: #fff;
+      --border: #e5e7eb;
+      --muted: #6b7280;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      color: #111827;
+    }
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 16px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+    main {
+      max-width: 680px;
+      margin: 20px auto;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 20px;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 1.3rem;
+      text-align: center;
+      color: var(--primary);
+    }
+    form {
+      display: grid;
+      gap: 16px;
+    }
+    label {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    textarea { resize: vertical; min-height: 90px; }
+    .form-row {
+      display: grid;
+      gap: 12px;
+    }
+    @media(min-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      border: 0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-weight: 600;
+    }
+    .btn:hover {
+      background: var(--primary-hover);
+    }
+    .file-upload {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      text-align: center;
+      padding: 20px;
+      background: #f9fafb;
+    }
+    .file-upload input {
+      display: none;
+    }
+    .file-upload label {
+      display: inline-block;
+      cursor: pointer;
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .preview {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+    }
+    .preview img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+  </style>
+{% include "header.html"%}
+
+{% endblock %}
+
+{% block content %}
+ 
+
+  <header>Add New Product</header>
+
+  <main>
+    <h2>Product Information</h2>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      <label>Product Name</label>
+      <input type="text" name="name" required>
+
+      <div class="form-row">
+        <div>
+          <label>Category</label>
+          <select name="category" required>
+            <option value="">Select Category</option>
+            {% for c in categories %}
+            <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Status</label>
+          <select name="status">
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label>Actual Price (₦)</label>
+          <input type="number" step="0.01" name="actualprice" required>
+        </div>
+        <div>
+          <label>Discounted Price (₦)</label>
+          <input type="number" step="0.01" name="discountedprice">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label>Stock Quantity</label>
+          <input type="number" name="stock" min="0" required>
+        </div>
+      </div>
+
+      <label>Description</label>
+      <textarea name="description" placeholder="Enter product details..."></textarea>
+
+      <div class="form-row">
+        <div>
+          <label>Meta Keywords</label>
+          <input type="text" name="meta_keywords" placeholder="SEO keywords separated by commas">
+        </div>
+        <div>
+          <label>Meta Description</label>
+          <input type="text" name="meta_descriptions" placeholder="SEO description">
+        </div>
+      </div>
+
+      <!-- MULTIPLE IMAGE UPLOAD -->
+      <div class="file-upload">
+        <label for="images">📸 Upload Product Images (You can select multiple)</label>
+        <input type="file" id="images" name="images" accept="image/*" multiple onchange="previewImages(event)">
+        <div class="preview" id="imagePreview"></div>
+      </div>
+
+      <div class="actions">
+        <a href="{% url 'product_lists' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn">Save Product</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    // Multiple image preview
+    function previewImages(event) {
+      const previewContainer = document.getElementById('imagePreview');
+      previewContainer.innerHTML = '';
+
+      const files = event.target.files;
+      if (files) {
+        Array.from(files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            previewContainer.appendChild(img);
+          }
+          reader.readAsDataURL(file);
+        });
+      }
+    }
+  </script>
+
+{% endblock %}
