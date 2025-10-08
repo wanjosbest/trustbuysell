@@ -1,21 +1,92 @@
 {% extends "base.html" %}
 {% block content %}
-<main class="chat-box">
-  <h3>Chat with {{ other_user.username }}</h3>
+<main class="section">
+  <h2>Chat with {{ other_user_obj.username }}</h2>
 
-  <div class="messages">
-    {% for message in messages %}
-      <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
-        <p>{{ message.content }}</p>
-        <span class="timestamp">{{ message.timestamp|date:"H:i" }}</span>
-      </div>
-    {% endfor %}
+  <div class="chat-box">
+    <div class="messages">
+      {% for msg in messages %}
+        <div class="message {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
+          {{ msg.content }}
+          <div class="timestamp">{{ msg.timestamp|date:"M d, H:i" }}</div>
+        </div>
+      {% empty %}
+        <p>No messages yet. Say hi!</p>
+      {% endfor %}
+    </div>
+
+    <form method="POST">
+      {% csrf_token %}
+      <textarea name="content" placeholder="Type a message..." required></textarea>
+      <button type="submit">Send</button>
+    </form>
   </div>
-
-  <form method="POST">
-    {% csrf_token %}
-    <textarea name="content" placeholder="Type your message..." required></textarea>
-    <button type="submit">Send</button>
-  </form>
 </main>
+
+<style>
+.chat-box {
+  max-width: 600px;
+  margin: 20px auto;
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.messages {
+  height: 400px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.message {
+  margin: 8px 0;
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 75%;
+  position: relative;
+}
+
+.message.sent {
+  background: #dcf8c6;
+  margin-left: auto;
+  text-align: right;
+}
+
+.message.received {
+  background: #f1f1f1;
+}
+
+.timestamp {
+  font-size: 0.7rem;
+  color: #888;
+  margin-top: 4px;
+}
+
+form textarea {
+  width: 100%;
+  height: 60px;
+  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  resize: none;
+}
+
+form button {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-top: 6px;
+  cursor: pointer;
+}
+form button:hover {
+  background: #0056b3;
+}
+</style>
 {% endblock %}

@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import (ProductImage,Products,category,Cart_Items,shipping,Payment,HeroImage,Order,OrderItem,Review
 )
 from django.core.paginator import Paginator
-from user.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils.text import slugify
@@ -26,6 +25,8 @@ from decimal import Decimal
 from django.db import transaction
 from django.utils.dateparse import parse_datetime
 from wallet.models import Wallet, Transaction,PendingWallet
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 #users to add products images
 @login_required
