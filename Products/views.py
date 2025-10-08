@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import (Product_image,Products,category,Cart_Items,shipping,Payment,HeroImage,Order,OrderItem)
+from .models import (Product_image,Products,category,Cart_Items,shipping,Payment,HeroImage,Order,OrderItem,Review
+)
 from user.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -24,7 +25,6 @@ from decimal import Decimal
 from django.db import transaction
 from django.utils.dateparse import parse_datetime
 from wallet.models import Wallet, Transaction,PendingWallet
-
 
 #users to add products images
 
@@ -103,16 +103,30 @@ def user_product_list(request):
     )
 
 
+@login_required(login_url='login')
 def product_detail(request, slug):
     product = get_object_or_404(Products, slug=slug, status="published")
     related_product = (
         Products.objects.filter(category=product.category, status="published")
         .exclude(id=product.id)
-        .order_by("?")[:3]   
+        .order_by("?")[:3]
     )
+    reviews = Review.objects.filter(product=product).order_by("-created_at")
+
+    if request.method == "POST":
+        message = request.POST.get("message")
+        rating = int(request.POST.get("rating", 0))
+        if 1 <= rating <= 5:
+            Review.objects.create(user=request.user, product=product, message=message, rating=rating)
+            messages.success(request, "Your review has been submitted.")
+            return redirect("product_detail", slug=slug)
+        else:
+            messages.error(request, "Please choose a rating between 1 and 5.")
+
     context = {
         "product": product,
         "related_product": related_product,
+        "reviews": reviews,
     }
     return render(request, "product_detail.html", context)
 
@@ -568,3 +582,31 @@ def ordered_items_view(request):
         "ordered_items": ordered_items
     }
     return render(request, "products/ordered_items.html", context)
+
+# # review products
+
+# @login_required
+# def review_products(request, product_id):
+#     product = get_object_or_404(Products, id=product_id)
+#     reviews = Review.objects.filter(product=product).order_by("-id")
+
+#     if request.method == "POST":
+#         message = request.POST.get("message")
+#         rating = request.POST.get("rating")
+
+#         if not message:
+#             messages.warning(request, "Please write something before submitting your review.")
+#             return redirect("product_detail", product_id=product.id)
+
+#         Review.objects.create(
+#             product=product,
+#             user=request.user,
+#             message=message,
+#             rating = rating,
+#         )
+
+#         messages.success(request, f"{request.user.username}, thank you for reviewing {product.name}!")
+#         return redirect("index")
+
+#     context = {"product": product, "reviews": reviews}
+#     return render(request, "product_detail.html", context)

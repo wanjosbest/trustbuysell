@@ -1,0 +1,16 @@
+ /* ===== Footer ===== */
+ footer {
+     margin-top: 18px;
+     background: #fff;
+     border-top: 1px solid #eef2f7;
+     color: #334155
+ }
+
+ .foot {
+     max-width: 1200px;
+     margin: 0 auto;
+     padding: 18px;
+     display: flex;
+     flex-direction: column;
+     gap: 10px
+ }

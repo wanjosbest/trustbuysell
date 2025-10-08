@@ -2,6 +2,8 @@ from decimal import Decimal
 from django.db import models
 from user.models import User
 from django.urls import reverse
+from django.conf import settings
+from django.utils import timezone
 
 #global class
 class category(models.Model):
@@ -73,6 +75,11 @@ class Products(models.Model):
     class Meta:
         verbose_name="Products"
         verbose_name_plural="Products"
+    def average_rating(self):
+        reviews = self.reviews.all()
+        if reviews.exists():
+            return round(sum(r.rating for r in reviews) / reviews.count(), 1)
+        return 0
 
 class Payment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="payments")
@@ -156,3 +163,20 @@ class shipping(models.Model):
 
     def __str__(self):
         return f'shipping to {self.user}| {self.state} |{self.lga}| {self.address}'
+    
+User = settings.AUTH_USER_MODEL
+
+
+class Review(models.Model):
+    product = models.ForeignKey("Products", on_delete=models.CASCADE, related_name="reviews")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
+    message = models.TextField()
+    rating = models.PositiveIntegerField(default=5)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name}"
+    

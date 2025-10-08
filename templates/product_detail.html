@@ -6,11 +6,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}Product Details {% endblock %}</title>
 <link rel="stylesheet" href="{% static 'css/products.css' %}">
+
 {% include "header.html"%}
 
 {% endblock %}
 
 {% block content %}
+{% for message in messages %}
+{{message}}
+{% endfor %}
 <main>
 
   <!-- Product Gallery -->
@@ -56,17 +60,95 @@
       {% endfor %}
     </div>
   </section>
+  <section class="reviews-container">
+    <h2 class="section-title">Customer Reviews ({{ reviews.count }})</h2>
+
+    {% if reviews %}
+    <div class="review-list">
+      {% for review in reviews %}
+      <div class="review-card">
+        <div class="review-header">
+          <span class="review-user">{{ review.user.username }}</span>
+          <div class="stars">
+            {% for i in "12345" %}
+            <span class="star {% if forloop.counter <= review.rating %}filled{% endif %}">★</span>
+            {% endfor %}
+          </div>
+        </div>
+        <p class="review-message">{{ review.message }}</p>
+        <div class="review-date">{{ review.created_at|date:"M d, Y - h:i A" }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p>No reviews yet. Be the first to review this product!</p>
+    {% endif %}
+
+    <hr class="divider">
+
+    {% if user.is_authenticated %}
+    <form method="POST" class="review-form">
+      {% csrf_token %}
+      <textarea name="message" placeholder="Share your experience..." required></textarea>
+      <label>Rating:</label>
+      <div class="stars">
+        {% for i in "12345" %}
+        <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" style="display:none;">
+        <span class="star" data-value="{{ i }}">★</span>
+        {% endfor %}
+      </div>
+      <button type="submit" class="submit-btn">Submit Review</button>
+    </form>
+    {% else %}
+    <p class="login-msg"><a href="{% url 'login' %}">Login</a> to write a review.</p>
+    {% endif %}
+  </section>
+
 
 </main>
 
 <script>
-const thumbs = document.querySelectorAll('.thumbs img');
-const mainImage = document.getElementById('mainImage');
-thumbs.forEach(t => {
-  t.addEventListener('click', () => {
-    thumbs.forEach(x => x.classList.remove('active'));
-    t.classList.add('active');
-    mainImage.src = t.src;
+  const thumbs = document.querySelectorAll('.thumbs img');
+  const mainImage = document.getElementById('mainImage');
+  thumbs.forEach(t => {
+    t.addEventListener('click', () => {
+      thumbs.forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      mainImage.src = t.src;
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+  const stars = document.querySelectorAll(".review-form .star");
+  const ratingInput = document.createElement("input");
+  ratingInput.type = "hidden";
+  ratingInput.name = "rating";
+  document.querySelector(".review-form").appendChild(ratingInput);
+
+  stars.forEach((star, index) => {
+    star.addEventListener("click", () => {
+      const value = index + 1;
+      ratingInput.value = value;
+
+      // Highlight stars up to the clicked one
+      stars.forEach((s, i) => {
+        s.classList.toggle("selected", i < value);
+      });
+    });
+
+    // Hover effect: preview rating before click
+    star.addEventListener("mouseenter", () => {
+      stars.forEach((s, i) => {
+        s.classList.toggle("filled", i <= index);
+      });
+    });
+
+    // Remove hover highlight when leaving the star area
+    star.addEventListener("mouseleave", () => {
+      stars.forEach((s, i) => {
+        s.classList.toggle("filled", i < ratingInput.value);
+      });
+    });
   });
 });
 </script>
