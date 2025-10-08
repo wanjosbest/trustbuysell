@@ -62,6 +62,47 @@
     <p class="muted">No featured products available at the moment.</p>
     {% endfor %}
   </div>
+  
+<!-- Top Rated Products -->
+
+<main class="section">
+  <div class="title">
+    <h2>⭐ Top Rated Products</h2>
+    <span class="muted">Most loved by customers</span>
+  </div>
+
+  {% if top_rated %}
+  <div id="topRated" class="grid">
+    {% for product in top_rated %}
+    <article class="card">
+      <a class="btn btn-outline" href="{% url 'product_detail' product.slug %}">
+        <div class="media">
+          <img src="{{ product.product_image.image.url }}" alt="{{ product.name }}">
+        </div>
+      </a>
+
+      <div class="body">
+        <div class="p-title">{{ product.name }}</div>
+        <div class="price">₦{{ product.discountedprice|floatformat:0 }}</div>
+
+        <p class="rating">
+          ★ {{ product.five_star_count }} five-star{{ product.five_star_count|pluralize }}
+        </p>
+
+        <div class="actions">
+          <a class="btn btn-accent" href="{% url 'add-to-cart' product.id %}">Add to Cart</a>
+          <a class="btn btn-outline" href="{% url 'product_detail' product.slug %}">View</a>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="muted">No top-rated products yet.</p>
+  {% endif %}
+  <a href="{% url 'top_rated' %}"><h3>All top rated products</h3></a>
+
+
 
   <section class="section" style="padding:0;margin-top:16px">
     <div class="title">

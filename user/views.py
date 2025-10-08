@@ -1,5 +1,6 @@
 from django.shortcuts import render,redirect
 from.models import User
+from django.db.models import Count, Q
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, logout,login
@@ -82,11 +83,8 @@ def index(request):
     #output featured products
     hero = HeroImage.objects.filter(is_active=True).first()
     FeaturedProduct = Products.objects.filter(featured = True).order_by("-published")[:8]
+    top_rated = Products.objects.annotate(five_star_count=Count("reviews", filter=Q(reviews__rating=5))).filter(five_star_count__gt=0).order_by("-five_star_count")[:10]  # Show top 10
    
-    context = {"categories":categories,"FeaturedProduct":FeaturedProduct,"hero":hero}
+    context = {"categories":categories,"FeaturedProduct":FeaturedProduct,"hero":hero,"top_rated": top_rated}
     return render(request,"index.html", context)
 
-# def header(request):
-#     categories = category.objects.all()
-#     context = {"categories":categories }
-#     return render(request,"footer.html", context)

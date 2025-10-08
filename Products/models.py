@@ -169,14 +169,10 @@ User = settings.AUTH_USER_MODEL
 
 class Review(models.Model):
     product = models.ForeignKey("Products", on_delete=models.CASCADE, related_name="reviews")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
-    message = models.TextField()
-    rating = models.PositiveIntegerField(default=5)
-    created_at = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        ordering = ['-created_at']
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(default=0)
+    message = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.product.name}"
-    
+        return f"{self.product.name} - {self.rating}⭐"

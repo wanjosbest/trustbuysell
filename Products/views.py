@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import (Product_image,Products,category,Cart_Items,shipping,Payment,HeroImage,Order,OrderItem,Review
 )
+from django.core.paginator import Paginator
 from user.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -583,30 +584,21 @@ def ordered_items_view(request):
     }
     return render(request, "products/ordered_items.html", context)
 
-# # review products
 
-# @login_required
-# def review_products(request, product_id):
-#     product = get_object_or_404(Products, id=product_id)
-#     reviews = Review.objects.filter(product=product).order_by("-id")
 
-#     if request.method == "POST":
-#         message = request.POST.get("message")
-#         rating = request.POST.get("rating")
+def top_rated_products(request):
+    # Annotate products with their count of 5-star reviews
+    top_rated = (
+        Products.objects.annotate(
+            five_star_count=Count('reviews', filter=Q(reviews__rating=5))
+        )
+        .filter(five_star_count__gt=0)
+        .order_by('-five_star_count')
+    )
 
-#         if not message:
-#             messages.warning(request, "Please write something before submitting your review.")
-#             return redirect("product_detail", product_id=product.id)
+    # Apply pagination
+    paginator = Paginator(top_rated, 8)  # Show 8 products per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
 
-#         Review.objects.create(
-#             product=product,
-#             user=request.user,
-#             message=message,
-#             rating = rating,
-#         )
-
-#         messages.success(request, f"{request.user.username}, thank you for reviewing {product.name}!")
-#         return redirect("index")
-
-#     context = {"product": product, "reviews": reviews}
-#     return render(request, "product_detail.html", context)
+    return render(request, "products/top_rated_products.html", {"page_obj": page_obj})
