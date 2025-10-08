@@ -18,19 +18,19 @@
   <!-- Product Gallery -->
   <section class="gallery">
     {% if product.images.all %}
-      {% with product.images.first as main_image %}
-        <img id="mainImage" src="{{ main_image.image.url }}" alt="{{ product.name }}">
-      {% endwith %}
+    {% with product.images.first as main_image %}
+    <img id="mainImage" src="{{ main_image.image.url }}" alt="{{ product.name }}">
+    {% endwith %}
     {% else %}
-      <img id="mainImage" src="{% static 'img/no-image.png' %}" alt="No Image">
+    <img id="mainImage" src="{% static 'img/no-image.png' %}" alt="No Image">
     {% endif %}
   </section>
 
   <div class="thumbs">
     {% for image in product.images.all %}
-      <img src="{{ image.image.url }}" class="{% if forloop.first %}active{% endif %}" alt="{{ product.name }}">
+    <img src="{{ image.image.url }}" class="{% if forloop.first %}active{% endif %}" alt="{{ product.name }}">
     {% empty %}
-      <p>No images available for this product.</p>
+    <p>No images available for this product.</p>
     {% endfor %}
   </div>
 
@@ -43,6 +43,10 @@
     <div class="actions">
       <a href="tel:{{ product.user.phone_number }}" class="btn btn-accent">📞 Call Seller</a>
       <a href="{% url 'add-to-cart' product.id %}" class="btn btn-primary">Add to Cart</a>
+      <a href="{% url 'start_chat' product.user.username %}" class="btn btn-outline">
+        💬 Chat with Seller
+      </a>
+
     </div>
   </section>
 
@@ -59,9 +63,9 @@
       {% for related in related_product %}
       <div class="rel-card">
         {% if related.images.first %}
-          <img src="{{ related.images.first.image.url }}" alt="{{ related.name }}">
+        <img src="{{ related.images.first.image.url }}" alt="{{ related.name }}">
         {% else %}
-          <img src="{% static 'img/no-image.png' %}" alt="No Image">
+        <img src="{% static 'img/no-image.png' %}" alt="No Image">
         {% endif %}
         <div class="body">
           <div class="title">{{ related.name }}</div>
@@ -120,39 +124,39 @@
 
 <!-- JavaScript -->
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const thumbs = document.querySelectorAll('.thumbs img');
-  const mainImage = document.getElementById('mainImage');
+  document.addEventListener("DOMContentLoaded", () => {
+    const thumbs = document.querySelectorAll('.thumbs img');
+    const mainImage = document.getElementById('mainImage');
 
-  thumbs.forEach(t => {
-    t.addEventListener('click', () => {
-      thumbs.forEach(x => x.classList.remove('active'));
-      t.classList.add('active');
-      mainImage.src = t.src;
+    thumbs.forEach(t => {
+      t.addEventListener('click', () => {
+        thumbs.forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        mainImage.src = t.src;
+      });
     });
+
+    const stars = document.querySelectorAll(".review-form .star");
+    if (stars.length) {
+      const ratingInput = document.createElement("input");
+      ratingInput.type = "hidden";
+      ratingInput.name = "rating";
+      document.querySelector(".review-form").appendChild(ratingInput);
+
+      stars.forEach((star, index) => {
+        star.addEventListener("click", () => {
+          const value = index + 1;
+          ratingInput.value = value;
+          stars.forEach((s, i) => s.classList.toggle("selected", i < value));
+        });
+        star.addEventListener("mouseenter", () => {
+          stars.forEach((s, i) => s.classList.toggle("filled", i <= index));
+        });
+        star.addEventListener("mouseleave", () => {
+          stars.forEach((s, i) => s.classList.toggle("filled", i < ratingInput.value));
+        });
+      });
+    }
   });
-
-  const stars = document.querySelectorAll(".review-form .star");
-  if (stars.length) {
-    const ratingInput = document.createElement("input");
-    ratingInput.type = "hidden";
-    ratingInput.name = "rating";
-    document.querySelector(".review-form").appendChild(ratingInput);
-
-    stars.forEach((star, index) => {
-      star.addEventListener("click", () => {
-        const value = index + 1;
-        ratingInput.value = value;
-        stars.forEach((s, i) => s.classList.toggle("selected", i < value));
-      });
-      star.addEventListener("mouseenter", () => {
-        stars.forEach((s, i) => s.classList.toggle("filled", i <= index));
-      });
-      star.addEventListener("mouseleave", () => {
-        stars.forEach((s, i) => s.classList.toggle("filled", i < ratingInput.value));
-      });
-    });
-  }
-});
 </script>
 {% endblock %}

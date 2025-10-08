@@ -538,11 +538,10 @@ def product_list(request):
 def category_products(request, category_id):
     Category = get_object_or_404(category, id=category_id)
     products = Products.objects.filter(category=Category)
-
-    return render(request, "products/category_products.html", {
-        "category": Category,
-        "products": products
-    })
+    hero = HeroImage.objects.filter(is_active=True).first()
+    categories = category.objects.all()
+    context = {"categories":categories,"hero":hero, "category": Category,"products": products}
+    return render(request, "products/category_products.html",context)
 
 @login_required(login_url="login")
 def seller_dashboard(request):

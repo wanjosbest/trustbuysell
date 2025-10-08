@@ -6,11 +6,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}{{category.name}} products{% endblock %}</title>
 <link rel="stylesheet" href="{% static 'css/category-products.css' %}">
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
 {% include "header.html"%}
 
 {% endblock %}
 
 {% block content %}
+<section class="hero" aria-label="Hero">
+  <div class="hero-card">
+    {% if hero %}
+    <div class="hero-media" style="background-image:url('{{ hero.image.url }}')"></div>
+    {% endif %}
+    <div class="hero-content">
+      <h1>Buy & Sell in Adamawa — Fast • Secure • Reliable</h1>
+      <p>Reach more customers in your community. Start selling today on TrustBuySell.</p>
+      <div class="hero-actions">
+        <a class="btn btn-accent" href="{% url 'register' %}">Register & Sell</a>
+        <a class="btn ghost" href="#featuredA">Shop Featured</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="chip-row" id="catsA">
+    {% for category in categories %}
+      <a class="chip" href="{% url 'category_products' category.id %}"
+        data-cat="{{ category.name|default:'' }}">{{ category.name }}</a>
+    {% empty %}
+      <span class="chip">No categories yet</span>
+    {% endfor %}
+  </div>
+</section>
   
   <h2 style="text-align:center;">{{ category.name }} 🛍️</h2>
   <div class="grid">
@@ -18,7 +43,7 @@
      
     <div class="card">
         <a href="{% url 'product_detail' product.slug %}">
-      <img src="{{ product.product_image.image.url }}" alt="{{ product.name }}">
+      <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
       <a href="{% url 'product_detail' product.slug %}"><h4>{{ product.name }}</h4></a>
       
       <p>₦{{ product.discountedprice }}</p>

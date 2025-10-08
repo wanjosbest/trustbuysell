@@ -18,7 +18,7 @@
       {% for product in products %}
       <article class="card">
         <div class="media">
-          <img src="{{ product.product_image.image.url }}" alt="{{ product.title }}">
+          <img src="{{ product.images.first.image.url }}" alt="{{ product.title }}">
         </div>
         <div class="body">
           <div class="p-title">{{ product.title }}</div>
