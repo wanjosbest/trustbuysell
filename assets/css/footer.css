@@ -1,16 +1,242 @@
- /* ===== Footer ===== */
- footer {
-     margin-top: 18px;
-     background: #fff;
-     border-top: 1px solid #eef2f7;
-     color: #334155
- }
 
- .foot {
-     max-width: 1200px;
-     margin: 0 auto;
-     padding: 18px;
-     display: flex;
-     flex-direction: column;
-     gap: 10px
- }
+:root {
+    --tbs-footer-primary: #1e3a8a;
+    --tbs-footer-dark: #142b69;
+    --tbs-footer-orange: #f97316;
+    --tbs-footer-muted: #cbd5e1;
+}
+
+/* MAIN FOOTER */
+
+.tbs-footer {
+    width: 100%;
+    background: linear-gradient(
+        120deg,
+        var(--tbs-footer-dark),
+        var(--tbs-footer-primary)
+    );
+    color: #fff;
+    margin-top: 55px;
+    font-family: inherit;
+}
+
+.tbs-footer-container {
+    max-width: 1300px;
+    margin: auto;
+    padding: 55px 22px 0;
+}
+
+/* FOOTER GRID */
+
+.tbs-footer-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1.3fr;
+    gap: 40px;
+    padding-bottom: 45px;
+}
+
+/* BRAND */
+
+.tbs-footer-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    text-decoration: none;
+    font-size: 21px;
+    font-weight: 850;
+    margin-bottom: 17px;
+    letter-spacing: -.5px;
+}
+
+.tbs-footer-logo:hover {
+    color: white;
+}
+
+.tbs-footer-logo-icon {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    background: var(--tbs-footer-orange);
+    border-radius: 10px;
+    color: white;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.tbs-footer-orange {
+    color: #fb923c;
+}
+
+.tbs-footer-brand p {
+    color: var(--tbs-footer-muted);
+    font-size: 13px;
+    line-height: 1.9;
+    max-width: 300px;
+    margin: 0 0 17px;
+}
+
+.tbs-footer-location {
+    display: inline-block;
+    color: #fed7aa;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* FOOTER COLUMNS */
+
+.tbs-footer-column h3 {
+    color: white;
+    font-size: 15px;
+    font-weight: 800;
+    margin: 5px 0 20px;
+    position: relative;
+    padding-bottom: 12px;
+}
+
+.tbs-footer-column h3::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 35px;
+    height: 3px;
+    border-radius: 5px;
+    background: var(--tbs-footer-orange);
+}
+
+.tbs-footer-column ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tbs-footer-column ul li {
+    margin-bottom: 13px;
+}
+
+.tbs-footer-column ul li a {
+    color: var(--tbs-footer-muted);
+    text-decoration: none;
+    font-size: 13px;
+    transition: .2s ease;
+}
+
+.tbs-footer-column ul li a:hover {
+    color: #fb923c;
+    padding-left: 5px;
+}
+
+/* SAFETY COLUMN */
+
+.tbs-footer-safety p {
+    color: var(--tbs-footer-muted);
+    font-size: 13px;
+    line-height: 1.8;
+    margin: 0 0 18px;
+}
+
+.tbs-safety-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: #fed7aa;
+    font-size: 12px;
+    font-weight: 800;
+    background: rgba(255,255,255,.08);
+    padding: 10px 13px;
+    border-radius: 7px;
+}
+
+.tbs-safety-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--tbs-footer-orange);
+    border-radius: 50%;
+}
+
+/* BOTTOM FOOTER */
+
+.tbs-footer-bottom {
+    min-height: 65px;
+    border-top: 1px solid rgba(255,255,255,.14);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.tbs-footer-bottom p {
+    color: #cbd5e1;
+    font-size: 11px;
+    margin: 0;
+}
+
+/* TABLET */
+
+@media (max-width: 900px) {
+
+    .tbs-footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 35px;
+    }
+
+}
+
+/* MOBILE */
+
+@media (max-width: 550px) {
+
+    .tbs-footer-container {
+        padding: 40px 18px 0;
+    }
+
+    .tbs-footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 30px 18px;
+        padding-bottom: 30px;
+    }
+
+    .tbs-footer-brand {
+        grid-column: 1 / -1;
+    }
+
+    .tbs-footer-brand p {
+        max-width: 100%;
+    }
+
+    .tbs-footer-logo {
+        font-size: 19px;
+    }
+
+    .tbs-footer-column h3 {
+        font-size: 14px;
+    }
+
+    .tbs-footer-column ul li a,
+    .tbs-footer-safety p {
+        font-size: 12px;
+    }
+
+    .tbs-footer-bottom {
+        padding: 18px 0;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 9px;
+    }
+
+}
+
+@media (max-width: 350px) {
+
+    .tbs-footer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tbs-footer-brand {
+        grid-column: auto;
+    }
+
+}
