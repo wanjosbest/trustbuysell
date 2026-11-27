@@ -501,7 +501,7 @@ def category_products(request, category_id):
 
 @login_required(login_url="login")
 def dashboard(request):
-    products = Products.objects.filter(seller=request.user)
+    products = Products.objects.filter(user=request.user)
 
     context = {
         "total_products": products.count(),
