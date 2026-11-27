@@ -500,7 +500,7 @@ def category_products(request, category_id):
     return render(request, "products/category_products.html",context)
 
 @login_required(login_url="login")
-@def dashboard(request):
+def dashboard(request):
     products = Products.objects.filter(seller=request.user)
 
     context = {
