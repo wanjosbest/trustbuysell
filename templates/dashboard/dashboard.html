@@ -1,0 +1,1177 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seller Dashboard | TrustBuySell</title>
+
+<style>
+:root {
+    --primary: #1e3a8a;
+    --primary-dark: #172554;
+    --accent: #f97316;
+    --bg: #f5f7fb;
+    --white: #fff;
+    --text: #1e293b;
+    --muted: #8490a3;
+    --border: #e9edf4;
+    --green: #15965b;
+    --red: #dc4545;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button, input {
+    font: inherit;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+    width: 255px;
+    background: var(--white);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    transition: .3s;
+}
+
+.brand {
+    height: 76px;
+    padding: 0 23px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    border-bottom: 1px solid var(--border);
+}
+
+.brand-logo {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    color: white;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    font-size: 22px;
+    border-radius: 10px;
+}
+
+.brand-name {
+    font-size: 19px;
+    font-weight: 850;
+    letter-spacing: -.7px;
+    color: var(--primary-dark);
+}
+
+.brand-name span {
+    color: var(--accent);
+}
+
+.sidebar-content {
+    padding: 24px 14px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.menu-title {
+    color: #a0aaba;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    margin: 17px 12px 12px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 12px 14px;
+    margin-bottom: 5px;
+    border-radius: 8px;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 13px;
+    transition: .2s;
+}
+
+.nav-link:hover {
+    background: #eff4ff;
+    color: var(--primary);
+}
+
+.nav-link.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 5px 12px #1e3a8a20;
+}
+
+.nav-icon {
+    width: 20px;
+    font-size: 17px;
+    text-align: center;
+}
+
+.sidebar-footer {
+    padding: 17px;
+    border-top: 1px solid var(--border);
+}
+
+.support-box {
+    background: #f4f6fb;
+    padding: 16px;
+    border-radius: 10px;
+}
+
+.support-box strong {
+    color: var(--primary-dark);
+    font-size: 12px;
+}
+
+.support-box p {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.6;
+    margin-top: 7px;
+}
+
+.support-box a {
+    display: inline-block;
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 750;
+    margin-top: 10px;
+}
+
+/* MAIN */
+
+.main {
+    margin-left: 255px;
+    min-height: 100vh;
+}
+
+/* HEADER */
+
+.topbar {
+    height: 76px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    gap: 20px;
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.topbar-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--primary-dark);
+}
+
+.topbar-subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.marketplace-link {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: #eff4ff;
+    color: var(--primary);
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.profile-info strong {
+    display: block;
+    font-size: 12px;
+}
+
+.profile-info span {
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 3px;
+}
+
+.hamburger {
+    display: none;
+    border: none;
+    background: transparent;
+    color: var(--primary);
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* CONTENT */
+
+.content {
+    max-width: 1600px;
+    margin: auto;
+    padding: 30px 32px;
+}
+
+.welcome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 26px;
+}
+
+.welcome h1 {
+    font-size: 24px;
+    color: var(--primary-dark);
+    letter-spacing: -.7px;
+    font-weight: 850;
+}
+
+.welcome p {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 7px;
+}
+
+.post-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--accent);
+    color: white;
+    border-radius: 8px;
+    padding: 13px 18px;
+    font-size: 12px;
+    font-weight: 750;
+    transition: .2s;
+}
+
+.post-btn:hover {
+    background: #e9650c;
+    transform: translateY(-2px);
+}
+
+/* STATS */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 17px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: white;
+    padding: 21px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    transition: .2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 22px #1725540b;
+}
+
+.stat-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 17px;
+}
+
+.stat-label {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.stat-icon {
+    width: 41px;
+    height: 41px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 19px;
+}
+
+.blue { background: #eaf0ff; color: #315bc7; }
+.orange { background: #fff0e5; color: #e97721; }
+.green { background: #e5f8ed; color: #15965b; }
+.purple { background: #f1eaff; color: #8150d5; }
+
+.stat-value {
+    font-size: 27px;
+    font-weight: 850;
+    color: var(--primary-dark);
+}
+
+.stat-footer {
+    font-size: 10px;
+    color: #9aa5b5;
+    margin-top: 6px;
+}
+
+/* PANELS */
+
+.panel {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    padding: 22px;
+    margin-bottom: 22px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.panel-header h3 {
+    color: var(--primary-dark);
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.panel-link {
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 750;
+}
+
+/* VERIFICATION */
+
+.verification {
+    background: linear-gradient(110deg, #edf3ff, #f8faff);
+    border: 1px solid #dce7ff;
+    border-radius: 11px;
+    padding: 20px 23px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.verify-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.verify-icon {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    background: white;
+    color: var(--primary);
+    font-size: 22px;
+    border-radius: 11px;
+}
+
+.verify-left h3 {
+    color: var(--primary-dark);
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.verify-left p {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.verify-button {
+    border: none;
+    background: var(--primary);
+    color: white;
+    border-radius: 7px;
+    padding: 11px 16px;
+    font-size: 11px;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.status {
+    display: inline-flex;
+    padding: 6px 10px;
+    border-radius: 30px;
+    font-size: 10px;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.status-active {
+    color: #14834d;
+    background: #e4f8ed;
+}
+
+.status-pending {
+    color: #a76b08;
+    background: #fff3d9;
+}
+
+.status-rejected {
+    color: #b52d35;
+    background: #ffebed;
+}
+
+/* LISTINGS */
+
+.listings-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 17px;
+}
+
+.listing-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: .2s;
+    background: white;
+}
+
+.listing-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 18px #17255412;
+}
+
+.listing-image {
+    width: 100%;
+    height: 175px;
+    background: #f1f4f8;
+    object-fit: cover;
+    display: block;
+}
+
+.listing-details {
+    padding: 14px;
+}
+
+.listing-details h4 {
+    color: var(--primary-dark);
+    font-size: 13px;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.listing-price {
+    font-size: 16px;
+    font-weight: 850;
+    color: var(--primary);
+    margin-bottom: 11px;
+}
+
+.listing-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 10px;
+    margin-bottom: 12px;
+}
+
+.listing-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+}
+
+.listing-actions a {
+    font-size: 11px;
+    font-weight: 750;
+    color: var(--primary);
+}
+
+.listing-actions .delete {
+    color: var(--red);
+}
+
+/* PERFORMANCE */
+
+.performance-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 13px;
+}
+
+.performance-item {
+    padding: 16px;
+    background: #f8faff;
+    border-radius: 9px;
+}
+
+.performance-item span {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 9px;
+}
+
+.performance-item strong {
+    font-size: 20px;
+    color: var(--primary-dark);
+}
+
+/* MESSAGES */
+
+.message-list {
+    list-style: none;
+}
+
+.message-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid #f0f2f6;
+}
+
+.message-list li:last-child {
+    border-bottom: none;
+}
+
+.message-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #eff4ff;
+    color: var(--primary);
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+}
+
+.message-text strong {
+    font-size: 12px;
+    color: var(--primary-dark);
+}
+
+.message-text p {
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+.empty {
+    text-align: center;
+    padding: 30px 15px;
+    color: #9aa5b5;
+    font-size: 12px;
+    border: 1px dashed var(--border);
+    border-radius: 9px;
+}
+
+/* PROMOTION */
+
+.promotion {
+    background: linear-gradient(115deg, #172554, #1e40af);
+    border-radius: 12px;
+    padding: 25px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.promotion h3 {
+    font-size: 17px;
+    margin-bottom: 8px;
+}
+
+.promotion p {
+    color: #d4ddf8;
+    font-size: 11px;
+    line-height: 1.7;
+    max-width: 450px;
+}
+
+.promotion a {
+    background: var(--accent);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+/* OVERLAY */
+
+.overlay {
+    display: none;
+}
+
+/* RESPONSIVE */
+
+@media(max-width: 1100px) {
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .listings-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .content {
+        padding: 25px 20px;
+    }
+}
+
+@media(max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .overlay.active {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: #0f172a80;
+        z-index: 90;
+    }
+
+    .main {
+        margin-left: 0;
+    }
+
+    .hamburger {
+        display: block;
+    }
+
+    .topbar {
+        height: 66px;
+        padding: 0 15px;
+    }
+
+    .marketplace-link {
+        display: none;
+    }
+
+    .profile-info {
+        display: none;
+    }
+
+    .content {
+        padding: 22px 14px;
+    }
+
+    .welcome {
+        align-items: flex-start;
+    }
+
+    .welcome h1 {
+        font-size: 19px;
+    }
+
+    .welcome p {
+        line-height: 1.6;
+    }
+
+    .post-btn {
+        padding: 11px;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+    .listings-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .listing-image {
+        height: 125px;
+    }
+
+    .listing-details {
+        padding: 10px;
+    }
+
+    .listing-price {
+        font-size: 14px;
+    }
+
+    .verification {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .verify-button {
+        width: 100%;
+    }
+}
+
+@media(max-width: 430px) {
+    .stats {
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 14px;
+    }
+
+    .stat-value {
+        font-size: 22px;
+    }
+
+    .stat-label {
+        font-size: 10px;
+    }
+
+    .stat-icon {
+        width: 34px;
+        height: 34px;
+        font-size: 16px;
+    }
+
+    .listings-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .performance-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .promotion {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media(max-width: 340px) {
+    .welcome {
+        flex-direction: column;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+        <div class="brand-logo">T</div>
+        <div class="brand-name">Trust<span>BuySell</span></div>
+    </div>
+
+    <div class="sidebar-content">
+
+        <div class="menu-title">WORKSPACE</div>
+
+        <a href="{% url 'dashboard' %}" class="nav-link active">
+            <span class="nav-icon">▦</span> Overview
+        </a>
+
+        <a href="{% url 'product_lists' %}" class="nav-link">
+            <span class="nav-icon">▣</span> My Listings
+        </a>
+
+        <a href="{% url 'product_lists' %}" class="nav-link">
+            <span class="nav-icon">＋</span> Post New Ad
+        </a>
+
+        <a href="{% url 'chat_list' %}" class="nav-link">
+            <span class="nav-icon">✉</span> Buyer Messages
+        </a>
+
+        <div class="menu-title">GROW YOUR BUSINESS</div>
+
+        <a href="{% url 'product_lists' %}" class="nav-link">
+            <span class="nav-icon">◉</span> Listing Performance
+        </a>
+
+        <a href="#" class="nav-link">
+            <span class="nav-icon">✦</span> Promote Listings
+        </a>
+
+        <div class="menu-title">ACCOUNT</div>
+
+        <a href="#" class="nav-link">
+            <span class="nav-icon">✧</span> Seller Verification
+        </a>
+
+        <a href="#" class="nav-link">
+            <span class="nav-icon">⚙</span> Account Settings
+        </a>
+
+        <a href="{% url 'index' %}" class="nav-link">
+            <span class="nav-icon">⌂</span> Visit Marketplace
+        </a>
+
+        <a href="{% url 'logout' %}" class="nav-link">
+            <span class="nav-icon">↪</span> Logout
+        </a>
+
+    </div>
+
+    <div class="sidebar-footer">
+        <div class="support-box">
+            <strong>Need assistance?</strong>
+            <p>Have questions about your listings? Our team is here to help.</p>
+            <a href="#">Contact Support →</a>
+        </div>
+    </div>
+
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- HEADER -->
+    <header class="topbar">
+
+        <div class="topbar-left">
+            <button class="hamburger" onclick="openSidebar()">☰</button>
+
+            <div>
+                <div class="topbar-title">Seller Workspace</div>
+                <div class="topbar-subtitle">Marketplace / Dashboard</div>
+            </div>
+        </div>
+
+        <div class="topbar-right">
+
+            <a href="{% url 'index' %}" class="marketplace-link">
+                Visit Marketplace ↗
+            </a>
+
+            <div class="profile">
+                <div class="avatar">
+                    {{ user.username|first|upper }}
+                </div>
+
+                <div class="profile-info">
+                    <strong>{{ user.username }}</strong>
+                    <span>Seller Account</span>
+                </div>
+            </div>
+
+        </div>
+
+    </header>
+
+    <main class="content">
+
+        <!-- WELCOME -->
+        <section class="welcome">
+
+            <div>
+                <h1>Welcome back, {{ user.username }}!</h1>
+                <p>Manage your advertisements and connect with potential buyers.</p>
+            </div>
+
+            <a href="{% url 'product_lists' %}" class="post-btn">
+                ＋ Post New Advertisement
+            </a>
+
+        </section>
+
+        <!-- STATISTICS -->
+        <section class="stats">
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Total Listings</span>
+                    <div class="stat-icon blue">▣</div>
+                </div>
+                <div class="stat-value">{{ total_products }}</div>
+                <div class="stat-footer">All your advertisements</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Active Listings</span>
+                    <div class="stat-icon green">✓</div>
+                </div>
+                <div class="stat-value">{{ active_products }}</div>
+                <div class="stat-footer">Currently published ads</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Pending Approval</span>
+                    <div class="stat-icon orange">◷</div>
+                </div>
+                <div class="stat-value">{{ pending_products }}</div>
+                <div class="stat-footer">Awaiting moderation</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="stat-label">Buyer Inquiries</span>
+                    <div class="stat-icon purple">✉</div>
+                </div>
+                <div class="stat-value">{{ message_count }}</div>
+                <div class="stat-footer">Messages from interested buyers</div>
+            </div>
+
+        </section>
+
+        <!-- VERIFICATION -->
+        <section class="verification">
+
+            <div class="verify-left">
+                <div class="verify-icon">✦</div>
+
+                <div>
+                    <h3>Seller Verification</h3>
+
+                    {% if is_verified %}
+                    <p>Your account is verified. Buyers can identify your trusted seller profile.</p>
+                    {% else %}
+                    <p>Verify your identity to increase buyer confidence in your advertisements.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if is_verified %}
+            <span class="status status-active">✓ Verified Seller</span>
+            {% else %}
+            <button class="verify-button" type="button">
+                Get Verified →
+            </button>
+            {% endif %}
+
+        </section>
+
+        <!-- LISTINGS -->
+        <section class="panel">
+
+            <div class="panel-header">
+                <h3>My Recent Listings</h3>
+                <a href="{% url 'product_lists' %}" class="panel-link">Manage All Listings →</a>
+            </div>
+
+            <div class="listings-grid">
+
+                {% for product in recent_products %}
+
+                <article class="listing-card">
+
+                    {% if product.Product_image %}
+                    <img src="{{ product.Product_image.url }}"
+                         alt="{{ product.name }}"
+                         class="listing-image">
+                    {% else %}
+                    <div class="listing-image" style="display:grid;place-items:center;color:#9aa5b5;">
+                        No Image Available
+                    </div>
+                    {% endif %}
+
+                    <div class="listing-details">
+
+                        <h4>{{ product.name|default:product }}</h4>
+
+                        <div class="listing-price">
+                            ₦{{ product.price }}
+                        </div>
+
+                        <div class="listing-meta">
+                            <span>{{ product.category }}</span>
+                            <span>
+                                {% if product.status == "published" %}
+                                <span class="status status-active">Active</span>
+                                {% else %}
+                                <span class="status status-pending">{{ product.status|title }}</span>
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div class="listing-actions">
+                            <a href="{% url 'product_lists' %}">Manage Listing →</a>
+                        </div>
+
+                    </div>
+
+                </article>
+
+                {% empty %}
+
+                <div class="empty" style="grid-column:1/-1;">
+                    <div style="font-size:28px;margin-bottom:12px;">▣</div>
+                    <strong>You haven't posted any advertisements yet.</strong>
+                    <p style="margin-top:7px;">Start reaching potential buyers by posting your first advertisement.</p>
+                    <a href="{% url 'product_lists' %}" class="post-btn" style="margin-top:17px;">
+                        ＋ Post Your First Ad
+                    </a>
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+        <!-- PERFORMANCE -->
+        <section class="panel">
+
+            <div class="panel-header">
+                <h3>Listing Performance</h3>
+                <span class="panel-link">Your marketplace activity</span>
+            </div>
+
+            <div class="performance-grid">
+
+                <div class="performance-item">
+                    <span>Total Advertisement Views</span>
+                    <strong>{{ total_views|default:"0" }}</strong>
+                </div>
+
+                <div class="performance-item">
+                    <span>Buyer Messages</span>
+                    <strong>{{ message_count|default:"0" }}</strong>
+                </div>
+
+                <div class="performance-item">
+                    <span>Published Advertisements</span>
+                    <strong>{{ active_products|default:"0" }}</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- PROMOTION -->
+        <section class="promotion">
+
+            <div>
+                <h3>Get More Visibility for Your Ads</h3>
+                <p>
+                    Give your advertisements more exposure.
+                    Promote your listings to reach more potential buyers
+                    across the TrustBuySell marketplace.
+                </p>
+            </div>
+
+            <a href="{% url 'product_lists' %}">Explore Your Listings →</a>
+
+        </section>
+
+        <!-- MESSAGES -->
+        <section class="panel">
+
+            <div class="panel-header">
+                <h3>Recent Buyer Messages</h3>
+                <a href="{% url 'chat_list' %}" class="panel-link">View All Messages →</a>
+            </div>
+
+            <ul class="message-list">
+
+                {% for msg in recent_messages %}
+
+                <li>
+                    <div class="message-avatar">
+                        {{ msg.sender|first|upper }}
+                    </div>
+
+                    <div class="message-text">
+                        <strong>{{ msg.sender }}</strong>
+                        <p>{{ msg.content|truncatechars:70 }}</p>
+                    </div>
+                </li>
+
+                {% empty %}
+
+                <li class="empty" style="width:100%;">
+                    No buyer inquiries yet. Your messages will appear here.
+                </li>
+
+                {% endfor %}
+
+            </ul>
+
+        </section>
+
+        <footer style="text-align:center;padding:20px;color:#9aa5b5;font-size:11px;">
+            © {% now "Y" %} TrustBuySell. All rights reserved.
+        </footer>
+
+    </main>
+
+</div>
+
+<script>
+function openSidebar() {
+    document.getElementById('sidebar').classList.add('active');
+    document.getElementById('overlay').classList.add('active');
+}
+
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('active');
+    document.getElementById('overlay').classList.remove('active');
+}
+</script>
+
+</body>
+</html>

@@ -1,145 +1,271 @@
+
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - TrustBuySell</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f8f9fa;
-            margin: 0;
-            padding: 0;
-        }
 
-        .register-container {
-            max-width: 420px;
-            margin: 50px auto;
-            background: #fff;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        }
+    <title>Create Account | TrustBuySell</title>
 
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #0d6efd;
-            /* TrustBuySell main blue */
-        }
-
-        label {
-            display: block;
-            margin-top: 12px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        input,
-        select {
-            width: 100%;
-            padding: 10px;
-            margin-top: 6px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            outline: none;
-            font-size: 14px;
-        }
-
-        input:focus,
-        select:focus {
-            border-color: #0d6efd;
-        }
-
-        .user-type {
-            display: flex;
-            gap: 15px;
-            margin-top: 6px;
-        }
-
-        .user-type label {
-            font-weight: normal;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 20px;
-            background: #0d6efd;
-            border: none;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        button:hover {
-            background: #094dbf;
-        }
-
-        .login-link {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
-        }
-
-        .login-link a {
-            color: #0d6efd;
-            text-decoration: none;
-        }
-
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
 </head>
 
 <body>
-    <div>
-        {% for message in messages %}
-        {{message}}
-        {% endfor %}
+
+<div class="register-page">
+
+    <!-- LEFT BRANDING -->
+    <div class="register-brand">
+
+        <a href="{% url 'index' %}" class="brand-logo">
+            <span class="brand-icon">T</span>
+            <span>TrustBuySell</span>
+        </a>
+
+        <div class="brand-content">
+
+            <span class="brand-label">JOIN OUR MARKETPLACE</span>
+
+            <h1>Your next opportunity starts here.</h1>
+
+            <p>
+                Create your account and become part of a growing marketplace
+                connecting buyers and sellers across Adamawa State.
+            </p>
+
+            <div class="brand-features">
+
+                <div class="feature">
+                    <span>✓</span>
+                    Create and manage advertisements
+                </div>
+
+                <div class="feature">
+                    <span>✓</span>
+                    Connect directly with customers
+                </div>
+
+                <div class="feature">
+                    <span>✓</span>
+                    Discover products in your community
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="brand-footer">
+            Buy Smart. Sell Smart.
+        </div>
+
+        <div class="brand-decoration decoration-one"></div>
+        <div class="brand-decoration decoration-two"></div>
+
     </div>
-    <div class="register-container">
-        <h2>Create Account</h2>
-        <form action="#" method="POST">
-            {% csrf_token %}
-            <label for="firstname">Full Name</label>
-            <input type="text" id="firstname" name="firstname" placeholder="First name" required>
-            <label for="lastname">Full Name</label>
-            <input type="text" id="lastname" name="lastname" placeholder="Last name" required>
-            <label for="lastname">UserName</label>
-            <input type="text" id="username" name="username" placeholder="User name" required>
-            <label for="phonenumber">Phone Number</label>
-            <input type="number" id="username" name="phone_number" placeholder="Phone Number" required>
 
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" placeholder="Enter your email" required>
-            <label>User </label>
-            <div class="user-type">
-                <label><input type="radio" name="user_type" value="seller" required> Seller</label>
+
+    <!-- REGISTRATION FORM -->
+    <div class="register-main">
+
+        <div class="register-container">
+
+            <div class="mobile-logo">
+                <a href="{% url 'index' %}">
+                    <span class="brand-icon">T</span>
+                    TrustBuySell
+                </a>
             </div>
-            <div class="user-type">
-                <label><input type="radio" name="user_type" value="buyer" required> Buyer</label>
+
+            <div class="register-heading">
+
+                <span class="welcome-label">GET STARTED</span>
+
+                <h2>Create your account</h2>
+
+                <p>Fill in your details to join TrustBuySell.</p>
+
             </div>
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter password" required>
 
-            <label for="confirm_password">Confirm Password</label>
-            <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm password"
-                required>
 
-            <button type="submit">Register</button>
+            <!-- DJANGO MESSAGES -->
+            {% for message in messages %}
+                <div class="message-alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+
+            <form method="POST" class="register-form">
+                {% csrf_token %}
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label for="firstname">First Name</label>
+
+                        <input
+                            type="text"
+                            id="firstname"
+                            name="firstname"
+                            placeholder="First name"
+                            autocomplete="given-name"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastname">Last Name</label>
+
+                        <input
+                            type="text"
+                            id="lastname"
+                            name="lastname"
+                            placeholder="Last name"
+                            autocomplete="family-name"
+                            required>
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Choose a username"
+                        autocomplete="username"
+                        required>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="phone_number">Phone Number</label>
+
+                    <input
+                        type="tel"
+                        id="phone_number"
+                        name="phone_number"
+                        placeholder="Enter your phone number"
+                        autocomplete="tel"
+                        required>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email address"
+                        autocomplete="email"
+                        required>
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+
+                        <div class="password-wrapper">
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Create password"
+                                autocomplete="new-password"
+                                required>
+
+                            <button
+                                type="button"
+                                class="toggle-password"
+                                data-target="password">
+                                Show
+                            </button>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password</label>
+
+                        <div class="password-wrapper">
+                            <input
+                                type="password"
+                                id="confirm_password"
+                                name="confirm_password"
+                                placeholder="Confirm password"
+                                autocomplete="new-password"
+                                required>
+
+                            <button
+                                type="button"
+                                class="toggle-password"
+                                data-target="confirm_password">
+                                Show
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <button type="submit" class="register-button">
+                    Create Account
+                    <span>→</span>
+                </button>
+
+            </form>
+
 
             <div class="login-link">
-                Already have an account? <a href="{% url 'login' %}">Login</a>
+                Already have an account?
+                <a href="{% url 'login' %}">Sign in</a>
             </div>
-        </form>
+
+
+            <div class="register-bottom">
+                <a href="{% url 'index' %}">← Back to Marketplace</a>
+            </div>
+
+        </div>
+
     </div>
 
-</body>
+</div>
 
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const toggleButtons = document.querySelectorAll(".toggle-password");
+
+    toggleButtons.forEach(function (button) {
+
+        button.addEventListener("click", function () {
+
+            const target = document.getElementById(this.dataset.target);
+
+            if (target.type === "password") {
+                target.type = "text";
+                this.textContent = "Hide";
+            } else {
+                target.type = "password";
+                this.textContent = "Show";
+            }
+
+        });
+
+    });
+
+});
+</script>
+
+</body>
 </html>

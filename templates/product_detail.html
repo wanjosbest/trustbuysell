@@ -1,162 +1,304 @@
+
 {% extends "base.html" %}
 {% load static %}
 
 {% block header %}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ product.name }} - Product Details</title>
+
+<title>{{ product.name }} | TrustBuySell</title>
+<meta name="description" content="{{ product.description|truncatewords:25 }}">
+
 <link rel="stylesheet" href="{% static 'css/products.css' %}">
+
 {% include "header.html" %}
 {% endblock %}
 
 {% block content %}
-<main>
-  {% for message in messages %}
-  <div class="alert">{{ message }}</div>
-  {% endfor %}
 
-  <!-- Product Gallery -->
-  <section class="gallery">
-    {% if product.images.all %}
-    {% with product.images.first as main_image %}
-    <img id="mainImage" src="{{ main_image.image.url }}" alt="{{ product.name }}">
-    {% endwith %}
-    {% else %}
-    <img id="mainImage" src="{% static 'img/no-image.png' %}" alt="No Image">
-    {% endif %}
-  </section>
+<main class="product-page">
 
-  <div class="thumbs">
-    {% for image in product.images.all %}
-    <img src="{{ image.image.url }}" class="{% if forloop.first %}active{% endif %}" alt="{{ product.name }}">
-    {% empty %}
-    <p>No images available for this product.</p>
+    <!-- MESSAGES -->
+    {% for message in messages %}
+        <div class="product-alert">
+            {{ message }}
+        </div>
     {% endfor %}
-  </div>
 
-  <!-- Product Info -->
-  <section class="info">
-    <h1>{{ product.name }}</h1>
-    <div class="seller">by <strong>{{ product.user.username }}</strong></div>
-    <div class="price">₦{{ product.discountedprice }}</div>
+    <!-- BREADCRUMB -->
+    <nav class="product-breadcrumb">
+        <a href="{% url 'index' %}">Home</a>
+        <span>/</span>
 
-    <div class="actions">
-      <a href="tel:{{ product.user.phone_number }}" class="btn btn-accent">📞 Call Seller</a>
-      <a href="{% url 'add-to-cart' product.id %}" class="btn btn-primary">Add to Cart</a>
-      <a href="{% url 'start_chat' product.user.username %}" class="btn btn-outline">
-        💬 Chat with Seller
-      </a>
-
-    </div>
-  </section>
-
-  <!-- Description -->
-  <section class="desc">
-    <h2>Product Description</h2>
-    <p>{{ product.description }}</p>
-  </section>
-
-  <!-- Related Products -->
-  <section class="related">
-    <h2>Related Products</h2>
-    <div class="rel-grid">
-      {% for related in related_product %}
-      <div class="rel-card">
-        {% if related.images.first %}
-        <img src="{{ related.images.first.image.url }}" alt="{{ related.name }}">
-        {% else %}
-        <img src="{% static 'img/no-image.png' %}" alt="No Image">
+        {% if product.category %}
+            <a href="{% url 'category_products' product.category.id %}">
+                {{ product.category.name }}
+            </a>
+            <span>/</span>
         {% endif %}
-        <div class="body">
-          <div class="title">{{ related.name }}</div>
-          <div class="price">₦{{ related.discountedprice }}</div>
+
+        <span class="current">{{ product.name }}</span>
+    </nav>
+
+    <!-- PRODUCT DETAILS -->
+    <section class="product-layout">
+
+        <!-- LEFT: PRODUCT GALLERY -->
+        <div class="product-gallery-section">
+
+            <div class="main-gallery">
+
+                {% if product.images.all %}
+                    {% with product.images.first as main_image %}
+                        <img
+                            id="mainImage"
+                            src="{{ main_image.image.url }}"
+                            alt="{{ product.name }}">
+                    {% endwith %}
+                {% else %}
+                    <img
+                        id="mainImage"
+                        src="{% static 'img/no-image.png' %}"
+                        alt="No product image">
+                {% endif %}
+
+                {% if product.featured %}
+                    <span class="gallery-featured">FEATURED AD</span>
+                {% endif %}
+
+            </div>
+
+            <!-- IMAGE THUMBNAILS -->
+            {% if product.images.all %}
+                <div class="product-thumbnails">
+
+                    {% for image in product.images.all %}
+                        <button
+                            type="button"
+                            class="thumbnail {% if forloop.first %}active{% endif %}"
+                            data-image="{{ image.image.url }}"
+                            aria-label="View product image {{ forloop.counter }}">
+
+                            <img src="{{ image.image.url }}" alt="{{ product.name }}">
+
+                        </button>
+                    {% endfor %}
+
+                </div>
+            {% endif %}
+
+            <!-- PRODUCT DESCRIPTION -->
+            <div class="product-description-card">
+
+                <div class="details-section-heading">
+                    <h2>Product Description</h2>
+                </div>
+
+                <div class="description-content">
+                    {{ product.description|linebreaks }}
+                </div>
+
+            </div>
+
         </div>
-      </div>
-      {% endfor %}
-    </div>
-  </section>
 
-  <!-- Reviews Section -->
-  <section class="reviews-container">
-    <h2 class="section-title">Customer Reviews ({{ reviews.count }})</h2>
+        <!-- RIGHT: PRODUCT INFORMATION -->
+        <aside class="product-sidebar">
 
-    {% if reviews %}
-    <div class="review-list">
-      {% for review in reviews %}
-      <div class="review-card">
-        <div class="review-header">
-          <span class="review-user">{{ review.user.username }}</span>
-          <div class="stars">
-            {% for i in "12345" %}
-            <span class="star {% if forloop.counter <= review.rating %}filled{% endif %}">★</span>
+            <div class="product-info-card">
+
+                <div class="listing-category">
+                    {{ product.category.name }}
+                </div>
+
+                <h1>{{ product.name }}</h1>
+
+                <div class="listing-price">
+                    ₦{{ product.discountedprice}}
+                </div>
+
+                {% if product.actualprice and product.discountedprice and product.actualprice != product.discountedprice %}
+                    <div class="original-price">
+                        <span>₦{{ product.actualprice|floatformat:0 }}</span>
+                    </div>
+                {% endif %}
+
+                <div class="listing-divider"></div>
+
+                <!-- SELLER INFORMATION -->
+                <div class="seller-panel">
+
+                    <div class="seller-avatar">
+                        {{ product.user.username|first|upper }}
+                    </div>
+
+                    <div class="seller-details">
+                        <span class="seller-caption">Listed by</span>
+                        <strong>{{ product.user.username }}</strong>
+                        <span class="seller-status">
+                            <span class="online-dot"></span>
+                            Seller on TrustBuySell
+                        </span>
+                    </div>
+
+                </div>
+
+                <!-- CONTACT ACTIONS -->
+                <div class="seller-actions">
+
+                    {% if product.user.phone_number %}
+                        <a
+                            href="tel:{{ product.user.phone_number }}"
+                            class="contact-btn call-btn">
+                            <span>☎</span>
+                            Call Seller
+                        </a>
+                    {% endif %}
+
+                    <a
+                        href="{% url 'start_chat' product.user.username %}"
+                        class="contact-btn chat-btn">
+                        <span>▣</span>
+                        Chat with Seller
+                    </a>
+
+                </div>
+
+                <div class="safety-note">
+                    <div class="safety-icon">✓</div>
+                    <div>
+                        <strong>Shop with care</strong>
+                        <p>Inspect the product and confirm its condition before making payment.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- QUICK INFORMATION -->
+            <div class="trust-card">
+                <h3>Buy with confidence</h3>
+
+                <div class="trust-item">
+                    <span class="trust-check">✓</span>
+                    Contact the seller directly
+                </div>
+
+                <div class="trust-item">
+                    <span class="trust-check">✓</span>
+                    Ask questions before buying
+                </div>
+
+                <div class="trust-item">
+                    <span class="trust-check">✓</span>
+                    Arrange a safe inspection
+                </div>
+            </div>
+
+        </aside>
+
+    </section>
+
+    <!-- RELATED PRODUCTS -->
+    {% if related_product %}
+    <section class="related-section">
+
+        <div class="related-heading">
+            <div>
+                <span class="related-eyebrow">YOU MAY ALSO LIKE</span>
+                <h2>Related Advertisements</h2>
+                <p>Discover more products you might be interested in.</p>
+            </div>
+        </div>
+
+        <div class="related-grid">
+
+            {% for related in related_product %}
+
+                <article class="related-card">
+
+                    <a href="{% url 'product_detail' related.slug %}" class="related-image">
+
+                        {% if related.images.first %}
+                            <img
+                                src="{{ related.images.first.image.url }}"
+                                alt="{{ related.name }}"
+                                loading="lazy">
+                        {% else %}
+                            <img
+                                src="{% static 'img/no-image.png' %}"
+                                alt="No product image"
+                                loading="lazy">
+                        {% endif %}
+
+                        {% if related.featured %}
+                            <span class="related-featured">Featured</span>
+                        {% endif %}
+
+                    </a>
+
+                    <div class="related-body">
+
+                        <span class="related-category">
+                            {{ related.category.name }}
+                        </span>
+
+                        <a
+                            href="{% url 'product_detail' related.slug %}"
+                            class="related-name">
+                            {{ related.name }}
+                        </a>
+
+                        <div class="related-price">
+                            ₦{{ related.discountedprice}}
+                        </div>
+
+                        <a
+                            href="{% url 'product_detail' related.slug %}"
+                            class="related-view">
+                            View Advertisement →
+                        </a>
+
+                    </div>
+
+                </article>
+
             {% endfor %}
-          </div>
+
         </div>
-        <p class="review-message">{{ review.message }}</p>
-        <div class="review-date">{{ review.created_at|date:"M d, Y - h:i A" }}</div>
-      </div>
-      {% endfor %}
-    </div>
-    {% else %}
-    <p>No reviews yet. Be the first to review this product!</p>
+
+    </section>
     {% endif %}
 
-    <hr class="divider">
-
-    {% if user.is_authenticated %}
-    <form method="POST" class="review-form">
-      {% csrf_token %}
-      <textarea name="message" placeholder="Share your experience..." required></textarea>
-      <label>Rating:</label>
-      <div class="stars">
-        {% for i in "12345" %}
-        <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" style="display:none;">
-        <span class="star" data-value="{{ i }}">★</span>
-        {% endfor %}
-      </div>
-      <button type="submit" class="submit-btn">Submit Review</button>
-    </form>
-    {% else %}
-    <p class="login-msg"><a href="{% url 'login' %}">Login</a> to write a review.</p>
-    {% endif %}
-  </section>
 </main>
 
-<!-- JavaScript -->
+<!-- GALLERY JAVASCRIPT -->
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const thumbs = document.querySelectorAll('.thumbs img');
-    const mainImage = document.getElementById('mainImage');
+document.addEventListener("DOMContentLoaded", function () {
 
-    thumbs.forEach(t => {
-      t.addEventListener('click', () => {
-        thumbs.forEach(x => x.classList.remove('active'));
-        t.classList.add('active');
-        mainImage.src = t.src;
-      });
+    const mainImage = document.getElementById("mainImage");
+    const thumbnails = document.querySelectorAll(".thumbnail");
+
+    thumbnails.forEach(function (thumbnail) {
+
+        thumbnail.addEventListener("click", function () {
+
+            const imageUrl = this.dataset.image;
+
+            if (mainImage && imageUrl) {
+                mainImage.src = imageUrl;
+            }
+
+            thumbnails.forEach(function (item) {
+                item.classList.remove("active");
+            });
+
+            this.classList.add("active");
+
+        });
+
     });
 
-    const stars = document.querySelectorAll(".review-form .star");
-    if (stars.length) {
-      const ratingInput = document.createElement("input");
-      ratingInput.type = "hidden";
-      ratingInput.name = "rating";
-      document.querySelector(".review-form").appendChild(ratingInput);
-
-      stars.forEach((star, index) => {
-        star.addEventListener("click", () => {
-          const value = index + 1;
-          ratingInput.value = value;
-          stars.forEach((s, i) => s.classList.toggle("selected", i < value));
-        });
-        star.addEventListener("mouseenter", () => {
-          stars.forEach((s, i) => s.classList.toggle("filled", i <= index));
-        });
-        star.addEventListener("mouseleave", () => {
-          stars.forEach((s, i) => s.classList.toggle("filled", i < ratingInput.value));
-        });
-      });
-    }
-  });
+});
 </script>
+
 {% endblock %}

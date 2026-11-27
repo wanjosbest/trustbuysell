@@ -1,24 +1,128 @@
+
 {% load static %}
 
 <link rel="stylesheet" href="{% static 'css/header.css' %}">
-<header>
-        <div class="wrap nav" role="navigation" aria-label="Main">
-            <div class="brand"><a href="{% url 'index' %}"><span class="logo">TB</span> TrustBuySell</a></div>
-            <button class="hamb" id="hambA" aria-expanded="false" aria-controls="navA">☰</button>
-            <form class="searchbar" action="{% url 'search' %}" method="get" style="flex:1;min-width:220px">
-                <input name="q" placeholder="Search products, categories, sellers…" value="{{ request.GET.q }}">
-                <button type="submit">Search</button>
-            </form>
-            <nav id="navA" class="links" aria-label="Primary">
-                <a href="#featuredA">Featured</a>
-                {% if user.is_authenticated %}
-                <a href="{% url 'seller_dashboard' %}">🏛 Dashboard</a>
-                <a href="{% url 'cart' %}">🛒View Cart</a>
-                <a href="{% url 'logout' %}">Log Out</a>
-                {% else %}
-                <a href="{% url 'login' %}">Login</a>
-                <a href="{% url 'register' %}">Register</a>
-                {% endif %}
-            </nav>
-        </div>
-    </header>
+
+<header class="tbs-header">
+  <div class="tbs-wrap">
+
+    <div class="tbs-nav">
+
+      <!-- BRAND -->
+      <div class="tbs-brand">
+        <a href="{% url 'index' %}">
+          <span class="tbs-logo">TB</span>
+          <span>Trust<span class="tbs-orange">Buy</span>Sell</span>
+        </a>
+      </div>
+
+      <!-- MOBILE MENU BUTTON -->
+      <button
+        class="tbs-hamb"
+        id="hambA"
+        type="button"
+        aria-label="Open navigation menu"
+        aria-expanded="false"
+        aria-controls="navA"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <!-- SEARCH -->
+      <form class="tbs-searchbar" action="{% url 'search' %}" method="get">
+        <input
+          type="search"
+          name="q"
+          placeholder="Search products, categories, sellers..."
+          value="{{ request.GET.q|default:'' }}"
+          aria-label="Search marketplace"
+        >
+        <button type="submit">
+          Search
+        </button>
+      </form>
+
+      <!-- NAVIGATION -->
+      <nav id="navA" class="tbs-links" aria-label="Main navigation">
+
+        <a href="{% url 'index' %}#recent-listings">
+          Explore Listings
+        </a>
+
+        {% if user.is_authenticated %}
+
+          <a href="{% url 'dashboard' %}">
+            Dashboard
+          </a>
+
+          <a href="{% url 'add_product' %}" class="tbs-post-link">
+            + Post Advertisement
+          </a>
+
+          <a href="{% url 'logout' %}" class="tbs-logout">
+            Log Out
+          </a>
+
+        {% else %}
+
+          <a href="{% url 'login' %}">
+            Login
+          </a>
+
+          <a href="{% url 'register' %}" class="tbs-register">
+            Register / Sell
+          </a>
+
+        {% endif %}
+
+      </nav>
+
+    </div>
+  </div>
+</header>
+
+<script>
+  (function () {
+    const menuButton = document.getElementById("hambA");
+    const navigation = document.getElementById("navA");
+
+    if (!menuButton || !navigation) return;
+
+    menuButton.addEventListener("click", function () {
+      const isOpen = navigation.classList.toggle("tbs-open");
+
+      menuButton.setAttribute("aria-expanded", isOpen);
+      menuButton.setAttribute(
+        "aria-label",
+        isOpen ? "Close navigation menu" : "Open navigation menu"
+      );
+
+      menuButton.classList.toggle("active", isOpen);
+    });
+
+    // Close menu after selecting a navigation link
+    navigation.querySelectorAll("a").forEach(function (link) {
+      link.addEventListener("click", function () {
+        navigation.classList.remove("tbs-open");
+        menuButton.classList.remove("active");
+        menuButton.setAttribute("aria-expanded", "false");
+        menuButton.setAttribute("aria-label", "Open navigation menu");
+      });
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener("click", function (event) {
+      if (
+        !navigation.contains(event.target) &&
+        !menuButton.contains(event.target)
+      ) {
+        navigation.classList.remove("tbs-open");
+        menuButton.classList.remove("active");
+        menuButton.setAttribute("aria-expanded", "false");
+        menuButton.setAttribute("aria-label", "Open navigation menu");
+      }
+    });
+  })();
+</script>

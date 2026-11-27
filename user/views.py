@@ -15,7 +15,7 @@ def register_view(request):
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
         email = request.POST.get('email')
-        user_type = request.POST.get("user_type")
+      
 
         user = User.objects.filter(username=username)
         if user.exists():
@@ -32,16 +32,10 @@ def register_view(request):
             phone_number = phone_number,
         )
         user.set_password(password)
-        if user_type == "seller":
-           user.is_seller = True
-        elif user_type == "buyer":
-            user.is_buyer = True
-        else:
-            messages.info(request, "You Must select Buyer or Seller")
-            return redirect("register")
         user.save()
         messages.info(request, "Account created Successfully!")
-        return redirect('login')
+        login(request, user)
+        return redirect('dashboard')
     return render(request, 'user/register.html')
 
 def login_view(request):
@@ -54,7 +48,6 @@ def login_view(request):
             messages.error(request, 'Invalid username')
             return redirect('login')
         user = authenticate(username=username, password=password)
-        
         if user is None:
             messages.error(request, "Invalid Password")
             return redirect('login')
@@ -62,13 +55,9 @@ def login_view(request):
             login(request,user)
             if next_url:
                 return redirect(next_url)
-            elif user.is_seller == True:
-               return redirect("seller_dashboard")
             else:
-                return redirect("buyer_dashboard")
+                return redirect("dashboard")
     return render(request, 'user/login.html',{"next_url":next_url})
-
-
 
 # logout user
 @login_required(login_url='login')

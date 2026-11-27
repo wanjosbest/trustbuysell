@@ -18,18 +18,6 @@ class category(models.Model):
         verbose_name="category"
         verbose_name_plural="Category"
 
-# #userbase
-# class Product_image(models.Model):
-#     user = models.ForeignKey(User, related_name="user_image",on_delete=models.CASCADE)
-#     image = models.ImageField( upload_to="img/product_images/", null=True)
-#     image_url = models.URLField(max_length=500, blank=True, null=True) 
-#     Ishero = models.BooleanField(default=False)
-#     def __str__(self):
-#         return 'image' 
-   
-#     class Meta:
-#         verbose_name="Product_image"
-#         verbose_name_plural="Product Images"
 
 class HeroImage(models.Model):
     title = models.CharField(max_length=200, blank=True, null=True)
@@ -63,9 +51,9 @@ class Products(models.Model):
     published = models.DateTimeField(auto_now_add=True, null=True)
     updated = models.DateTimeField(auto_now=True, null=True)
     slug = models.SlugField(max_length=120, unique=True, null=True)
-    actualprice = models.DecimalField(max_digits=20, decimal_places=2, null=True)
+    # actualprice = models.DecimalField(max_digits=20, decimal_places=2, null=True)
     discountedprice = models.DecimalField(max_digits=20, decimal_places=2, null=True)
-    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="published")
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="draft")
     stock = models.PositiveIntegerField(default=0)
 
     def __str__(self):

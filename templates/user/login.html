@@ -1,107 +1,183 @@
+
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TrustBuySell - Login</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background: #f7f7f7;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    .login-container {
-        max-width: 400px;
-        background: white;
-        margin: 50px auto;
-        padding: 25px;
-        border-radius: 8px;
-        box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
-    }
+    <title>Login | TrustBuySell</title>
 
-    h2 {
-        text-align: center;
-        color: #1e3a8a;
-        margin-bottom: 20px;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-        color: #333;
-    }
-
-    input[type="username"], input[type="password"] {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        margin-bottom: 15px;
-        font-size: 1rem;
-    }
-
-    button {
-        width: 100%;
-        padding: 12px;
-        background: #1e3a8a;
-        color: white;
-        font-size: 1.1rem;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background 0.3s;
-    }
-
-    button:hover {
-        background: #162b68;
-    }
-
-    .links {
-        text-align: center;
-        margin-top: 15px;
-        font-size: 0.9rem;
-    }
-
-    .links a {
-        color: #1e3a8a;
-        text-decoration: none;
-    }
-
-    .links a:hover {
-        text-decoration: underline;
-    }
-</style>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
+
 <body>
-   {% for message in messages %}
-         {{message}}
-         {% endfor %}
 
-<div class="login-container">
-    <h2>Login</h2>
-    <form method="POST">
-        {%csrf_token%}
-        <input type="hidden" name="next" value="{{next_url}}">
-        <label for="username">User Name</label>
-        <input type="username" id="email" name="username" placeholder="Enter your username" required>
+<div class="login-page">
 
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+    <!-- LEFT BRANDING SECTION -->
+    <div class="login-brand">
 
-        <button type="submit">Login</button>
-    </form>
+        <a href="{% url 'index' %}" class="brand-logo">
+            <span class="brand-icon">T</span>
+            <span>TrustBuySell</span>
+        </a>
 
-    <div class="links">
-        <p><a href="#">Forgot Password?</a></p>
-        <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+        <div class="brand-content">
+            <span class="brand-label">ADAMAWA MARKETPLACE</span>
+
+            <h1>Welcome back to your marketplace.</h1>
+
+            <p>
+                Sign in to manage your advertisements, connect with buyers
+                and discover products from sellers in your community.
+            </p>
+
+            <div class="brand-features">
+                <div class="feature">
+                    <span>✓</span>
+                    Connect directly with sellers
+                </div>
+
+                <div class="feature">
+                    <span>✓</span>
+                    Manage your advertisements
+                </div>
+
+                <div class="feature">
+                    <span>✓</span>
+                    Discover products around you
+                </div>
+            </div>
+        </div>
+
+        <div class="brand-footer">
+            Buy Smart. Sell Smart.
+        </div>
+
+        <div class="brand-decoration decoration-one"></div>
+        <div class="brand-decoration decoration-two"></div>
+
     </div>
+
+    <!-- RIGHT LOGIN SECTION -->
+    <div class="login-main">
+
+        <div class="login-container">
+
+            <div class="mobile-logo">
+                <a href="{% url 'index' %}">
+                    <span class="brand-icon">T</span>
+                    TrustBuySell
+                </a>
+            </div>
+
+            <div class="login-heading">
+                <span class="welcome-label">WELCOME BACK</span>
+                <h2>Sign in to your account</h2>
+                <p>Enter your details to continue.</p>
+            </div>
+
+            <!-- DJANGO MESSAGES -->
+            {% for message in messages %}
+                <div class="message-alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            <form method="POST" class="login-form">
+                {% csrf_token %}
+
+                <input type="hidden" name="next" value="{{ next_url }}">
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+
+                    <div class="input-wrapper">
+                        <span class="input-icon">♙</span>
+
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            placeholder="Enter your username"
+                            autocomplete="username"
+                            required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="password-label">
+                        <label for="password">Password</label>
+                    </div>
+
+                    <div class="input-wrapper">
+                        <span class="input-icon">♙</span>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required>
+
+                        <button
+                            type="button"
+                            class="toggle-password"
+                            id="togglePassword"
+                            aria-label="Show password">
+                            Show
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-button">
+                    Sign In
+                    <span>→</span>
+                </button>
+
+            </form>
+
+            <div class="login-links">
+                <p>
+                    Don't have an account?
+                    <a href="{% url 'register' %}">Create an account</a>
+                </p>
+            </div>
+
+            <div class="login-bottom">
+                <a href="{% url 'index' %}">← Back to Marketplace</a>
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const password = document.getElementById("password");
+    const toggle = document.getElementById("togglePassword");
+
+    toggle.addEventListener("click", function () {
+
+        if (password.type === "password") {
+            password.type = "text";
+            toggle.textContent = "Hide";
+            toggle.setAttribute("aria-label", "Hide password");
+        } else {
+            password.type = "password";
+            toggle.textContent = "Show";
+            toggle.setAttribute("aria-label", "Show password");
+        }
+
+    });
+
+});
+</script>
 
 </body>
 </html>
-
-
- 

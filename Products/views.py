@@ -28,81 +28,38 @@ from wallet.models import Wallet, Transaction,PendingWallet
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-#users to add products images
-@login_required
-def upload_image(request):
-    products = Products.objects.filter(user=request.user)
+# #users to add products images
+# @login_required
+# def upload_image(request):
+#     products = Products.objects.filter(user=request.user)
 
-    if request.method == "POST":
-        product_id = request.POST.get("product")
-        image_files = request.FILES.getlist("image")  # Support multiple uploads
+#     if request.method == "POST":
+#         product_id = request.POST.get("product")
+#         image_files = request.FILES.getlist("image")  # Support multiple uploads
 
-        if not product_id:
-            messages.error(request, "Please select a product.")
-            return redirect("addproductimage")
+#         if not product_id:
+#             messages.error(request, "Please select a product.")
+#             return redirect("addproductimage")
 
-        product = get_object_or_404(Products, id=product_id, user=request.user)
+#         product = get_object_or_404(Products, id=product_id, user=request.user)
 
-        for image_file in image_files:
-            ProductImage.objects.create(
-                user=request.user,
-                product=product,
-                image=image_file
-            )
+#         for image_file in image_files:
+#             ProductImage.objects.create(
+#                 user=request.user,
+#                 product=product,
+#                 image=image_file
+#             )
 
-        messages.success(request, "✅ Image(s) uploaded successfully.")
-        return redirect("addproductimage")
+#         messages.success(request, "✅ Image(s) uploaded successfully.")
+#         return redirect("addproductimage")
 
-    images = ProductImage.objects.filter(user=request.user)
-    return render(request, "upload_image.html", {"images": images, "products": products})
+#     images = ProductImage.objects.filter(user=request.user)
+#     return render(request, "upload_image.html", {"images": images, "products": products})
 
 
 #user product list
 @login_required
 def user_product_list(request):
-    if request.method == "POST":
-        name = request.POST.get("name")
-        description = request.POST.get("description")
-        meta_keywords = request.POST.get("meta_keywords")
-        meta_descriptions = request.POST.get("meta_descriptions")
-        actualprice = request.POST.get("actualprice")
-        discountedprice = request.POST.get("discountedprice")
-        status = request.POST.get("status")
-        category_id = request.POST.get("category")
-        stock = int(request.POST.get("stock") or 0)
-        slug = slugify(name)
-
-        # Get category object
-        category_obj = category.objects.filter(id=category_id).first() if category_id else None
-
-        # Handle product image (single upload)
-        product_image_file = request.FILES.get("product_image")
-
-        image_obj = None
-        if product_image_file:
-            image_obj = ProductImage.objects.create(
-                user=request.user,
-                image=product_image_file
-            )
-
-        # Create product
-        Products.objects.create(
-            user=request.user,
-            name=name,
-            description=description,
-            meta_keywords=meta_keywords,
-            meta_descriptions=meta_descriptions,
-            actualprice=actualprice,
-            discountedprice=discountedprice,
-            status=status,
-            category=category_obj,
-            product_image=image_obj,
-            slug=slug,
-            stock=stock,
-        )
-
-        return redirect("product_lists")
-
     # Fetch data for template
     products = Products.objects.filter(user=request.user).order_by("-published")
     categories = category.objects.all()
@@ -125,14 +82,14 @@ def add_product(request):
         description = request.POST.get("description")
         meta_keywords = request.POST.get("meta_keywords")
         meta_descriptions = request.POST.get("meta_descriptions")
-        actualprice = request.POST.get("actualprice")
+        # actualprice = request.POST.get("actualprice")
         discountedprice = request.POST.get("discountedprice")
         status = request.POST.get("status")
         category_id = request.POST.get("category")
         stock = request.POST.get("stock")
 
         # Validations
-        if not name or not actualprice:
+        if not name or not discountedprice:
             messages.error(request, "Product name and price are required.")
             return redirect("add_product")
 
@@ -264,7 +221,6 @@ def product_delete(request, slug):
     return render(request, "product_delete.html", {"product": product})
 
 #add to cart
-@login_required
 def add_to_cart(request,product_id):
     product = get_object_or_404(Products, id= product_id)
 
@@ -544,41 +500,34 @@ def category_products(request, category_id):
     return render(request, "products/category_products.html",context)
 
 @login_required(login_url="login")
-def seller_dashboard(request):
-    products = Products.objects.filter(user=request.user)
-    total_products = products.count()
-    sold_out = products.filter(stock=0).count()
-    pending_orders = Order.objects.all().filter(status = "pending").count()
-    order = request.user.sales
-    recent_order = order.all().order_by("-created_at")[:3]
-    order_count = order.count()
-    wallet = request.user.wallet
-    Transactions = Transaction.objects.filter(wallet = wallet)
-    pending_wallet = request.user.pending_wallet
+@def dashboard(request):
+    products = Products.objects.filter(seller=request.user)
+
     context = {
-        "products": products,
-        "total_products": total_products,
-        "sold_out": sold_out,
-        "pending_orders":pending_orders,
-        "order_count":order_count,
-        "recent_order": recent_order,
-        "wallet":wallet,
-        "Transactions":Transactions,
-        "pending_wallet":pending_wallet,
+        "total_products": products.count(),
+        "active_products": products.filter(status="published").count(),
+        "pending_products": products.filter(status="draft").count(),
+        "recent_products": products.order_by("-id")[:6],
+
+        # Keep your existing message query here
+        # and calculate message_count from your Message model.
+
+        "is_verified": request.user.is_verified,
     }
-    return render(request, "dashboard/seller_dashboard.html", context)
+
+    return render(request, "dashboard/dashboard.html", context)
 
 
-@login_required(login_url="login")
-def buyer_dashboard(request):
-    total_items_ordered = (request.user.orders.prefetch_related("product").order_by("-created_at"))[:5]
+# @login_required(login_url="login")
+# def buyer_dashboard(request):
+#     total_items_ordered = (request.user.orders.prefetch_related("product").order_by("-created_at"))[:5]
 
-    context ={"orders":total_items_ordered}
-    # # Debug: print products for each order
-    # for order in total_items_ordered:
-    #     print(f"Order {order.id}: {[p.name for p in order.product.all()]}")
+#     context ={"orders":total_items_ordered}
+#     # # Debug: print products for each order
+#     # for order in total_items_ordered:
+#     #     print(f"Order {order.id}: {[p.name for p in order.product.all()]}")
    
-    return render(request, "dashboard/buyer_dashboard.html", context)
+#     return render(request, "dashboard/buyer_dashboard.html", context)
 
 @login_required
 def hero_image_update(request):

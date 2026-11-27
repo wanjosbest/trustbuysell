@@ -1,12 +1,150 @@
+
 {% load static %}
-   <link rel="stylesheet" href="{% static 'css/footer.css' %}">
-  <div class="foot">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-      <div><strong>TrustBuySell</strong><div class="muted">Serving Adamawa sellers & buyers</div></div>
-      <div class="muted">Contact: 07041696102</div>
+
+<link rel="stylesheet" href="{% static 'css/footer.css' %}">
+
+<footer class="tbs-footer">
+
+    <div class="tbs-footer-container">
+
+        <div class="tbs-footer-grid">
+
+            <!-- BRAND -->
+            <div class="tbs-footer-brand">
+
+                <a href="{% url 'index' %}" class="tbs-footer-logo">
+                    <span class="tbs-footer-logo-icon">TB</span>
+                    <span>Trust<span class="tbs-footer-orange">Buy</span>Sell</span>
+                </a>
+
+                <p>
+                    Your trusted local marketplace in Adamawa State.
+                    Discover products, explore local advertisements
+                    and connect directly with sellers around you.
+                </p>
+
+                <span class="tbs-footer-location">
+                    Adamawa State, Nigeria
+                </span>
+
+            </div>
+
+
+            <!-- MARKETPLACE LINKS -->
+            <div class="tbs-footer-column">
+
+                <h3>Marketplace</h3>
+
+                <ul>
+                    <li>
+                        <a href="{% url 'index' %}">Home</a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'index' %}#recent-listings">
+                            Explore Advertisements
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'register' %}">
+                            Start Selling
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'register' %}">
+                            Join TrustBuySell
+                        </a>
+                    </li>
+                </ul>
+
+            </div>
+
+
+            <!-- ACCOUNT LINKS -->
+            <div class="tbs-footer-column">
+
+                <h3>Your Account</h3>
+
+                <ul>
+
+                    {% if user.is_authenticated %}
+
+                        <li>
+                            <a href="{% url 'dashboard' %}">
+                                My Dashboard
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'add_product' %}">
+                                Post an Advertisement
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'logout' %}">
+                                Logout
+                            </a>
+                        </li>
+
+                    {% else %}
+
+                        <li>
+                            <a href="{% url 'login' %}">
+                                Login
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'register' %}">
+                                Create an Account
+                            </a>
+                        </li>
+
+                    {% endif %}
+
+                </ul>
+
+            </div>
+
+
+            <!-- SAFETY INFORMATION -->
+            <div class="tbs-footer-column tbs-footer-safety">
+
+                <h3>Stay Safe</h3>
+
+                <p>
+                    Your safety matters. Always verify products
+                    before making payment and meet sellers in
+                    safe public locations.
+                </p>
+
+                <div class="tbs-safety-note">
+                    <span class="tbs-safety-dot"></span>
+                    Buy Smart. Sell Smart.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- FOOTER BOTTOM -->
+        <div class="tbs-footer-bottom">
+
+            <p>
+                &copy; {% now "Y" %} TrustBuySell.
+                All rights reserved.
+            </p>
+
+            <p>
+                Connecting buyers and sellers across Adamawa.
+            </p>
+
+        </div>
+
     </div>
-    <div class="muted" style="font-size:13px">© {{ now|date:"Y" }} TrustBuySell — All rights reserved.</div>
-  </div>
 
-
-<script src="{% static '/js/main.js' %}"></script>
+</footer>

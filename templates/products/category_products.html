@@ -1,58 +1,160 @@
-{% extends "base.html" %}
 
+{% extends "base.html" %}
 {% load static %}
+
 {% block header %}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{% block title %}{{category.name}} products{% endblock %}</title>
+
+<title>{% block title %}{{ category.name }} Advertisements | TrustBuySell{% endblock %}</title>
+
+<meta name="description" content="Browse {{ category.name }} advertisements on TrustBuySell. Discover products from sellers across Adamawa State.">
+
 <link rel="stylesheet" href="{% static 'css/category-products.css' %}">
 <link rel="stylesheet" href="{% static 'css/main.css' %}">
-{% include "header.html"%}
 
+{% include "header.html" %}
 {% endblock %}
 
 {% block content %}
-<section class="hero" aria-label="Hero">
-  <div class="hero-card">
-    {% if hero %}
-    <div class="hero-media" style="background-image:url('{{ hero.image.url }}')"></div>
-    {% endif %}
-    <div class="hero-content">
-      <h1>Buy & Sell in Adamawa — Fast • Secure • Reliable</h1>
-      <p>Reach more customers in your community. Start selling today on TrustBuySell.</p>
-      <div class="hero-actions">
-        <a class="btn btn-accent" href="{% url 'register' %}">Register & Sell</a>
-        <a class="btn ghost" href="#featuredA">Shop Featured</a>
-      </div>
-    </div>
-  </div>
 
-  <div class="chip-row" id="catsA">
-    {% for category in categories %}
-      <a class="chip" href="{% url 'category_products' category.id %}"
-        data-cat="{{ category.name|default:'' }}">{{ category.name }}</a>
-    {% empty %}
-      <span class="chip">No categories yet</span>
-    {% endfor %}
-  </div>
-</section>
-  
-  <h2 style="text-align:center;">{{ category.name }} 🛍️</h2>
-  <div class="grid">
-    {% for product in products %}
-     
-    <div class="card">
-        <a href="{% url 'product_detail' product.slug %}">
-      <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
-      <a href="{% url 'product_detail' product.slug %}"><h4>{{ product.name }}</h4></a>
-      
-      <p>₦{{ product.discountedprice }}</p>
-      <a class="btn" href="{% url 'add-to-cart' product.id %}">Add to Cart</a>
-      </a>
+<!-- CATEGORY HERO -->
+<section class="category-hero">
+    <div class="category-hero-overlay">
+        <div class="category-hero-content">
+            <span class="category-label">EXPLORE CATEGORY</span>
+
+            <h1>{{ category.name }}</h1>
+
+            <p>
+                Discover available {{ category.name }} advertisements
+                from trusted sellers across Adamawa.
+            </p>
+
+            <a href="#category-listings" class="category-hero-btn">
+                Browse Advertisements
+                <span>→</span>
+            </a>
+        </div>
+
+        <div class="category-hero-decoration">TB</div>
     </div>
-   
-    {% empty %}
-      <p>No products available in this category.</p>
-    {% endfor %}
-  </div>
-{% endblock %} 
+</section>
+
+<!-- CATEGORY NAVIGATION -->
+<section class="category-navigation">
+    <div class="category-nav-inner">
+        <div class="category-nav-heading">
+            <span class="nav-dot"></span>
+            Browse Categories
+        </div>
+
+        <div class="category-chips">
+            {% for cat in categories %}
+                <a
+                    href="{% url 'category_products' cat.id %}"
+                    class="category-chip {% if cat.id == category.id %}active{% endif %}">
+                    {{ cat.name }}
+                </a>
+            {% empty %}
+                <span class="category-empty">No categories available</span>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- LISTINGS -->
+<section class="category-listings" id="category-listings">
+
+    <div class="listings-heading">
+        <div>
+            <span class="section-eyebrow">TRUSTBU YSELL MARKETPLACE</span>
+            <h2>{{ category.name }} Advertisements</h2>
+            <p>Explore products listed by sellers in your community.</p>
+        </div>
+
+        <a href="{% url 'index' %}" class="back-home">
+            ← Back to Home
+        </a>
+    </div>
+
+    <div class="product-grid">
+
+        {% for product in products %}
+
+        <article class="product-card">
+
+            <a href="{% url 'product_detail' product.slug %}" class="product-image-link">
+
+                <div class="product-image">
+
+                    {% if product.images.all %}
+                        <img
+                            src="{{ product.images.first.image.url }}"
+                            alt="{{ product.name }}"
+                            loading="lazy">
+                    {% else %}
+                        <img
+                            src="{% static 'img/placeholder.png' %}"
+                            alt="Product image unavailable"
+                            loading="lazy">
+                    {% endif %}
+
+                    {% if product.featured %}
+                        <span class="featured-badge">Featured</span>
+                    {% endif %}
+
+                </div>
+
+            </a>
+
+            <div class="product-info">
+
+                <span class="product-category">
+                    {{ product.category.name }}
+                </span>
+
+                <a href="{% url 'product_detail' product.slug %}" class="product-name">
+                    {{ product.name }}
+                </a>
+
+                <div class="product-price">
+                    ₦{{ product.discountedprice}}
+                </div>
+
+                <div class="product-card-footer">
+
+                    <span class="seller-name">
+                        <span class="seller-icon">●</span>
+                        {{ product.seller.name }}
+                    </span>
+
+                    <a href="{% url 'product_detail' product.slug %}" class="view-product">
+                        View Details →
+                    </a>
+
+                </div>
+
+            </div>
+
+        </article>
+
+        {% empty %}
+
+        <div class="empty-category">
+            <div class="empty-icon">⌕</div>
+            <h3>No advertisements found</h3>
+            <p>
+                There are currently no products listed in
+                {{ category.name }}. Please check back later.
+            </p>
+            <a href="{% url 'index' %}">Explore Other Categories</a>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}

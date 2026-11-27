@@ -1,172 +1,1284 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Products Dashboard</title>
-  <style>
-    :root{
-      --primary:#2563eb;
-      --primary-600:#1d4ed8;
-      --danger:#dc2626;
-      --danger-600:#b91c1c;
-      --muted:#64748b;
-      --bg:#f8fafc;
-      --card:#fff;
-      --ring:rgba(0,0,0,.06);
-      --radius:12px;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Listings | TrustBuySell</title>
+
+<style>
+:root {
+    --primary: #1e3a8a;
+    --primary-dark: #172554;
+    --primary-light: #eff4ff;
+    --accent: #f97316;
+    --bg: #f5f7fb;
+    --white: #fff;
+    --text: #1e293b;
+    --muted: #8290a3;
+    --border: #e8edf4;
+    --green: #15803d;
+    --red: #dc2626;
+    --radius: 12px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button, input, select {
+    font: inherit;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+    width: 255px;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    background: white;
+    border-right: 1px solid var(--border);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    transition: .3s;
+}
+
+.brand {
+    height: 76px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 0 23px;
+    border-bottom: 1px solid var(--border);
+}
+
+.brand-logo {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    color: white;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    font-size: 22px;
+    font-weight: 900;
+}
+
+.brand-name {
+    font-size: 19px;
+    font-weight: 850;
+    color: var(--primary-dark);
+    letter-spacing: -.6px;
+}
+
+.brand-name span {
+    color: var(--accent);
+}
+
+.sidebar-content {
+    padding: 23px 14px;
+    flex: 1;
+}
+
+.menu-label {
+    color: #a0aaba;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    margin: 18px 12px 12px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 12px 14px;
+    margin-bottom: 5px;
+    border-radius: 9px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    transition: .2s;
+}
+
+.nav-link:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.nav-link.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 5px 12px #1e3a8a20;
+}
+
+.nav-icon {
+    width: 20px;
+    text-align: center;
+    font-size: 17px;
+}
+
+.sidebar-footer {
+    padding: 17px;
+    border-top: 1px solid var(--border);
+}
+
+.help-box {
+    background: #f4f6fb;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.help-box strong {
+    font-size: 12px;
+    color: var(--primary-dark);
+}
+
+.help-box p {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.6;
+    margin-top: 7px;
+}
+
+/* MAIN */
+
+.main {
+    margin-left: 255px;
+    min-height: 100vh;
+}
+
+/* HEADER */
+
+.topbar {
+    height: 76px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.page-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--primary-dark);
+}
+
+.breadcrumb {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.market-link {
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary);
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+}
+
+.profile strong {
+    display: block;
+    font-size: 12px;
+}
+
+.profile small {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.hamburger {
+    display: none;
+    border: none;
+    background: none;
+    color: var(--primary);
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* CONTENT */
+
+.content {
+    max-width: 1600px;
+    margin: auto;
+    padding: 30px 32px;
+}
+
+.welcome {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.welcome h1 {
+    font-size: 24px;
+    font-weight: 850;
+    color: var(--primary-dark);
+    letter-spacing: -.7px;
+}
+
+.welcome p {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 7px;
+    line-height: 1.6;
+}
+
+.add-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 19px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    font-weight: 750;
+    font-size: 12px;
+    transition: .2s;
+}
+
+.add-btn:hover {
+    background: #e9650c;
+    transform: translateY(-2px);
+}
+
+/* SUMMARY */
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 17px;
+    margin-bottom: 24px;
+}
+
+.summary-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    padding: 19px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.summary-icon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 11px;
+    font-size: 19px;
+}
+
+.blue { background: #eaf0ff; color: #315bc7; }
+.green { background: #e5f8ed; color: #15803d; }
+.orange { background: #fff0e5; color: #e97721; }
+
+.summary-card span {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    margin-bottom: 5px;
+}
+
+.summary-card strong {
+    display: block;
+    color: var(--primary-dark);
+    font-size: 23px;
+    font-weight: 850;
+}
+
+/* LISTING PANEL */
+
+.panel {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.panel-header h2 {
+    color: var(--primary-dark);
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.panel-header p {
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+/* FILTERS */
+
+.filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.search-box {
+    flex: 1;
+    position: relative;
+}
+
+.search-box input {
+    width: 100%;
+    height: 43px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    padding: 0 14px 0 40px;
+    font-size: 12px;
+    background: #fafbfe;
+}
+
+.search-box input:focus,
+.filters select:focus {
+    border-color: var(--primary);
+}
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 12px;
+    color: var(--muted);
+    font-size: 15px;
+}
+
+.filters select {
+    height: 43px;
+    padding: 0 13px;
+    min-width: 145px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+    outline: none;
+    color: #475569;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* TABLE */
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+}
+
+thead th {
+    background: #f7f9fc;
+    color: #8290a3;
+    padding: 15px 13px;
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    font-weight: 800;
+    border-bottom: 1px solid var(--border);
+}
+
+tbody td {
+    padding: 15px 13px;
+    border-bottom: 1px solid #eff2f6;
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+tbody tr:hover {
+    background: #fafbfe;
+}
+
+.product-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 190px;
+}
+
+.product-image {
+    width: 58px;
+    height: 58px;
+    flex-shrink: 0;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #f1f4f8;
+}
+
+.product-placeholder {
+    width: 58px;
+    height: 58px;
+    background: #f1f4f8;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    color: #a0aaba;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.product-name {
+    font-size: 12px;
+    font-weight: 750;
+    color: var(--primary-dark);
+    line-height: 1.5;
+}
+
+.product-category {
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 4px;
+}
+
+.price {
+    font-weight: 800;
+    color: var(--primary-dark);
+    white-space: nowrap;
+}
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 30px;
+    font-size: 10px;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.status.published {
+    background: #e5f8ed;
+    color: #15803d;
+}
+
+.status.draft {
+    background: #fff3d9;
+    color: #a16207;
+}
+
+/* ACTIONS */
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 11px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 750;
+    border: none;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.edit-btn {
+    color: var(--primary);
+    background: #eff4ff;
+}
+
+.edit-btn:hover {
+    background: #dce7ff;
+}
+
+.delete-btn {
+    color: #dc2626;
+    background: #fff0f0;
+}
+
+.delete-btn:hover {
+    background: #fee2e2;
+}
+
+/* EMPTY */
+
+.empty-state {
+    padding: 55px 20px;
+    text-align: center;
+}
+
+.empty-icon {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 17px;
+    background: #eff4ff;
+    color: var(--primary);
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    font-size: 27px;
+}
+
+.empty-state h3 {
+    color: var(--primary-dark);
+    font-size: 16px;
+}
+
+.empty-state p {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 9px 0 20px;
+}
+
+.no-results {
+    display: none;
+    text-align: center;
+    padding: 35px 15px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* DELETE MODAL */
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    padding: 15px;
+}
+
+.modal {
+    background: white;
+    width: min(430px, 100%);
+    border-radius: 14px;
+    padding: 27px;
+    box-shadow: 0 20px 60px #0002;
+    animation: appear .2s ease;
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
     }
-    *{box-sizing:border-box}
-    body{font-family:Inter,system-ui,Roboto,Arial,sans-serif;background:var(--bg);margin:0;color:#0f172a}
-    header{position:sticky;top:0;background:var(--primary);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
-    header h1{margin:0;font-size:1.1rem}
-    .btn{border:0;cursor:pointer;border-radius:10px;padding:10px 14px;font-weight:700;background:var(--primary);color:#fff}
-    .btn:hover{background:var(--primary-600)}
-    .btn-ghost{background:#fff;color:#1f2937}
-    .btn-danger{background:var(--danger)}
-    .btn-danger:hover{background:var(--danger-600)}
-    .container{padding:16px}
-    table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px var(--ring)}
-    th,td{padding:12px;text-align:left;border-bottom:1px solid #e5e7eb}
-    th{background:#f1f5f9;text-transform:uppercase;font-size:12px}
-    img.thumb{width:60px;height:60px;object-fit:cover;border-radius:6px}
-    .status{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
-    .status.published{background:rgba(22,163,74,.12);color:#166534}
-    .status.draft{background:rgba(245,158,11,.12);color:#a16207}
-    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}
-    .modal{background:#fff;border-radius:12px;width:min(500px,90%);padding:20px;max-height:90vh;overflow:auto}
-    .form{display:grid;gap:10px}
-    input,select,textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px}
-    textarea{min-height:80px}
-  </style>
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.delete-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 13px;
+    display: grid;
+    place-items: center;
+    background: #fff0f0;
+    color: var(--red);
+    font-size: 22px;
+    margin-bottom: 18px;
+}
+
+.modal h2 {
+    color: var(--primary-dark);
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.modal p {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.modal strong {
+    color: var(--text);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.cancel-btn, .confirm-btn {
+    padding: 11px 17px;
+    border: none;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.confirm-btn {
+    background: var(--red);
+    color: white;
+}
+
+.confirm-btn:hover {
+    background: #b91c1c;
+}
+
+/* FOOTER */
+
+.footer {
+    text-align: center;
+    color: #a0aaba;
+    font-size: 11px;
+    padding: 25px 10px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width: 1050px) {
+    .summary-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .content {
+        padding: 25px 20px;
+    }
+
+    .topbar {
+        padding: 0 20px;
+    }
+}
+
+@media(max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .main {
+        margin-left: 0;
+    }
+
+    .overlay.active {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: #0f172a80;
+        z-index: 90;
+    }
+
+    .hamburger {
+        display: block;
+    }
+
+    .topbar {
+        height: 66px;
+        padding: 0 15px;
+    }
+
+    .market-link {
+        display: none;
+    }
+
+    .profile-info {
+        display: none;
+    }
+
+    .content {
+        padding: 22px 14px;
+    }
+
+    .welcome {
+        align-items: flex-start;
+    }
+
+    .welcome h1 {
+        font-size: 20px;
+    }
+
+    .welcome p {
+        line-height: 1.6;
+    }
+
+    .add-btn {
+        padding: 11px 12px;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .panel {
+        padding: 17px 13px;
+    }
+
+    .filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filters select {
+        width: 100%;
+    }
+}
+
+@media(max-width: 420px) {
+    .welcome {
+        flex-direction: column;
+    }
+
+    .add-btn {
+        width: 100%;
+    }
+
+    .summary-card {
+        padding: 13px;
+        gap: 9px;
+    }
+
+    .summary-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 15px;
+    }
+
+    .summary-card strong {
+        font-size: 20px;
+    }
+
+    .summary-card span {
+        font-size: 10px;
+    }
+
+    .panel-header h2 {
+        font-size: 14px;
+    }
+}
+</style>
 </head>
+
 <body>
-  <header>
-    <h1>Products Dashboard</h1>
-    <div>
-      <a class="btn-ghost btn" href="{% url 'addproductimage' %}">Manage Images</a>
-      <a href="{% url 'add_product'%}"><button class="btn" >＋ Add Product</button></a>
-    </div>
-  </header>
 
-  <div class="container">
-    <table>
-      <thead>
-        <tr>
-          <th>Image</th>
-          <th>Name</th>
-          <th>Category</th>
-          <th>Price</th>
-          <th>Status</th>
-          <th>Updated</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for product in products %}
-        <tr>
-          <td>
-            {% if product.product_image %}
-              <img src="{{ product.product_image.image.url }}" class="thumb">
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+        <div class="brand-logo">T</div>
+        <div class="brand-name">Trust<span>BuySell</span></div>
+    </div>
+
+    <div class="sidebar-content">
+
+        <div class="menu-label">WORKSPACE</div>
+
+        <a href="{% url 'dashboard' %}" class="nav-link">
+            <span class="nav-icon">▦</span>
+            Overview
+        </a>
+
+        <a href="{% url 'product_lists' %}" class="nav-link active">
+            <span class="nav-icon">▣</span>
+            My Listings
+        </a>
+
+        <a href="{% url 'add_product' %}" class="nav-link">
+            <span class="nav-icon">＋</span>
+            Post New Advertisement
+        </a>
+
+        <a href="{% url 'chat_list' %}" class="nav-link">
+            <span class="nav-icon">✉</span>
+            Buyer Messages
+        </a>
+
+        <div class="menu-label">ACCOUNT</div>
+
+        <a href="{% url 'index' %}" class="nav-link">
+            <span class="nav-icon">⌂</span>
+            Visit Marketplace
+        </a>
+
+        <a href="{% url 'logout' %}" class="nav-link">
+            <span class="nav-icon">↪</span>
+            Logout
+        </a>
+
+    </div>
+
+    <div class="sidebar-footer">
+        <div class="help-box">
+            <strong>Need assistance?</strong>
+            <p>Need help managing your advertisements? Contact our support team.</p>
+        </div>
+    </div>
+
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+
+        <div class="topbar-left">
+            <button class="hamburger" onclick="openSidebar()">☰</button>
+
+            <div>
+                <div class="page-title">My Listings</div>
+                <div class="breadcrumb">Seller Workspace / My Listings</div>
+            </div>
+        </div>
+
+        <div class="topbar-right">
+
+            <a href="{% url 'index' %}" class="market-link">
+                Visit Marketplace ↗
+            </a>
+
+            <div class="profile">
+                <div class="avatar">
+                    {{ user.username|first|upper }}
+                </div>
+
+                <div class="profile-info">
+                    <strong>{{ user.username }}</strong>
+                    <small>Seller Account</small>
+                </div>
+            </div>
+
+        </div>
+
+    </header>
+
+    <!-- CONTENT -->
+    <main class="content">
+
+        <!-- WELCOME -->
+        <section class="welcome">
+
+            <div>
+                <h1>My Advertisements</h1>
+                <p>Manage, organize and monitor all your marketplace listings.</p>
+            </div>
+
+            <a href="{% url 'add_product' %}" class="add-btn">
+                ＋ Post New Advertisement
+            </a>
+
+        </section>
+
+        <!-- SUMMARY -->
+        <section class="summary-grid">
+
+            <div class="summary-card">
+                <div class="summary-icon blue">▣</div>
+                <div>
+                    <span>Total Listings</span>
+                    <strong>{{ products|length }}</strong>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon green">✓</div>
+                <div>
+                    <span>Published Listings</span>
+                    <strong>{{ published_count|default:"—" }}</strong>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon orange">◷</div>
+                <div>
+                    <span>Draft Listings</span>
+                    <strong>{{ draft_count|default:"—" }}</strong>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- LISTINGS PANEL -->
+        <section class="panel">
+
+            <div class="panel-header">
+                <div>
+                    <h2>All Advertisements</h2>
+                    <p>View and manage your posted products.</p>
+                </div>
+            </div>
+
+            <!-- FILTERS -->
+            <div class="filters">
+
+                <div class="search-box">
+                    <span class="search-icon">⌕</span>
+                    <input
+                        type="search"
+                        id="searchInput"
+                        placeholder="Search by product name or category..."
+                    >
+                </div>
+
+                <select id="statusFilter">
+                    <option value="">All Statuses</option>
+                    <option value="published">Published</option>
+                    <option value="draft">Draft</option>
+                </select>
+
+            </div>
+
+            <!-- TABLE -->
+            {% if products %}
+
+            <div class="table-wrapper">
+
+                <table id="productsTable">
+
+                    <thead>
+                        <tr>
+                            <th>Advertisement</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Last Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="productsBody">
+
+                        {% for product in products %}
+
+                        <tr class="product-row"
+                            data-name="{{ product.name|lower }}"
+                            data-category="{{ product.category.name|lower }}"
+                            data-status="{{ product.status|lower }}">
+
+                            <td>
+                                <div class="product-info">
+
+                                    {% if product.product_image %}
+                                    <img
+                                        src="{{ product.product_image.image.url }}"
+                                        class="product-image"
+                                        alt="{{ product.name }}"
+                                    >
+                                    {% else %}
+                                    <div class="product-placeholder">▣</div>
+                                    {% endif %}
+
+                                    <div>
+                                        <div class="product-name">
+                                            {{ product.name }}
+                                        </div>
+                                        <div class="product-category">
+                                            Product Advertisement
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </td>
+
+                            <td>{{ product.category.name }}</td>
+
+                            <td>
+                                <span class="price">
+                                    ₦{{ product.discountedprice }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="status {{ product.status }}">
+                                    {{ product.get_status_display }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ product.updated|date:"M d, Y" }}
+                            </td>
+
+                            <td>
+                                <div class="actions">
+
+                                    <a
+                                        class="action-btn edit-btn"
+                                        href="{% url 'product_update' product.slug %}"
+                                    >
+                                        Edit
+                                    </a>
+
+                                    <button
+                                        type="button"
+                                        class="action-btn delete-btn"
+                                        onclick="openDeleteModal(
+                                            '{{ product.slug|escapejs }}',
+                                            '{{ product.name|escapejs }}'
+                                        )"
+                                    >
+                                        Delete
+                                    </button>
+
+                                </div>
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="no-results" id="noResults">
+                No advertisements match your search.
+            </div>
+
             {% else %}
-              —
+
+            <div class="empty-state">
+
+                <div class="empty-icon">▣</div>
+
+                <h3>No advertisements yet</h3>
+
+                <p>
+                    You haven't posted any products.
+                    Start advertising and connect with potential buyers.
+                </p>
+
+                <a href="{% url 'add_product' %}" class="add-btn">
+                    ＋ Post Your First Advertisement
+                </a>
+
+            </div>
+
             {% endif %}
-          </td>
-          <td>{{ product.name }}</td>
-          <td>{{ product.category.name }}</td>
-          <td>₦{{ product.discountedprice|default:product.actualprice }}</td>
-          <td><span class="status {{ product.status }}">{{ product.get_status_display }}</span></td>
-          <td>{{ product.updated|date:"M d, Y" }}</td>
-          <td>
-            <a class="btn" href="{% url 'product_update' product.slug %}">Edit</a>
-            <button class="btn btn-danger" onclick="openDeleteModal('{{ product.slug }}','{{ product.name|escapejs }}')">Delete</button>
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="7" style="text-align:center;color:#64748b;">No products yet.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
 
-  <!-- Add Product Modal -->
-  <div class="backdrop" id="addBackdrop">
+        </section>
+
+        <footer class="footer">
+            © {% now "Y" %} TrustBuySell. All rights reserved.
+        </footer>
+
+    </main>
+
+</div>
+
+<!-- DELETE CONFIRMATION MODAL -->
+<div class="backdrop" id="deleteBackdrop">
+
     <div class="modal">
-      <h2>Add Product</h2>
-      <form method="post" enctype="multipart/form-data" class="form">
-        {% csrf_token %}
-        <label>Name</label>
-        <input type="text" name="name" required>
 
-        <label>Category</label>
-        <select name="category">
-          {% for c in categories %}
-          <option value="{{ c.id }}">{{ c.name }}</option>
-          {% endfor %}
-        </select>
+        <div class="delete-icon">✕</div>
 
-        <label>Status</label>
-        <select name="status">
-          <option value="draft">Draft</option>
-          <option value="published">Published</option>
-        </select>
+        <h2>Delete Advertisement?</h2>
 
-        <label>Stock</label>
-        <input type="number" name="stock">
+        <p>
+            Are you sure you want to delete
+            <strong id="deleteName"></strong>?
+            This action cannot be undone.
+        </p>
 
-        <label>Actual Price</label>
-        <input type="number" name="actualprice" step="0.01">
+        <form method="post" id="deleteForm">
 
-        <label>Discounted Price</label>
-        <input type="number" name="discountedprice" step="0.01">
+            {% csrf_token %}
 
-        <label>Description</label>
-        <textarea name="description"></textarea>
+            <div class="modal-actions">
 
-        <label>Product Image</label>
-        <input type="file" name="product_image" accept="image/*">
+                <button
+                    type="button"
+                    class="cancel-btn"
+                    onclick="closeDeleteModal()"
+                >
+                    Cancel
+                </button>
 
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;">
-          <button type="button" class="btn-ghost btn" onclick="closeAddModal()">Cancel</button>
-          <button type="submit" class="btn">Save</button>
-        </div>
-      </form>
+                <button type="submit" class="confirm-btn">
+                    Yes, Delete
+                </button>
+
+            </div>
+
+        </form>
+
     </div>
-  </div>
 
-  <!-- Delete Modal -->
-  <div class="backdrop" id="deleteBackdrop">
-    <div class="modal">
-      <h2 style="color:#dc2626;">Confirm Delete</h2>
-      <p>Are you sure you want to delete <strong id="deleteName"></strong>?</p>
-      <form method="post" id="deleteForm">
-        {% csrf_token %}
-        <div style="display:flex;gap:10px;justify-content:flex-end;">
-          <button type="button" class="btn-ghost btn" onclick="closeDeleteModal()">Cancel</button>
-          <button type="submit" class="btn btn-danger">Delete</button>
-        </div>
-      </form>
-    </div>
-  </div>
+</div>
 
-  <script>
-    const addBackdrop=document.getElementById('addBackdrop');
-    const deleteBackdrop=document.getElementById('deleteBackdrop');
-    const deleteForm=document.getElementById('deleteForm');
-    const deleteName=document.getElementById('deleteName');
+<script>
 
-    document.getElementById('openAdd').onclick=()=>{addBackdrop.style.display='flex';};
-    function closeAddModal(){addBackdrop.style.display='none';}
+// SIDEBAR
+function openSidebar() {
+    document.getElementById('sidebar').classList.add('active');
+    document.getElementById('overlay').classList.add('active');
+}
 
-    function openDeleteModal(slug,name){
-      deleteForm.action=`{% url 'product_delete' 'slug-placeholder' %}`.replace('slug-placeholder',slug);
-      deleteName.textContent=name;
-      deleteBackdrop.style.display='flex';
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('active');
+    document.getElementById('overlay').classList.remove('active');
+}
+
+// DELETE MODAL
+const deleteBackdrop = document.getElementById('deleteBackdrop');
+const deleteForm = document.getElementById('deleteForm');
+const deleteName = document.getElementById('deleteName');
+
+function openDeleteModal(slug, name) {
+
+    const deleteUrl = "{% url 'product_delete' 'slug-placeholder' %}";
+
+    deleteForm.action = deleteUrl.replace(
+        'slug-placeholder',
+        encodeURIComponent(slug)
+    );
+
+    deleteName.textContent = name;
+
+    deleteBackdrop.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDeleteModal() {
+    deleteBackdrop.style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// CLOSE MODAL WHEN CLICKING OUTSIDE
+deleteBackdrop.addEventListener('click', function(e) {
+    if (e.target === deleteBackdrop) {
+        closeDeleteModal();
     }
-    function closeDeleteModal(){deleteBackdrop.style.display='none';}
+});
 
-    [addBackdrop,deleteBackdrop].forEach(b=>b.addEventListener('click',e=>{if(e.target===b)b.style.display='none';}));
-  </script>
+// ESCAPE KEY
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeDeleteModal();
+        closeSidebar();
+    }
+});
+
+// SEARCH AND FILTER
+const searchInput = document.getElementById('searchInput');
+const statusFilter = document.getElementById('statusFilter');
+const productRows = document.querySelectorAll('.product-row');
+const noResults = document.getElementById('noResults');
+
+function filterProducts() {
+
+    const search = searchInput.value.toLowerCase().trim();
+    const status = statusFilter.value.toLowerCase();
+
+    let visibleCount = 0;
+
+    productRows.forEach(row => {
+
+        const name = row.dataset.name;
+        const category = row.dataset.category;
+        const productStatus = row.dataset.status;
+
+        const matchesSearch =
+            name.includes(search) || category.includes(search);
+
+        const matchesStatus =
+            !status || productStatus === status;
+
+        if (matchesSearch && matchesStatus) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+
+    });
+
+    if (noResults) {
+        noResults.style.display =
+            visibleCount === 0 ? 'block' : 'none';
+    }
+}
+
+searchInput.addEventListener('input', filterProducts);
+statusFilter.addEventListener('change', filterProducts);
+
+</script>
+
 </body>
 </html>
